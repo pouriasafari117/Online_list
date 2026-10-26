@@ -1,8 +1,8 @@
 {
   "version": 1,
   "store": {
-    "name": "پوریا استور",
-    "tagline": "قبل از تماس، موجودی را ببین.",
+    "name": "فروشگاه پوریا",
+    "tagline": "بسون بره",
     "description": "موجودی موبایل، لپ‌تاپ و گیمینگ — مستقیم از انبار فروشگاه، همیشه به‌روز و بدون یک تماس اضافه.",
     "phone": "۰۹۱۲ ۳۴۵ ۶۷۸۹",
     "whatsapp": "989123456789",
@@ -369,7 +369,7 @@
       "hidden": false,
       "order": 3,
       "createdAt": "2026-07-01T08:00:00.000Z",
-      "updatedAt": "2026-10-26T06:45:00.000Z"
+      "updatedAt": "2026-10-26T18:28:41.720Z"
     },
     {
       "id": "dev_s25u",
@@ -1084,12 +1084,43 @@
       "order": 32,
       "createdAt": "2026-07-01T08:00:00.000Z",
       "updatedAt": "2026-10-26T06:45:00.000Z"
+    },
+    {
+      "id": "dev_mvplbsv59ukul",
+      "name": "shkl",
+      "brand": "",
+      "categoryId": "cat_phone",
+      "price": 0,
+      "priceOnRequest": false,
+      "stock": 1,
+      "condition": "نو",
+      "warranty": "",
+      "specs": {},
+      "note": "",
+      "image": "",
+      "featured": false,
+      "hidden": false,
+      "order": 33,
+      "createdAt": "2026-10-26T18:28:59.489Z",
+      "updatedAt": "2026-10-26T18:28:59.489Z"
     }
   ],
   "meta": {
-    "updatedAt": "2026-10-26T06:45:00.000Z",
+    "updatedAt": "2026-10-26T18:29:09.491Z",
     "updatedBy": "پوریا صفری",
     "history": [
+      {
+        "id": "h_mvplc0kz1oljn",
+        "at": "2026-10-26T18:29:09.491Z",
+        "by": "پوریا صفری",
+        "action": "publish",
+        "summary": "1 دستگاه جدید · 1 دستگاه به‌روزرسانی · اطلاعات فروشگاه",
+        "stats": {
+          "added": 1,
+          "updated": 1,
+          "removed": 0
+        }
+      },
       {
         "id": "h4",
         "at": "2026-10-26T06:45:00.000Z",
