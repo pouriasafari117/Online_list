@@ -29,11 +29,22 @@ jobs:
       - name: Verify project
         run: node tools/verify.mjs
 
+      - name: Check Pages is enabled
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh api "repos/${{ github.repository }}/pages" >/dev/null 2>&1; then
+            echo "GitHub Pages is enabled ✔"
+          else
+            echo "::error title=GitHub Pages is off::Settings → Pages → Build and deployment → Source: **GitHub Actions** (one click), then re-run this workflow."
+            exit 1
+          fi
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
         with:
-          # Turns Pages on (build_type: workflow) the first time this runs,
-          # so no manual Settings → Pages step is needed.
+          # If the token is allowed to create the site (org repos), do it here;
+          # user-owned repos need the one-click step above.
           enablement: true
           token: ${{ secrets.GITHUB_TOKEN }}
 
