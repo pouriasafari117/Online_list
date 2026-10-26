@@ -1103,12 +1103,43 @@
       "order": 33,
       "createdAt": "2026-10-26T18:28:59.489Z",
       "updatedAt": "2026-10-26T18:28:59.489Z"
+    },
+    {
+      "id": "dev_mvpldlshgc2mx",
+      "name": "sghljkfyffjhvhm",
+      "brand": "y,g,l",
+      "categoryId": "cat_phone",
+      "price": 1200000,
+      "priceOnRequest": false,
+      "stock": 3,
+      "condition": "نو",
+      "warranty": "",
+      "specs": {},
+      "note": "",
+      "image": "",
+      "featured": false,
+      "hidden": false,
+      "order": 34,
+      "createdAt": "2026-10-26T18:30:23.633Z",
+      "updatedAt": "2026-10-26T18:30:23.633Z"
     }
   ],
   "meta": {
-    "updatedAt": "2026-10-26T18:29:09.491Z",
+    "updatedAt": "2026-10-26T18:30:28.083Z",
     "updatedBy": "پوریا صفری",
     "history": [
+      {
+        "id": "h_mvpldp83wuyky",
+        "at": "2026-10-26T18:30:28.083Z",
+        "by": "پوریا صفری",
+        "action": "publish",
+        "summary": "1 دستگاه جدید",
+        "stats": {
+          "added": 1,
+          "updated": 0,
+          "removed": 0
+        }
+      },
       {
         "id": "h_mvplc0kz1oljn",
         "at": "2026-10-26T18:29:09.491Z",
