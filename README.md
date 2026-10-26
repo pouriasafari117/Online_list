@@ -109,11 +109,14 @@ npm start                 # پیش‌نمایش روی http://localhost:8080
 
 ### الف) صفحه راه‌اندازی در مرورگر (ساده‌ترین)
 
-```
-http://localhost:8080/setup/
-```
+صفحه `/setup/` عمداً **روی GitHub Pages منتشر نمی‌شود** — چون می‌تواند `data/vault.json`
+را بنویسد، باید فقط محلی باز شود:
 
-یا بعد از انتشار: `https://<username>.github.io/Online_list/setup/`
+```bash
+npm start          # سپس http://localhost:8080/setup/
+# یا بدون Node:
+python3 -m http.server 8080
+```
 
 1. توکن را وارد کنید.
 2. «بررسی اتصال و دسترسی» را بزنید تا مطمئن شوید توکن دسترسی نوشتن دارد.
@@ -161,7 +164,7 @@ GH_TOKEN=github_pat_xxx OL_PASSWORD='یک-عبارت-طولانی' node tools/ma
 ```
 .
 ├── index.html                 صفحه اصلی (لیست عمومی)
-├── setup/index.html           صفحه یک‌باره سینک توکن (noindex)
+├── setup/index.html           صفحه یک‌باره سینک توکن — فقط محلی، منتشر نمی‌شود
 ├── 404.html                   صفحه خطا
 ├── sw.js                      سرویس‌ورکر (آفلاین + داده تازه)
 ├── manifest.webmanifest       نصب به‌عنوان اپلیکیشن
@@ -226,7 +229,7 @@ GH_TOKEN=github_pat_xxx OL_PASSWORD='یک-عبارت-طولانی' node tools/ma
 ## توسعه محلی
 
 ```bash
-npm start          # http://localhost:8080  (+ /setup/)
+npm start          # http://localhost:8080  (و /setup/ برای راه‌اندازی)
 npm run verify     # بررسی JSON، سینتکس JS، ارجاع‌ها و عدم لو رفتن کلید
 npm test           # آزمون واحد: مدل داده، اعداد فارسی، CSV، رمزنگاری، API
 npm run check      # هر دو مورد بالا (همان چیزی که CI اجرا می‌کند)

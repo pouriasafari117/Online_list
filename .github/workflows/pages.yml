@@ -35,9 +35,10 @@ jobs:
       - name: Build artifact
         run: |
           mkdir -p _site
-          cp -r index.html 404.html sw.js manifest.webmanifest robots.txt assets data setup _site/
-          # Prefer not to expose the one-time setup page? Uncomment:
-          # rm -rf _site/setup
+          # setup/ is deliberately NOT published: it is a one-time, local-only page
+          # (it can write data/vault.json, so it must never be public). Run
+          # `npm start` and open http://localhost:8080/setup/ instead.
+          cp -r index.html 404.html sw.js manifest.webmanifest robots.txt assets data _site/
           echo "Built $(find _site -type f | wc -l) files"
 
       - name: Upload artifact

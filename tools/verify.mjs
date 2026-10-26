@@ -180,6 +180,15 @@ for (const file of htmlFiles) {
   if (!csp.includes("default-src 'self'")) warn(`${rel(file)}: default-src محدود نیست.`);
 }
 
+/* ── 8. Deploy safety: the setup page must never be published ──────────── */
+if (exists('.github/workflows/pages.yml')) {
+  const workflow = read('.github/workflows/pages.yml');
+  const copyLines = workflow.split('\n').filter((l) => /^\s*(cp -r|rm -rf)\b/.test(l));
+  const copiesSetup = copyLines.some((l) => /^\s*cp -r\b/.test(l) && /(^|\s)setup(\s|$)/.test(l));
+  if (copiesSetup) fail('گردش‌کار Pages پوشه setup/ را منتشر می‌کند؛ این صفحه باید فقط محلی بماند.');
+  else note('صفحه راه‌اندازی (setup/) در خروجی Pages نیست');
+}
+
 /* ── Report ─────────────────────────────────────────────────────────────── */
 const line = (char = '─') => char.repeat(58);
 console.log(`\n${line()}\n  Online List — verify\n${line()}`);
