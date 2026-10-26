@@ -206,9 +206,9 @@ body { padding-bottom: 0; }
   width: 38px; height: 38px;
   display: grid; place-items: center;
   border-radius: 12px;
-  background: var(--surface-2);
-  border: 1px solid var(--hairline);
-  color: var(--text-2);
+  background: var(--ok-container);
+  border: 1px solid color-mix(in srgb, var(--ok) 24%, transparent);
+  color: var(--ok);
   flex: none;
 }
 .update-card__label { font-size: var(--fs-xs); font-weight: 650; color: var(--text); line-height: 1.4; }
@@ -229,6 +229,7 @@ body { padding-bottom: 0; }
 .stat + .stat { border-inline-start: 1px solid var(--hairline); }
 .stat__value { font-size: 1.375rem; font-weight: 750; line-height: 1.2; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
 .stat__label { font-size: 10px; color: var(--text-3); }
+.update-card__stats .stat:nth-child(2) .stat__value { color: var(--ok); }
 .update-card__foot { display: flex; align-items: center; gap: 8px; margin-top: -4px; }
 .update-card__foot .btn { margin-inline-start: auto; }
 
@@ -524,6 +525,34 @@ body { padding-bottom: 0; }
 .device__thumb .ic { width: 26px; height: 26px; }
 .device__thumb img { width: 100%; height: 100%; object-fit: cover; }
 
+/* Visible colour for list icons: a tinted chip per device/category.
+   pickTone() already stamped data-tone="1…5" but nothing used it. */
+.device__thumb[data-tone],
+.group__icon[data-tone],
+.feature-card__media[data-tone] {
+  color: var(--tone);
+  background:
+    radial-gradient(120% 120% at 20% 0%, color-mix(in srgb, var(--tone) 16%, transparent), transparent 65%),
+    var(--tone-bg);
+  border-color: color-mix(in srgb, var(--tone) 26%, transparent);
+}
+.device__thumb[data-tone="1"], .group__icon[data-tone="1"], .feature-card__media[data-tone="1"] { --tone: var(--tone-1); --tone-bg: var(--tone-1-container); }
+.device__thumb[data-tone="2"], .group__icon[data-tone="2"], .feature-card__media[data-tone="2"] { --tone: var(--tone-2); --tone-bg: var(--tone-2-container); }
+.device__thumb[data-tone="3"], .group__icon[data-tone="3"], .feature-card__media[data-tone="3"] { --tone: var(--tone-3); --tone-bg: var(--tone-3-container); }
+.device__thumb[data-tone="4"], .group__icon[data-tone="4"], .feature-card__media[data-tone="4"] { --tone: var(--tone-4); --tone-bg: var(--tone-4-container); }
+.device__thumb[data-tone="5"], .group__icon[data-tone="5"], .feature-card__media[data-tone="5"] { --tone: var(--tone-5); --tone-bg: var(--tone-5-container); }
+.device--oos .device__thumb[data-tone] { filter: saturate(0.35); }
+
+/* Large surfaces stay calmer than 54 px chips: the featured rail is a big
+   block of colour, so it gets a lighter blend of the same tone. */
+.feature-card__media[data-tone] > .ic { color: var(--tone); }
+.feature-card__media[data-tone] {
+  background:
+    radial-gradient(120% 120% at 50% 0%, color-mix(in srgb, var(--tone) 12%, transparent), transparent 70%),
+    color-mix(in srgb, var(--tone-bg) 42%, var(--surface));
+  border-color: color-mix(in srgb, var(--tone) 18%, transparent);
+}
+
 .device__main { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
 .device__titleline { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .device__name {
@@ -593,10 +622,20 @@ body { padding-bottom: 0; }
   background: var(--surface-2);
   color: var(--text-2);
 }
+.stock-badge {
+  gap: 4px;
+  height: 23px;
+  padding-inline: 7px 9px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 16%, transparent);
+}
 .stock-badge__dot { width: 5px; height: 5px; border-radius: 99px; background: currentColor; }
+.stock-badge__ic { display: inline-flex; }
+.stock-badge__ic .ic { width: 13px; height: 13px; }
 .stock-badge[data-state="in"] { background: var(--ok-container); color: var(--ok); }
 .stock-badge[data-state="low"] { background: var(--low-container); color: var(--low); }
-.stock-badge[data-state="out"] { background: var(--surface-3); color: var(--out); }
+.stock-badge[data-state="out"] { background: var(--danger-container); color: var(--danger); }
 .device__admin {
   display: flex;
   align-items: center;
@@ -1617,6 +1656,9 @@ body.is-manage-page .skip { display: none !important; }
   color: var(--text-3);
   line-height: 1.5;
 }
+.mp-stat--ok .mp-stat__icon,
+.mp-stat--danger .mp-stat__icon,
+.mp-stat--low .mp-stat__icon { box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 16%, transparent); }
 .mp-stat--ok .mp-stat__icon { background: var(--ok-container); color: var(--ok); }
 .mp-stat--ok b { color: var(--ok); }
 .mp-stat--danger .mp-stat__icon { background: var(--danger-container); color: var(--danger); }
@@ -1767,8 +1809,8 @@ body.is-manage-page .skip { display: none !important; }
 .mp-row__hide { color: var(--text-3); }
 .mp-row__hide:hover { color: var(--low); background: var(--low-container); }
 .mp-row__hidden-on { color: var(--low); background: var(--low-container); }
-.mp-row__danger { color: var(--danger); }
-.mp-row__danger:hover { color: var(--danger); background: var(--danger-container); }
+.mp-row__danger { color: var(--danger); background: color-mix(in srgb, var(--danger) 15%, var(--surface)); }
+.mp-row__danger:hover { color: var(--danger); background: color-mix(in srgb, var(--danger) 24%, var(--surface)); }
 
 .mp-badge {
   display: inline-flex;
@@ -1812,10 +1854,22 @@ body.is-manage-page .skip { display: none !important; }
   box-shadow: var(--shadow-1);
   transition: background-color var(--dur-1), transform var(--dur-2) var(--ease-spring);
 }
-.mp-stepper__btn--inc { color: var(--ok); }
-.mp-stepper__btn--inc:hover { background: var(--ok-container); }
-.mp-stepper__btn--dec { color: var(--low); }
-.mp-stepper__btn--dec:hover { background: var(--low-container); }
+/* Filled, clearly-coloured circles — a tinted glyph on white was too quiet
+   to read as "green / amber" at 30 px. */
+.mp-stepper__btn--inc {
+  color: var(--ok);
+  background: color-mix(in srgb, var(--ok) 22%, var(--surface));
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--ok) 32%, transparent);
+}
+.mp-stepper__btn--inc:hover { background: color-mix(in srgb, var(--ok) 30%, var(--surface)); }
+.mp-stepper__btn--inc:active { background: color-mix(in srgb, var(--ok) 38%, var(--surface)); }
+.mp-stepper__btn--dec {
+  color: var(--low);
+  background: color-mix(in srgb, var(--low) 24%, var(--surface));
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--low) 34%, transparent);
+}
+.mp-stepper__btn--dec:hover { background: color-mix(in srgb, var(--low) 32%, var(--surface)); }
+.mp-stepper__btn--dec:active { background: color-mix(in srgb, var(--low) 40%, var(--surface)); }
 .mp-stepper__btn:active { transform: scale(0.92); }
 .mp-stepper__input {
   width: 46px;

@@ -240,7 +240,7 @@ function featureCardHtml(device) {
   return `
     <button class="feature-card reveal is-in" type="button" role="listitem" data-action="detail" data-device-id="${escapeHtml(device.id)}"
             aria-label="جزئیات ${escapeHtml(device.name)}">
-      <div class="feature-card__media">
+      <div class="feature-card__media" data-tone="${pickTone(device.name + device.brand)}">
         ${device.image ? `<img class="thumb-img" src="${escapeHtml(safeUrl(device.image))}" alt="" loading="lazy" decoding="async">` : icon(cat?.icon || 'devices_other', { size: 54 })}
         <span class="feature-card__tag badge badge--inverse">${icon('star', { size: 12 })} ویژه</span>
       </div>
@@ -475,7 +475,7 @@ function groupHtml(cat, items) {
   return `
     <section class="group group--${state.ui.view === 'grid' ? 'grid' : 'list'}" data-group="${escapeHtml(catId)}" aria-label="${escapeHtml(title)}">
       <div class="group__head">
-        <span class="group__icon">${icon(iconName, { size: 19 })}</span>
+        <span class="group__icon" data-tone="${pickTone(title)}">${icon(iconName, { size: 19 })}</span>
         <div class="group__titles">
           <h3 class="group__title">${escapeHtml(title)}</h3>
           <span class="group__meta" data-group-meta="${escapeHtml(catId)}">${metaBits.join(' · ')}</span>
@@ -603,8 +603,10 @@ export function stockBadgeHtml(device) {
       ? `${num(device.stock)} عدد`
       : (stateKey === 'low' ? 'کمیاب' : 'موجود');
   const title = stateKey === 'out' ? 'موجود نیست' : `موجودی: ${num(device.stock)} عدد`;
+  /* A coloured icon, not just a tinted word: ✓ green / ! amber / ✕ red. */
+  const stateIcon = stateKey === 'out' ? 'cancel' : stateKey === 'low' ? 'warning' : 'check_circle';
   return `<span class="stock-badge" data-stock-badge="${escapeHtml(device.id)}" data-state="${stateKey}" title="${escapeHtml(title)}">
-    <span class="stock-badge__dot" aria-hidden="true"></span>${label}
+    <span class="stock-badge__ic" aria-hidden="true">${icon(stateIcon, { size: 13 })}</span>${label}
   </span>`;
 }
 

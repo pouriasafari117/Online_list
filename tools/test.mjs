@@ -663,6 +663,25 @@ test('رنگ‌های تأکیدی فقط روی همین چند عنصر پنل
   assert.ok(/\.btn--ok\s*\{/.test(base), 'دکمهٔ سبز تأیید تعریف نشده');
 });
 
+test('رنگ‌ها روی آیکون‌ها دیده می‌شوند، نه فقط روی متن', () => {
+  const render = fs.readFileSync(path.join(ROOT, 'assets/js/render.js'), 'utf8');
+  // The stock pill must carry a coloured glyph: ✓ green, ! amber, ✕ red.
+  assert.ok(/stock-badge__ic/.test(render), 'نشان موجودی آیکون رنگی ندارد');
+  assert.ok(/'cancel'/.test(render) && /'warning'/.test(render) && /'check_circle'/.test(render),
+    'آیکون هر سه وضعیت موجودی تعریف نشده');
+  // pickTone() already stamped data-tone; the stylesheet must consume it now.
+  assert.ok(/data-tone="\$\{pickTone\(title\)\}"/.test(render), 'آیکون دسته رنگ نمی‌گیرد');
+  const css = fs.readFileSync(path.join(ROOT, 'assets/css/app.css'), 'utf8');
+  assert.ok(/\.stock-badge__ic \.ic\s*\{[^}]*width/.test(css), 'اندازهٔ آیکون نشان موجودی تعیین نشده');
+  assert.ok(/\.stock-badge\[data-state="out"\]\s*\{[^}]*var\(--danger\)/.test(css), 'ناموجود قرمز نیست');
+  for (const n of [1, 2, 3, 4, 5]) {
+    assert.ok(new RegExp(`\\.device__thumb\\[data-tone="${n}"\\]`).test(css),
+      `رنگ آیکون شمارهٔ ${n} در CSS استفاده نشده`);
+  }
+  const tokens = fs.readFileSync(path.join(ROOT, 'assets/css/tokens.css'), 'utf8');
+  assert.equal((tokens.match(/--tone-1:/g) || []).length, 3, 'رنگ‌های آیکون باید در روشن و هر دو بلوک تاریک باشند');
+});
+
 test('دسته‌ها قالب مشخصات دارند و کالاها می‌توانند مشخصهٔ اضافه بگیرند', () => {
   const admin = fs.readFileSync(path.join(ROOT, 'assets/js/admin.js'), 'utf8');
   assert.ok(/FIELD_PRESETS/.test(admin), 'قالب‌های آماده در ویرایش دسته استفاده نشده‌اند');

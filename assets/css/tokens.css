@@ -44,7 +44,8 @@
   --on-primary-container: #1d1c18;
   --primary-soft: rgba(29, 28, 24, 0.06);
 
-  /* Semantic accents — muted so the whole page stays monochrome */
+  /* Semantic accents — green / amber / red, kept muted so they read as
+     signals rather than decoration */
   --ok: #2f7d52;
   --ok-container: #e3f1e8;
   --on-ok: #ffffff;
@@ -54,6 +55,19 @@
   --danger: #b33a2d;
   --danger-container: #f9e5e1;
   --on-danger: #ffffff;
+
+  /* Decorative tones — low-saturation chips so lists read at a glance
+     without turning into a rainbow */
+  --tone-1: #3d6ea8;
+  --tone-1-container: #e6eefa;
+  --tone-2: #77569f;
+  --tone-2-container: #efe8f9;
+  --tone-3: #2b7a72;
+  --tone-3-container: #e0f1ee;
+  --tone-4: #a4506f;
+  --tone-4-container: #fae7ee;
+  --tone-5: #9a6320;
+  --tone-5-container: #f8eddc;
 
   /* Elevated surfaces */
   --shadow-1: 0 1px 2px rgba(38, 32, 22, 0.05), 0 1px 1px rgba(38, 32, 22, 0.03);
@@ -155,6 +169,17 @@
   --danger-container: #331b19;
   --on-danger: #2a1412;
 
+  --tone-1: #93b8e6;
+  --tone-1-container: #1a2635;
+  --tone-2: #bda4e4;
+  --tone-2-container: #241f36;
+  --tone-3: #7fc9c0;
+  --tone-3-container: #132a27;
+  --tone-4: #e4a2bd;
+  --tone-4-container: #301f27;
+  --tone-5: #e3b583;
+  --tone-5-container: #2c2417;
+
   --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-2: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 28px -16px rgba(0, 0, 0, 0.7);
   --shadow-3: 0 2px 6px rgba(0, 0, 0, 0.45), 0 30px 70px -28px rgba(0, 0, 0, 0.85);
@@ -200,6 +225,17 @@
     --danger: #f0968d;
     --danger-container: #331b19;
     --on-danger: #2a1412;
+
+    --tone-1: #93b8e6;
+    --tone-1-container: #1a2635;
+    --tone-2: #bda4e4;
+    --tone-2-container: #241f36;
+    --tone-3: #7fc9c0;
+    --tone-3-container: #132a27;
+    --tone-4: #e4a2bd;
+    --tone-4-container: #301f27;
+    --tone-5: #e3b583;
+    --tone-5-container: #2c2417;
 
     --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
     --shadow-2: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 28px -16px rgba(0, 0, 0, 0.7);
