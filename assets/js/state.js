@@ -44,6 +44,16 @@ export const state = {
 
 const listeners = new Set();
 
+/* refreshDirty() runs after every keystroke and every +/- tap. Serializing the
+   baseline each time doubled that work for no reason: it only changes when a
+   session starts or a publish succeeds. */
+let baselineJson = null;
+
+function setBaseline(next) {
+  state.baseline = next ? normalizeStore(next) : null;
+  baselineJson = next ? serializeStore(state.baseline) : null;
+}
+
 export function subscribe(fn) {
   listeners.add(fn);
   return () => listeners.delete(fn);
@@ -71,7 +81,7 @@ function draftStorageKey(repo = state.repo) {
 
 export function initPublic(data, { source = 'local', url = '', sha = null } = {}) {
   state.data = normalizeStore(data);
-  state.baseline = deepClone(state.data);
+  setBaseline(deepClone(state.data));
   state.sha = sha;
   state.source = source;
   state.sourceUrl = url;
@@ -96,7 +106,7 @@ export function setError(error) {
 /** Replaces the whole document (import, remote refresh while admin, etc.). */
 export function replaceData(next, { baseline = false, source = null } = {}) {
   state.data = normalizeStore(next);
-  if (baseline || !state.baseline) state.baseline = deepClone(state.data);
+  if (baseline || !state.baseline) setBaseline(deepClone(state.data));
   if (source) state.source = source;
   refreshDirty();
   if (isAdmin()) persistDraft();
@@ -134,7 +144,8 @@ export function mutateQuiet(fn) {
 
 export function refreshDirty() {
   if (!state.baseline || !state.data) { state.dirty = false; return false; }
-  const changed = serializeStore(state.baseline) !== serializeStore(state.data);
+  if (baselineJson == null) baselineJson = serializeStore(state.baseline);
+  const changed = baselineJson !== serializeStore(state.data);
   state.dirty = changed;
   return changed;
 }
@@ -194,19 +205,43 @@ export function syncUrl() {
 
 /* ── Drafts (survive an accidental refresh, per tab) ────────────────────── */
 
-export function persistDraft() {
+let draftTimer = 0;
+let draftPending = false;
+
+/**
+ * Stores the draft in sessionStorage. Writing on every +/- tap meant
+ * stringifying the whole document dozens of times per minute (the main cause
+ * of the editor feeling heavy on phones), so the write is debounced.
+ */
+export function persistDraft({ flush = false } = {}) {
   if (!isAdmin() || !state.data) return;
+  if (!state.dirty) {
+    draftPending = false;
+    clearTimeout(draftTimer);
+    sessionRemove(draftStorageKey());
+    return;
+  }
+  draftPending = true;
+  if (flush) { flushDraft(); return; }
+  if (draftTimer) return;
+  draftTimer = setTimeout(() => { draftTimer = 0; flushDraft(); }, 400);
+}
+
+function flushDraft() {
+  if (draftTimer) { clearTimeout(draftTimer); draftTimer = 0; }
+  if (!draftPending || !isAdmin() || !state.data) return;
+  draftPending = false;
   if (!state.dirty) { sessionRemove(draftStorageKey()); return; }
   try {
-    const ok = sessionSet(draftStorageKey(), {
-      data: state.data,
-      at: Date.now()
-    });
+    const ok = sessionSet(draftStorageKey(), { data: state.data, at: Date.now() });
     if (!ok) console.warn('[state] draft could not be stored');
   } catch (err) {
     console.warn('[state] draft failed', err);
   }
 }
+
+/** Writes the pending draft immediately (page hide, publish, logout). */
+export function flushDraftNow() { flushDraft(); }
 
 export function readDraft(repo = state.repo) {
   const draft = sessionGet(draftStorageKey(repo), null);
@@ -219,12 +254,15 @@ export function readDraft(repo = state.repo) {
 }
 
 export function clearDraft(repo = state.repo) {
+  draftPending = false;
+  if (draftTimer) { clearTimeout(draftTimer); draftTimer = 0; }
   sessionRemove(draftStorageKey(repo));
 }
 
 export function discardDraftAndReset() {
   clearDraft();
   state.data = deepClone(state.baseline);
+  baselineJson = serializeStore(state.data);
   state.dirty = false;
   emit('data', { source: 'discard' });
 }
@@ -233,7 +271,7 @@ export function discardDraftAndReset() {
 
 export function startAdminSession({ data, baseline, sha, site, repo, api, user, vault, vaultUrl, mode = 'admin' }) {
   const nextBaseline = normalizeStore(baseline || data);
-  state.baseline = nextBaseline;
+  setBaseline(nextBaseline);
   state.data = normalizeStore(data || nextBaseline);
   state.sha = sha ?? null;
   state.site = site || state.site;
@@ -265,7 +303,7 @@ export function endAdminSession() {
 }
 
 export function markPublished({ data, sha, commit }) {
-  state.baseline = deepClone(data);
+  setBaseline(deepClone(data));
   state.data = deepClone(data);
   state.sha = sha || state.sha;
   state.dirty = false;

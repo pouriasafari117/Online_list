@@ -195,6 +195,19 @@ hr { border: 0; border-top: 1px solid var(--hairline); margin: 0; }
 .btn--outlined:hover { --btn-bg: var(--surface-2); }
 .btn--text { padding-inline: 12px; }
 .btn--text:hover { --btn-bg: var(--primary-soft); }
+/* Inline text button that reads like a link (used inside notes/help copy). */
+.linklike {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+.linklike:hover { color: var(--primary); }
 .btn--danger { --btn-bg: var(--danger-container); --btn-fg: var(--danger); --btn-border: transparent; }
 .btn--danger:hover { box-shadow: var(--shadow-1); }
 .btn--sm { --btn-h: 36px; padding-inline: 14px; font-size: var(--fs-xs); }
@@ -490,8 +503,7 @@ dialog.sheet[open]::backdrop { animation: fade-in var(--dur-3) var(--ease-standa
   align-items: flex-start;
   gap: var(--sp-3);
   padding: 20px 22px 14px;
-  background: color-mix(in srgb, var(--surface) 92%, transparent);
-  backdrop-filter: blur(12px);
+  background: var(--surface);
   border-bottom: 1px solid var(--hairline);
 }
 .sheet__title { font-size: 1.0625rem; font-weight: 700; line-height: 1.4; }
@@ -511,8 +523,7 @@ dialog.sheet[open]::backdrop { animation: fade-in var(--dur-3) var(--ease-standa
   gap: var(--sp-2);
   padding: 14px 22px;
   border-top: 1px solid var(--hairline);
-  background: color-mix(in srgb, var(--surface) 94%, transparent);
-  backdrop-filter: blur(12px);
+  background: var(--surface);
 }
 .sheet__foot .spacer { flex: 1; }
 .sheet__section { display: flex; flex-direction: column; gap: 14px; }

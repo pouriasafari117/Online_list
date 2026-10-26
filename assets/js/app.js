@@ -5,23 +5,71 @@
 import { fetchSiteConfig, fetchStoreData, parseRepoFromLocation } from './api.js';
 import { makeDefaultData, normalizeStore, parseStoreJson } from './model.js';
 import {
-  initPublic, isAdmin, mutateQuiet, replaceData, setNetwork, setUI, state, subscribe, syncUrl
+  initPublic, isAdmin, replaceData, setNetwork, setUI, state, subscribe, syncUrl
 } from './state.js';
 import {
-  hydrateIcons, openDeviceDetail, openHistory, openShareSheet, patchDeviceStock,
+  hydrateIcons, openDeviceDetail, openHistory, openShareSheet,
   renderAll, renderFilters, renderList, renderPrintMeta, renderStats, renderUpdateCard,
   updateThemeIcon
 } from './render.js';
-import { initAdmin, renderAdmin } from './admin.js';
 import { initRipples, openSheet, toast } from './ui.js';
 import {
-  clamp, debounce, formatJalaliDateTime, parseNumber, prefersReducedMotion,
+  debounce, formatJalaliDateTime, prefersReducedMotion,
   storageGet, storageSet, toFaDigits
 } from './util.js';
 import { icon } from './icons.js';
 
 const THEME_KEY = 'ol.theme';
 const $ = (sel) => document.querySelector(sel);
+
+/* ── Admin bundle (loaded on demand) ─────────────────────────────────────
+   Reading stock never needs the editor. Keeping admin.js (≈110 KB of source)
+   out of the initial module graph means a public visit parses much less
+   JavaScript; the editor is fetched when someone clicks "ورود مدیر" or right
+   after the page goes idle. */
+const ADMIN_ACTIONS = new Set([
+  'login', 'logout', 'admin-menu', 'add-menu', 'manage', 'publish', 'discard', 'settings', 'security',
+  'add-device', 'edit-device', 'device-menu', 'add-category', 'edit-category',
+  'export-backup', 'import-backup', 'lock', 'demo-exit'
+]);
+let adminModule = null;
+let adminLoading = null;
+
+function loadAdmin() {
+  if (adminModule) return Promise.resolve(adminModule);
+  if (!adminLoading) {
+    adminLoading = import('./admin.js')
+      .then((mod) => {
+        adminModule = mod;
+        mod.initAdmin();
+        mod.renderAdmin();
+        return mod;
+      })
+      .catch((err) => {
+        adminLoading = null;
+        throw err;
+      });
+  }
+  return adminLoading;
+}
+
+function adminRender() {
+  if (adminModule) adminModule.renderAdmin();
+}
+
+/* Catch admin clicks that happen before the lazy bundle has landed. */
+function initAdminGate() {
+  document.addEventListener('click', (event) => {
+    const el = event.target.closest('[data-action]');
+    if (!el || adminModule || !ADMIN_ACTIONS.has(el.dataset.action)) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    loadAdmin().then(() => el.click()).catch((err) => {
+      console.error('[admin]', err);
+      toast('باز کردن پنل مدیریت ناموفق بود؛ صفحه را دوباره بارگذاری کنید.', { type: 'err' });
+    });
+  }, true);
+}
 
 /* ── Theme ──────────────────────────────────────────────────────────────── */
 
@@ -166,12 +214,23 @@ function initHeader() {
   updateNavState();
 }
 
+let navCache = null;
 function updateNavState() {
-  const links = [...document.querySelectorAll('.appbar__link')];
+  // Cache the nodes and the last active item: this runs on every scroll frame,
+  // so re-querying the DOM each time is wasted work.
+  if (!navCache || !navCache.links[0]?.isConnected) {
+    navCache = {
+      links: [...document.querySelectorAll('.appbar__link')],
+      contact: document.getElementById('contact'),
+      active: ''
+    };
+  }
+  const { links, contact } = navCache;
   if (!links.length) return;
-  const contact = document.getElementById('contact');
-  const contactTop = contact ? contact.getBoundingClientRect().top : Infinity;
+  const contactTop = contact && contact.isConnected ? contact.getBoundingClientRect().top : Infinity;
   const active = contactTop < window.innerHeight * 0.55 ? '#contact' : '#list';
+  if (active === navCache.active) return;
+  navCache.active = active;
   links.forEach((a) => {
     if (a.getAttribute('href') === '#categories') { a.removeAttribute('aria-current'); return; }
     if (a.getAttribute('href') === active) a.setAttribute('aria-current', 'page');
@@ -224,24 +283,6 @@ function resetFilters() {
   document.getElementById('sortSelect') && (document.getElementById('sortSelect').value = 'recommended');
 }
 
-function setStock(deviceId, value) {
-  const device = state.data?.devices.find((d) => d.id === deviceId);
-  if (!device) return;
-  const next = clamp(Math.round(Number(value)), 0, 9999);
-  if (!Number.isFinite(next) || next === device.stock) return;
-  mutateQuiet((draft) => {
-    const target = draft.devices.find((d) => d.id === deviceId);
-    if (!target) return;
-    target.stock = next;
-    target.updatedAt = new Date().toISOString();
-  });
-  patchDeviceStock(deviceId);
-  renderStats({ animate: false });
-  renderUpdateCard();
-  renderAdmin();
-  if (navigator.vibrate) navigator.vibrate(8);
-}
-
 function initDelegation() {
   document.addEventListener('click', (event) => {
     const actionEl = event.target.closest('[data-action]');
@@ -253,10 +294,6 @@ function initDelegation() {
         scrollToList();
       } else if (action === 'clear-filters') {
         resetFilters();
-      } else if (action === 'stock-inc' || action === 'stock-dec') {
-        const device = state.data?.devices.find((d) => d.id === actionEl.dataset.deviceId);
-        if (!device) return;
-        setStock(device.id, device.stock + (action === 'stock-inc' ? 1 : -1));
       } else if (action === 'detail') {
         openDeviceDetail(actionEl.dataset.deviceId);
       } else if (action === 'theme') {
@@ -289,12 +326,6 @@ function initDelegation() {
   });
 
   document.addEventListener('change', (event) => {
-    const input = event.target.closest('[data-action="stock-input"]');
-    if (input) {
-      const value = parseNumber(input.value);
-      setStock(input.dataset.deviceId, Number.isFinite(value) ? value : 0);
-      return;
-    }
     if (event.target.id === 'sortSelect') {
       setUI({ sort: event.target.value, limit: 24 });
     }
@@ -478,7 +509,36 @@ async function boot() {
   initReveal();
   initInstall();
   initDelegation();
-  initAdmin();
+  initAdminGate();
+  const warmAdmin = () => { loadAdmin().catch((err) => console.warn('[admin]', err)); };
+  // Warm the editor bundle once the page is loaded and idle, and earlier if the
+  // pointer/finger reaches the login button, so opening the panel still feels
+  // instant.
+  window.addEventListener('load', () => {
+    const whenIdle = window.requestIdleCallback || ((fn) => setTimeout(fn, 1500));
+    whenIdle(warmAdmin, { timeout: 4000 });
+  }, { once: true });
+  const loginBtn = document.getElementById('loginBtn');
+  if (loginBtn) {
+    ['pointerenter', 'touchstart', 'focus'].forEach((type) => {
+      loginBtn.addEventListener(type, warmAdmin, { once: true, passive: type !== 'focus' });
+    });
+  }
+
+  /* While the management panel covers the page, re-rendering the public list
+     behind it is wasted work (and the main source of jank on a phone). The
+     dock still updates, and one catch-up render runs when the panel closes. */
+  let panelOpen = false;
+  document.addEventListener('ol:manage-state', (event) => {
+    const open = !!event.detail?.open;
+    if (panelOpen && !open) {
+      panelOpen = false;
+      adminRender();
+      renderAll({ animateStats: false });
+      return;
+    }
+    panelOpen = open;
+  });
 
   subscribe((reason) => {
     if (!state.data) return;
@@ -493,9 +553,13 @@ async function boot() {
       return;
     }
     if (reason === 'loading') return;
-    renderAll({ animateStats: reason === 'data' });
-    renderAdmin();
     if (reason === 'auth' || reason === 'data') document.documentElement.dataset.mode = state.mode;
+    if (panelOpen) {
+      adminRender();
+      return;
+    }
+    renderAll({ animateStats: reason === 'data' });
+    adminRender();
     if (reason === 'data') handleDeepLink();
   });
 

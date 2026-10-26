@@ -13,14 +13,15 @@ body.has-adminbar { padding-bottom: 104px; }
   height: var(--header-h);
   display: flex;
   align-items: center;
-  background: color-mix(in srgb, var(--bg) 72%, transparent);
-  backdrop-filter: blur(18px) saturate(1.15);
+  /* Fully opaque: a blur here repaints on every scroll frame and was the main
+     source of jank on mid-range phones, while a semi-transparent bar without
+     a blur lets content ghost through. */
+  background: var(--bg);
   border-bottom: 1px solid transparent;
   transition: border-color var(--dur-3), background-color var(--dur-3), box-shadow var(--dur-3);
 }
 .appbar.is-stuck {
   border-bottom-color: var(--hairline);
-  background: color-mix(in srgb, var(--bg) 88%, transparent);
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.01);
 }
 .appbar__inner {
@@ -124,11 +125,10 @@ body.has-adminbar { padding-bottom: 104px; }
   padding-inline: 12px 14px;
   border-radius: var(--r-full);
   border: 1px solid var(--outline);
-  background: color-mix(in srgb, var(--surface) 70%, transparent);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
   font-size: var(--fs-2xs);
   font-weight: 550;
   color: var(--text-2);
-  backdrop-filter: blur(8px);
 }
 .live-dot { position: relative; width: 7px; height: 7px; border-radius: 99px; background: var(--ok); flex: none; }
 .live-dot::after {
@@ -186,10 +186,9 @@ body.has-adminbar { padding-bottom: 104px; }
   gap: 18px;
   padding: 24px;
   border-radius: var(--r-xl);
-  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
   border: 1px solid var(--outline);
   box-shadow: var(--shadow-2);
-  backdrop-filter: blur(14px);
   overflow: hidden;
 }
 .update-card::before {
@@ -453,8 +452,7 @@ body.has-adminbar { padding-bottom: 104px; }
   position: sticky;
   top: var(--header-h);
   z-index: 3;
-  background: linear-gradient(to bottom, var(--bg) 62%, color-mix(in srgb, var(--bg) 0%, transparent));
-  backdrop-filter: blur(2px);
+  background: var(--bg);
 }
 .group__icon {
   width: 36px; height: 36px;
@@ -802,8 +800,7 @@ body.has-adminbar { padding-bottom: 104px; }
   padding: 6px;
   border-radius: var(--r-full);
   border: 1px solid var(--outline);
-  background: var(--glass);
-  backdrop-filter: blur(20px) saturate(1.2);
+  background: var(--surface);
   box-shadow: var(--shadow-pop);
   pointer-events: auto;
   max-width: 100%;
@@ -1513,3 +1510,367 @@ body.has-adminbar .toast-root {
   border-radius: 6px;
   background: color-mix(in srgb, var(--text) 6%, transparent);
 }
+
+/* ── Management panel (full-screen admin) ─────────────────────────────────
+   The panel is a dialog so focus trapping, ESC and the scroll lock keep
+   working, but it fills the viewport like a page and never scrolls the body:
+   only the list inside it scrolls. */
+dialog.sheet--full {
+  width: 100vw;
+  height: 100dvh;
+  max-height: 100dvh;
+  border-radius: 0;
+  border: 0;
+  display: flex;
+  flex-direction: column;
+}
+dialog.sheet--full .sheet__head { padding: 14px 18px 12px; }
+dialog.sheet--full .sheet__body { padding: 0; max-height: none; overflow: hidden; flex: 1 1 auto; min-height: 0; }
+dialog.sheet--full .sheet__foot { padding: 10px 18px; flex-wrap: wrap; row-gap: 8px; }
+
+.mp { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+.mp__summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  padding: 10px 18px 2px;
+}
+.mp-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 9px 12px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--hairline);
+  background: var(--surface-2);
+}
+.mp-stat b { font-size: 1.0625rem; font-weight: 800; letter-spacing: -0.3px; font-variant-numeric: tabular-nums; }
+.mp-stat span { font-size: var(--fs-2xs); color: var(--text-3); }
+.mp-stat.is-warn b { color: var(--danger); }
+
+.mp__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  flex-wrap: wrap;
+}
+.mp__search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 220px;
+  min-width: 0;
+  height: 42px;
+  padding-inline: 12px;
+  border-radius: var(--r-full);
+  border: 1px solid var(--outline);
+  background: var(--surface-2);
+  color: var(--text-3);
+}
+.mp__search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: var(--fs-xs);
+  outline: none;
+}
+.mp__search:focus-within { border-color: var(--text-3); background: var(--surface); }
+.mp__cat { height: 42px; border-radius: var(--r-full); flex: 0 1 180px; font-size: var(--fs-xs); }
+.mp__seg {
+  display: inline-flex;
+  padding: 3px;
+  gap: 2px;
+  border-radius: var(--r-full);
+  border: 1px solid var(--outline);
+  background: var(--surface-2);
+}
+.mp__seg-btn {
+  border: 0;
+  background: none;
+  color: var(--text-2);
+  font: inherit;
+  font-size: var(--fs-2xs);
+  padding: 6px 11px;
+  border-radius: var(--r-full);
+  cursor: pointer;
+}
+.mp__seg-btn.is-active { background: var(--surface); color: var(--text); box-shadow: var(--shadow-1); font-weight: 700; }
+
+.mp__note {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 18px 6px;
+  padding: 9px 12px;
+  border-radius: var(--r-md);
+  border: 1px solid color-mix(in srgb, var(--text) 12%, var(--hairline));
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: var(--fs-2xs);
+  line-height: 1.8;
+}
+.mp__note .ic { flex: 0 0 auto; color: var(--text-3); }
+
+.mp__list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 4px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  scrollbar-gutter: stable;
+}
+
+.mp-row {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 11px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+}
+.mp-row.is-oos { border-color: color-mix(in srgb, var(--danger) 26%, var(--hairline)); }
+.mp-row__thumb {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--hairline);
+  color: var(--text-2);
+}
+.mp-row__main { min-width: 0; }
+.mp-row__title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-sm);
+  font-weight: 650;
+  line-height: 1.5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mp-row__sub {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  font-size: var(--fs-2xs);
+  color: var(--text-3);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.mp-row__meta { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.mp-row__price { color: var(--text-2); flex: 0 0 auto; }
+.mp-row__price small { font-size: 0.85em; color: var(--text-3); }
+.mp-row__actions { display: flex; align-items: center; gap: 2px; }
+.mp-row__actions[data-ask="1"] { gap: 6px; }
+.mp-row__ask { font-size: var(--fs-2xs); color: var(--text-3); white-space: nowrap; }
+.mp-row__danger { color: var(--danger); }
+.mp-row__danger:hover { background: var(--danger-container); color: var(--danger); }
+
+.mp-badge {
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--r-full);
+  border: 1px solid var(--hairline);
+  background: var(--surface-2);
+  color: var(--text-2);
+  white-space: nowrap;
+}
+.mp-badge--ok { color: var(--text-2); }
+.mp-badge--low { color: #8a6d00; background: color-mix(in srgb, #e6c458 18%, var(--surface)); border-color: color-mix(in srgb, #e6c458 40%, var(--hairline)); }
+.mp-badge--out { color: var(--danger); background: var(--danger-container); border-color: color-mix(in srgb, var(--danger) 22%, transparent); }
+.mp-badge--muted { color: var(--text-3); }
+
+.mp-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--r-full);
+  border: 1px solid var(--outline);
+  background: var(--surface-2);
+}
+.mp-stepper__btn {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  box-shadow: var(--shadow-1);
+}
+.mp-stepper__btn:hover { background: var(--primary-soft); }
+.mp-stepper__btn:active { transform: scale(0.94); }
+.mp-stepper__input {
+  width: 44px;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  -moz-appearance: textfield;
+}
+.mp-stepper__input::-webkit-outer-spin-button,
+.mp-stepper__input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.mp-stepper__input:focus { outline: 2px solid var(--text-3); outline-offset: 0; border-radius: 8px; }
+
+.mp-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 40px 16px;
+  text-align: center;
+  color: var(--text-3);
+}
+.mp-empty b { color: var(--text-2); font-size: var(--fs-sm); }
+
+.mp__pending {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: var(--fs-2xs);
+  color: var(--text-3);
+  white-space: nowrap;
+}
+.mp__pending.is-dirty { color: var(--text); font-weight: 600; }
+.mp__pending-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--danger);
+}
+
+.mp-apply {
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
+  margin: 0 18px;
+  transform: translateY(-6px);
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--outline);
+  background: var(--surface-2);
+  box-shadow: var(--shadow-2);
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.mp-apply__head { display: flex; align-items: flex-start; gap: 9px; }
+.mp-apply__head b { display: block; font-size: var(--fs-sm); }
+.mp-apply__head span { display: block; font-size: var(--fs-2xs); color: var(--text-3); line-height: 1.8; }
+.mp-apply__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.mp-apply__list li {
+  font-size: var(--fs-2xs);
+  padding: 2px 8px;
+  border-radius: var(--r-full);
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  color: var(--text-2);
+}
+.mp-apply .field { margin: 0; }
+.mp-apply .input { height: 38px; font-size: var(--fs-xs); }
+.mp-apply__actions { display: flex; justify-content: flex-end; gap: 8px; }
+
+.btn--manage { display: inline-flex; }
+@media (max-width: 560px) {
+  .btn--manage .label { display: none; }
+  .btn--manage { padding-inline: 10px; }
+}
+
+@media (max-width: 760px) {
+  .mp__summary { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; padding: 8px 12px 0; }
+  .mp-stat { padding: 7px 9px; }
+  .mp-stat b { font-size: 0.95rem; }
+  .mp__toolbar { padding: 8px 12px; gap: 6px; }
+  .mp__search { flex-basis: 100%; height: 38px; }
+  .mp__cat { flex: 1 1 auto; height: 38px; }
+  .mp__seg { flex: 1 1 auto; justify-content: space-between; }
+  .mp__seg-btn { padding: 6px 8px; }
+  .mp__list { padding: 2px 12px 12px; }
+  .mp-row {
+    grid-template-columns: 38px minmax(0, 1fr) auto;
+    grid-template-areas:
+      "thumb main badge"
+      "thumb stepper actions";
+    row-gap: 6px;
+    padding: 8px 9px;
+  }
+  .mp-row__thumb { grid-area: thumb; width: 38px; height: 38px; }
+  .mp-row__main { grid-area: main; }
+  /* the category is redundant next to the row icon on a phone; dropping it
+     stops the brand and the price from being clipped. */
+  .mp-row__cat { display: none; }
+  /* Two short lines instead of one clipped one: brand on top, price below. */
+  .mp-row__sub { flex-wrap: wrap; row-gap: 0; line-height: 1.7; }
+  .mp-row__meta { flex: 1 1 100%; }
+  .mp-row > .mp-badge { grid-area: badge; justify-self: end; }
+  .mp-stepper { grid-area: stepper; justify-self: start; }
+  .mp-row__actions { grid-area: actions; justify-self: end; }
+  .mp__pending { display: none; }
+  dialog.sheet--full .sheet__foot { padding: 8px 12px; }
+  .mp-apply { margin: 0 12px; }
+}
+
+.mp__seg-count {
+  display: inline-block;
+  min-width: 1.1rem;
+  margin-inline-start: 2px;
+  font-size: 0.92em;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.72;
+}
+.mp__seg-btn.is-active .mp__seg-count { opacity: 1; }
+
+/* ── Admin stock badge → opens the management panel ─────────────────────── */
+.stock-jump {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px;
+  border-radius: var(--r-full);
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  transition: background var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-spring);
+}
+.stock-jump:hover { background: var(--primary-soft); }
+.stock-jump:active { transform: scale(0.96); }
+.stock-jump .stock-badge { pointer-events: none; }
+.stock-jump__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--text-2);
+  padding-inline-end: 6px;
+}
+.stock-jump .ic { width: 13px; height: 13px; }

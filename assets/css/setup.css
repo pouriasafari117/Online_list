@@ -12,8 +12,7 @@
   position: sticky;
   top: 0;
   z-index: 30;
-  background: color-mix(in srgb, var(--bg) 82%, transparent);
-  backdrop-filter: blur(16px);
+  background: color-mix(in srgb, var(--bg) 95%, transparent);
   border-bottom: 1px solid var(--hairline);
 }
 .setup-header .brand__name { font-size: 0.9375rem; }

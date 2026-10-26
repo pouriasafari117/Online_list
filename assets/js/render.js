@@ -351,7 +351,9 @@ export function renderFilters() {
   if (resetBtn) resetBtn.hidden = !hasFilters;
 
   const listRoot = document.getElementById('listRoot');
-  if (listRoot) listRoot.classList.toggle('list--static', !!ui.q);
+  // Admin re-renders the list after every stock change; replaying the stagger
+  // animation 30+ times per edit is what made the panel feel heavy.
+  if (listRoot) listRoot.classList.toggle('list--static', !!ui.q || isAdmin());
   const chips = document.getElementById('categories');
   if (chips && ui.hiddenOnly) {
     chips.insertAdjacentHTML('afterbegin', `
@@ -565,7 +567,7 @@ function deviceRowHtml(device, index = 0, { showCategory = false } = {}) {
         <div class="device__price ${device.priceOnRequest || !data.settings.showPrices || !device.price ? 'device__price--ask' : ''}">
           ${priceHtml(device)}
         </div>
-        ${admin ? stepperHtml(device) : stockBadgeHtml(device)}
+        ${admin ? stockJumpHtml(device) : stockBadgeHtml(device)}
         ${admin ? `<div class="device__admin">
           <button class="icon-btn" type="button" data-action="edit-device" data-device-id="${escapeHtml(device.id)}" aria-label="ویرایش ${escapeHtml(device.name)}" data-tip="ویرایش">
             ${icon('edit', { size: 17 })}
@@ -581,19 +583,16 @@ function deviceRowHtml(device, index = 0, { showCategory = false } = {}) {
   `;
 }
 
-function stepperHtml(device) {
+/* Admin mode no longer edits stock inline (that path felt heavy and could
+   stall on big lists). Instead the badge opens the management panel, where
+   every change waits for an explicit confirmation before it goes live. */
+function stockJumpHtml(device) {
   return `
-    <div class="stepper" role="group" aria-label="موجودی ${escapeHtml(device.name)}">
-      <button class="stepper__btn" type="button" data-action="stock-dec" data-device-id="${escapeHtml(device.id)}" aria-label="کاهش موجودی">
-        ${icon('remove', { size: 15 })}
-      </button>
-      <input class="stepper__input" type="number" inputmode="numeric" min="0" max="9999" step="1"
-             value="${device.stock}" data-action="stock-input" data-device-id="${escapeHtml(device.id)}"
-             aria-label="تعداد موجودی ${escapeHtml(device.name)}" aria-valuenow="${device.stock}">
-      <button class="stepper__btn" type="button" data-action="stock-inc" data-device-id="${escapeHtml(device.id)}" aria-label="افزایش موجودی">
-        ${icon('add', { size: 15 })}
-      </button>
-    </div>
+    <button class="stock-jump" type="button" data-action="manage" data-tip="مدیریت در پنل"
+            aria-label="مدیریت موجودی ${escapeHtml(device.name)} در پنل">
+      ${stockBadgeHtml(device)}
+      <span class="stock-jump__label">${icon('inventory_2', { size: 13 })}<span class="stock-jump__word">پنل</span></span>
+    </button>
   `;
 }
 
@@ -676,16 +675,13 @@ export function patchDeviceStock(deviceId) {
   });
   document.querySelectorAll(`.device[data-device-id="${CSS.escape(deviceId)}"]`).forEach((row) => {
     row.classList.toggle('device--oos', device.stock <= 0);
-    const input = row.querySelector('.stepper__input');
-    if (input && document.activeElement !== input) input.value = device.stock;
-    if (input) input.setAttribute('aria-valuenow', device.stock);
   });
   const stat = document.querySelector('[data-stat="inStock"]');
   if (stat) stat.textContent = num(computeStats(state.data, { includeHidden: isAdmin() }).inStock);
   renderGroupMeta();
 }
 
-function renderGroupMeta() {
+export function renderGroupMeta() {
   if (!state.data) return;
   const counts = countByCategory(state.data, { includeHidden: isAdmin() });
   document.querySelectorAll('[data-group-meta]').forEach((el) => {
