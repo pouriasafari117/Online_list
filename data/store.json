@@ -20,12 +20,71 @@
     "adminName": "پوریا صفری",
     "updatedAtLabel": "آخرین به‌روزرسانی"
   },
-  "categories": [],
-  "devices": [],
+  "categories": [
+    {
+      "id": "cat_mvpq1twgentn6",
+      "title": "لپ تاپ",
+      "description": "لپتاپه دیگ",
+      "icon": "laptop_mac",
+      "fields": [
+        {
+          "key": "f_mvpq02pm8y4j7",
+          "label": "سیپیو",
+          "unit": "کیلو",
+          "type": "text",
+          "showInRow": true
+        },
+        {
+          "key": "f_mvpq10dqxmdum",
+          "label": "رم",
+          "unit": "گیگ",
+          "type": "text",
+          "showInRow": true
+        }
+      ]
+    }
+  ],
+  "devices": [
+    {
+      "id": "dev_mvpq2rtn8x51h",
+      "name": "ولویمیبندریمبندر",
+      "brand": "باباللا",
+      "categoryId": "cat_mvpq1twgentn6",
+      "price": 120000,
+      "priceOnRequest": false,
+      "stock": 3,
+      "condition": "استوک",
+      "warranty": "",
+      "specs": {
+        "f_mvpq02pm8y4j7": "12",
+        "f_mvpq10dqxmdum": "16"
+      },
+      "extraSpecs": [],
+      "note": "",
+      "image": "",
+      "featured": false,
+      "hidden": false,
+      "order": 1,
+      "createdAt": "2026-10-26T20:41:56.315Z",
+      "updatedAt": "2026-10-26T20:41:56.315Z"
+    }
+  ],
   "meta": {
-    "updatedAt": "2026-10-26T18:32:39.915Z",
+    "updatedAt": "2026-10-26T20:42:16.180Z",
     "updatedBy": "پوریا صفری",
     "history": [
+      {
+        "id": "h_mvpq375g60xnd",
+        "at": "2026-10-26T20:42:16.180Z",
+        "by": "پوریا صفری",
+        "action": "publish",
+        "summary": "۱ دستگاه جدید · ۱ دسته جدید",
+        "stats": {
+          "added": 1,
+          "updated": 0,
+          "removed": 0
+        }
+      },
       {
         "id": "h_mvplgiy4jmoyq",
         "at": "2026-10-26T18:32:39.915Z",
