@@ -7,7 +7,7 @@ import {
   CryptoError, cryptoAvailable, estimateCrackSeconds, isVault, openVault, passwordScore, sealVault
 } from './crypto.js';
 import {
-  CATEGORY_ICONS, CONDITION_OPTIONS, RESET_PHRASE, clearInventory, computeDiff,
+  CATEGORY_ICONS, CONDITION_OPTIONS, CREDENTIAL_RESET_PHRASE, RESET_PHRASE, clearInventory, computeDiff,
   defaultCategory, defaultField, diffSummary, getCategory, makeDefaultData, normalizeStore,
   parseStoreJson, serializeStore
 } from './model.js';
@@ -1300,7 +1300,13 @@ function openSecurity() {
         </div>
         <p class="t-xs" style="margin-top:12px;color:var(--text-3);line-height:1.9">با صفحه راه‌اندازی می‌توانید همین توکن را با یک رمز عبور سینک کنید؛ از آن به بعد ورود فقط با رمز انجام می‌شود.</p>
       `,
-      footer: `<span class="spacer"></span><a class="btn btn--filled btn--sm" href="setup/">${icon('rocket_launch', { size: 17 })} صفحه راه‌اندازی</a>`
+      footer: `<span class="spacer"></span>
+        <button class="btn btn--text btn--sm btn--danger" type="button" data-reset-credential>${icon('refresh', { size: 17 })} حذف فایل امنیتی</button>
+        <a class="btn btn--filled btn--sm" href="setup/">${icon('rocket_launch', { size: 17 })} صفحه راه‌اندازی</a>`
+    });
+    document.querySelector('dialog.sheet[open] [data-reset-credential]')?.addEventListener('click', () => {
+      document.querySelectorAll('dialog.sheet[open]').forEach((d) => { try { d.close(); } catch { /* ignore */ } });
+      openCredentialReset();
     });
     return;
   }
@@ -1335,6 +1341,17 @@ function openSecurity() {
         <div class="row" style="gap:8px;flex-wrap:wrap">
           <button class="btn btn--outlined btn--sm" type="button" data-download-vault>${icon('download', { size: 17 })} دریافت فایل پشتیبان امنیتی</button>
         </div>
+        <div class="sheet__section danger-zone" style="margin-top:4px">
+          <div class="sheet__legend">${icon('refresh', { size: 18 })} بازنشانی کامل رمز</div>
+          <p class="danger-zone__desc">
+            فایل امنیتی (رمز و توکنِ رمزگذاری‌شده) از مخزن حذف می‌شود. بعد از آن ورود با رمز ممکن نیست
+            تا دوباره صفحهٔ راه‌اندازی را باز کنید و <b>توکن تازه + رمز تازه</b> بسازید.
+            لیست کالاها، دسته‌ها و تنظیمات فروشگاه پاک نمی‌شود.
+          </p>
+          <button class="btn btn--text btn--sm btn--danger" type="button" data-reset-credential>
+            ${icon('refresh', { size: 17 })} بازنشانی رمز و توکن
+          </button>
+        </div>
       </form>
     `,
     footer: `
@@ -1366,6 +1383,10 @@ function openSecurity() {
         pw.type = show ? 'text' : 'password';
         event.currentTarget.innerHTML = icon(show ? 'visibility_off' : 'visibility', { size: 19 });
         pw.focus();
+      });
+      c.el.querySelector('[data-reset-credential]')?.addEventListener('click', () => {
+        c.close();
+        openCredentialReset();
       });
       c.el.querySelector('[data-download-vault]')?.addEventListener('click', () => {
         if (!state.vault) return;
@@ -1442,6 +1463,174 @@ function openSecurity() {
     }
   });
   return sheet;
+}
+
+/* ── Credential reset: delete the vault, start over with a fresh token ───── */
+
+/**
+ * Removes data/vault.json from the repository. Afterwards the site has no
+ * password and no token at all, so the owner must fetch a new GitHub token and
+ * set a new password in /setup/ — exactly the first-run flow. The inventory
+ * file is untouched. Works from a temporary-token session too, which is the
+ * way out when the password is forgotten.
+ */
+function openCredentialReset() {
+  if (!isAdmin()) { openLogin(); return; }
+  if (isDemo() || !state.api) {
+    alertDialog({
+      title: 'در پیش‌نمایش ممکن نیست',
+      message: 'حالت پیش‌نمایش توکنی ندارد، پس نمی‌تواند فایل امنیتی را از مخزن حذف کند.',
+      iconName: 'info'
+    });
+    return;
+  }
+  const hasVault = !!state.vault;
+  const sheet = openSheet({
+    title: 'بازنشانی کامل رمز و توکن',
+    subtitle: 'فایل امنیتی از مخزن حذف می‌شود',
+    size: 'narrow',
+    body: `
+      <form id="credentialResetForm" class="stack" style="gap:16px" novalidate>
+        ${errorNote('')}
+        <div class="danger-card">
+          ${icon('warning', { size: 22 })}
+          <div>
+            <b>بعد از این کار، ورود با رمز ممکن نیست</b>
+            <p>فایل <span dir="ltr">data/vault.json</span> حذف می‌شود؛ یعنی هیچ رمز و هیچ توکنی روی سایت نمی‌ماند.
+            برای برگشتن باید یک <b>توکن تازه</b> در گیت‌هاب بسازید و در صفحهٔ راه‌اندازی یک <b>رمز تازه</b> بگذارید.</p>
+          </div>
+        </div>
+        <div class="reset-summary">
+          <div class="reset-summary__row is-removed">
+            ${icon('delete', { size: 18 })}
+            <span>حذف می‌شود: فایل امنیتی، یعنی توکنِ رمزگذاری‌شده و رمزِ مربوط به آن</span>
+          </div>
+          <div class="reset-summary__row">
+            ${icon('check', { size: 18 })}
+            <span>می‌ماند: لیست کالاها، دسته‌بندی‌ها، تنظیمات فروشگاه و تاریخچه</span>
+          </div>
+        </div>
+        <div class="form-note">
+          ${icon('info', { size: 18 })}
+          <span>این دکمه توکن را در گیت‌هاب باطل نمی‌کند. بعد از بازنشانی، توکن قدیمی را در
+          <a href="https://github.com/settings/tokens" target="_blank" rel="noopener" dir="ltr">github.com/settings/tokens</a>
+          حذف (Revoke) کنید و یک توکن تازه بگیرید.</span>
+        </div>
+        ${state.dirty ? `<div class="form-note form-note--danger">
+          ${icon('warning', { size: 18 })}
+          <span>تغییرات منتشرنشدهٔ لیست دارید؛ با بازنشانی از بین می‌رود. اول «انتشار» بزنید یا نسخه پشتیبان بگیرید.</span>
+        </div>` : ''}
+        ${hasVault ? `<label class="check">
+          <input type="checkbox" name="backup" checked>
+          <span>قبل از حذف، نسخهٔ پشتیبان فایل امنیتی را دانلود کن</span>
+        </label>` : ''}
+        <label class="field">
+          <span class="field__label">برای تأیید، عبارت <b>${escapeHtml(CREDENTIAL_RESET_PHRASE)}</b> را بنویسید<span class="req">*</span></span>
+          <input class="input" name="phrase" autocomplete="off" placeholder="${escapeHtml(CREDENTIAL_RESET_PHRASE)}" required>
+          <span class="field__hint">این عبارت جلوی بازنشانی اتفاقی را می‌گیرد.</span>
+          <span class="field__error"></span>
+        </label>
+      </form>
+    `,
+    footer: `
+      <span class="spacer"></span>
+      <button class="btn btn--text btn--sm" type="button" data-close>انصراف</button>
+      <button class="btn btn--filled btn--sm btn--danger" type="submit" form="credentialResetForm" data-submit>
+        ${icon('refresh', { size: 17 })} حذف رمز و توکن
+      </button>
+    `,
+    onMount: (c) => {
+      const form = c.el.querySelector('#credentialResetForm');
+      const submit = c.el.querySelector('[data-submit]');
+      const phrase = form.elements.namedItem('phrase');
+      phrase.focus();
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        hideError(c);
+        const typed = String(phrase.value || '').replace(/\s+/g, ' ').trim();
+        if (typed !== CREDENTIAL_RESET_PHRASE) {
+          fieldError(phrase, `برای تأیید، دقیقاً «${CREDENTIAL_RESET_PHRASE}» را بنویسید.`);
+          phrase.select();
+          return;
+        }
+        const wantsBackup = hasVault && form.elements.namedItem('backup')?.checked;
+        if (wantsBackup && state.vault) {
+          download('vault-backup.json', `${JSON.stringify(state.vault, null, 2)}\n`);
+        }
+        setButtonBusy(submit, true, 'در حال حذف…');
+        c.setBusy(true);
+        try {
+          const file = await state.api.getFile('data/vault.json');
+          const res = file?.sha
+            ? await state.api.deleteFile({
+              path: 'data/vault.json',
+              sha: file.sha,
+              message: `بازنشانی رمز و توکن (حذف فایل امنیتی) — ${formatJalaliStamp()}`
+            })
+            : { missing: true, commitUrl: null };
+          resetGate();
+          endAdminSession();
+          document.querySelectorAll('dialog.sheet[open]').forEach((d) => { try { d.close(); } catch { /* ignore */ } });
+          openCredentialResetDone({ commitUrl: res?.commitUrl || null, already: !!res?.missing });
+        } catch (err) {
+          setButtonBusy(submit, false);
+          c.setBusy(false);
+          showError(c, err?.message || 'حذف فایل امنیتی ناموفق بود.');
+        }
+      });
+    }
+  });
+  return sheet;
+}
+
+function openCredentialResetDone({ commitUrl = null, already = false } = {}) {
+  openSheet({
+    title: 'رمز و توکن پاک شد',
+    size: 'narrow',
+    body: `
+      <div class="stack" style="gap:16px">
+        <div class="login-hero">
+          <span class="login-hero__icon">${icon('lock_open', { size: 24 })}</span>
+          <div>
+            <div class="login-hero__title">${already ? 'فایل امنیتی از قبل وجود نداشت' : 'از این لحظه هیچ رمزی روی سایت نیست'}</div>
+            <div class="login-hero__sub">
+              لیست کالاها، دسته‌ها و تنظیمات دست‌نخورده ماند. برای ورود مدیر باید یک توکن تازه و یک رمز تازه بسازید.
+            </div>
+          </div>
+        </div>
+        <ol class="cred-steps">
+          <li>
+            <span class="cred-steps__num">۱</span>
+            <b>توکن قدیمی را باطل کنید.</b>
+            در <a href="https://github.com/settings/tokens" target="_blank" rel="noopener" dir="ltr">github.com/settings/tokens</a>
+            توکن قبلی را Revoke کنید و یک توکن تازه بسازید (Contents: Read and write).
+          </li>
+          <li>
+            <span class="cred-steps__num">۲</span>
+            <b>صفحهٔ راه‌اندازی را روی رایانه باز کنید:</b>
+            <code dir="ltr">npm start</code> ← <code dir="ltr">http://localhost:8080/setup/</code>
+          </li>
+          <li>
+            <span class="cred-steps__num">۳</span>
+            توکن تازه و رمز تازه را وارد کنید؛ زیر کادر رمز، تخمین زمان شکستن را ببینید.
+            بعد <b>ساخت فایل امنیتی</b> ← <b>نوشتن در مخزن گیت‌هاب</b>.
+          </li>
+          <li><span class="cred-steps__num">۴</span>به سایت برگردید و با رمز تازه وارد شوید.</li>
+        </ol>
+        <div class="form-note">
+          ${icon('info', { size: 18 })}
+          <span>اگر رمز را فراموش کرده بودید، همین مسیر جواب می‌دهد: با «ورود موقت با توکن» وارد شوید،
+          فایل امنیتی را پاک کنید و از نو رمز بسازید.</span>
+        </div>
+      </div>
+    `,
+    footer: `
+      <span class="spacer"></span>
+      ${commitUrl ? `<a class="btn btn--text btn--sm" href="${escapeHtml(commitUrl)}" target="_blank" rel="noopener">${icon('open_in_new', { size: 17 })} کامیت حذف</a>` : ''}
+      <a class="btn btn--text btn--sm" href="help/#security">${icon('help', { size: 17 })} راهنما</a>
+      <button class="btn btn--filled btn--sm" type="button" data-close>باشه</button>
+    `
+  });
 }
 
 /* ── Publish ────────────────────────────────────────────────────────────── */

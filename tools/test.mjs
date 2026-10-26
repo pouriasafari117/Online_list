@@ -517,6 +517,59 @@ test('parseJsonLoose فایل‌های base64 قدیمی را بازیابی م�
   assert.throws(() => api.parseJsonLoose('not json at all'));
 });
 
+test('deleteFile فایل امنیتی را با sha حذف می‌کند', async () => {
+  const calls = [];
+  const reply = (data, status = 200) => ({
+    ok: status < 400,
+    status,
+    headers: new Headers(),
+    text: async () => JSON.stringify(data),
+    json: async () => data
+  });
+  const fetchImpl = async (url, options = {}) => {
+    calls.push({ url, method: options.method || 'GET', body: options.body ? JSON.parse(options.body) : null });
+    if (url.includes('/contents/data/vault.json') && (options.method || 'GET') === 'GET') {
+      return reply({ sha: 'vault-sha', content: Buffer.from('{}').toString('base64') });
+    }
+    if (url.includes('/contents/data/vault.json') && options.method === 'DELETE') {
+      return reply({ commit: { sha: 'c0ffee', html_url: 'https://github.com/me/Online_list/commit/c0ffee' } });
+    }
+    return reply({}, 404);
+  };
+  const client = api.createGitHub({
+    token: fakeToken('ghp_', 30), owner: 'me', repo: 'Online_list', branch: 'main', fetchImpl
+  });
+  const res = await client.deleteFile({ path: 'data/vault.json', message: 'حذف فایل امنیتی' });
+  const del = calls.find((c) => c.method === 'DELETE');
+  assert.ok(del, 'درخواست DELETE ارسال نشد');
+  assert.equal(del.body.sha, 'vault-sha', 'sha فایل باید فرستاده شود');
+  assert.equal(del.body.branch, 'main');
+  assert.equal(del.body.message, 'حذف فایل امنیتی');
+  assert.equal(res.commitSha, 'c0ffee');
+  assert.equal(res.missing, false);
+});
+
+test('deleteFile برای فایل ناموجود خطا نمی‌دهد', async () => {
+  const calls = [];
+  const fetchImpl = async (url, options = {}) => {
+    calls.push({ url, method: options.method || 'GET' });
+    return { ok: false, status: 404, headers: new Headers(), text: async () => '{}', json: async () => ({}) };
+  };
+  const client = api.createGitHub({
+    token: fakeToken('ghp_', 30), owner: 'me', repo: 'Online_list', branch: 'main', fetchImpl
+  });
+  const res = await client.deleteFile({ path: 'data/vault.json', message: 'حذف' });
+  assert.equal(res.missing, true);
+  assert.equal(calls.some((c) => c.method === 'DELETE'), false, 'وقتی فایل نیست، DELETE نباید بفرستد');
+});
+
+test('عبارت تأیید بازنشانی رمز دقیق است', () => {
+  assert.equal(model.CREDENTIAL_RESET_PHRASE.trim(), model.CREDENTIAL_RESET_PHRASE);
+  assert.ok(model.CREDENTIAL_RESET_PHRASE.length >= 8);
+  assert.notEqual(model.CREDENTIAL_RESET_PHRASE, model.RESET_PHRASE,
+    'عبارت بازنشانی رمز باید با عبارت حذف لیست فرق کند');
+});
+
 /* ── Summary ──────────────────────────────────────────────────────────── */
 const line = '─'.repeat(58);
 console.log(`\n${line}`);

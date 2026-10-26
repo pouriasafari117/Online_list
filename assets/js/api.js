@@ -358,6 +358,26 @@ export function createGitHub({ token, owner, repo, branch = 'main', fetchImpl } 
       return { commitSha: newCommit.data.sha, commitUrl: newCommit.data.html_url || null };
     },
 
+    /**
+     * Deletes a file from the branch (one commit). Used by the credential
+     * reset: removing data/vault.json leaves no password and no token behind,
+     * so the owner must create a fresh token and a new password.
+     */
+    async deleteFile({ path, message, sha }) {
+      const target = await (sha ? Promise.resolve({ sha }) : this.getFile(path));
+      if (!target?.sha) return { missing: true, commitSha: null, commitUrl: null };
+      const { data } = await request(`/contents/${encodePath(path)}`, {
+        method: 'DELETE',
+        body: { message, sha: target.sha, branch }
+      });
+      return {
+        missing: false,
+        commitSha: data?.commit?.sha || null,
+        commitUrl: data?.commit?.html_url || null,
+        message: data?.commit?.message || message
+      };
+    },
+
     /** Convenience used by the security dialog to rotate the vault. */
     async replaceVault(text, message) {
       const existing = await this.getFile('data/vault.json');

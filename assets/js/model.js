@@ -455,6 +455,8 @@ export function clearInventory(data, {
 
 /** The exact phrase an admin has to type before a destructive reset. */
 export const RESET_PHRASE = 'حذف همه';
+/** Typed confirmation for deleting the vault (password + token) entirely. */
+export const CREDENTIAL_RESET_PHRASE = 'بازنشانی رمز';
 
 export function parseStoreJson(text) {
   const raw = JSON.parse(text);
