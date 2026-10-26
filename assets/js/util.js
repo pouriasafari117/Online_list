@@ -250,6 +250,22 @@ export function toCsv(rows, { separator = ',', bom = true } = {}) {
   return `${bom ? '\uFEFF' : ''}${body}\r\n`;
 }
 
+/** Persian, human-friendly duration for the password strength estimate. */
+export function formatCrackTime(seconds, numerals = 'fa') {
+  const total = Number(seconds);
+  if (!Number.isFinite(total) || total <= 0) return '—';
+  const DAY = 86_400;
+  const YEAR = 365.25 * DAY;
+  if (total < 60) return 'کمتر از یک دقیقه';
+  if (total < 3_600) return `حدود ${formatNum(Math.round(total / 60), numerals)} دقیقه`;
+  if (total < DAY) return `حدود ${formatNum(Math.round(total / 3_600), numerals)} ساعت`;
+  if (total < 30 * DAY) return `حدود ${formatNum(Math.round(total / DAY), numerals)} روز`;
+  if (total < YEAR) return `حدود ${formatNum(Math.round(total / (30 * DAY)), numerals)} ماه`;
+  const years = total / YEAR;
+  if (years >= 1_000) return 'بیش از یک هزار سال';
+  return `حدود ${formatNum(Math.max(1, Math.round(years)), numerals)} سال`;
+}
+
 export function download(filename, content, type = 'application/json') {
   const blob = new Blob([content], { type: `${type};charset=utf-8` });
   const url = URL.createObjectURL(blob);

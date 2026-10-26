@@ -275,3 +275,16 @@ body.is-blocked .setup-header .setup-badge { display: none; }
 .setup-locked .t-lead { font-size: var(--fs-sm, 0.95rem); line-height: 2; color: var(--text-2, #5c5a54); }
 .setup-locked .code-block { margin: 18px 0 12px; text-align: left; }
 .setup-locked .t-xs { font-size: var(--fs-xs, 0.78rem); color: var(--text-3, #8a877f); line-height: 2; }
+
+/* Password estimate (see assets/js/crypto.js for the attacker model). */
+.pw-estimate {
+  margin-top: 6px;
+  font-size: var(--fs-2xs);
+  line-height: 1.85;
+  color: var(--text-3);
+  border-inline-start: 3px solid var(--outline);
+  padding-inline-start: 9px;
+}
+.pw-estimate[data-level="weak"] { color: var(--danger); border-inline-start-color: var(--danger); }
+.pw-estimate[data-level="ok"] { color: var(--low); border-inline-start-color: var(--low); }
+.pw-estimate[data-level="strong"] { color: var(--ok); border-inline-start-color: var(--ok); }

@@ -1460,3 +1460,17 @@ body.has-adminbar .toast-root {
 /* Empty catalogue: the filter chrome adds nothing, so it steps aside. */
 #filterbar.is-hidden, .resultbar.is-hidden { display: none !important; }
 .empty__actions .btn { text-decoration: none; }
+
+/* Offline-cracking estimate next to the password meter. The vault file is
+   public, so this number is the honest measure of the password, not a gimmick. */
+.pw-estimate {
+  margin-top: 6px;
+  font-size: var(--fs-2xs);
+  line-height: 1.85;
+  color: var(--text-3);
+  border-inline-start: 3px solid var(--outline);
+  padding-inline-start: 9px;
+}
+.pw-estimate[data-level="weak"] { color: var(--danger); border-inline-start-color: var(--danger); }
+.pw-estimate[data-level="ok"] { color: var(--low); border-inline-start-color: var(--low); }
+.pw-estimate[data-level="strong"] { color: var(--ok); border-inline-start-color: var(--ok); }

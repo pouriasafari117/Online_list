@@ -4,7 +4,7 @@
  * ---------------------------------------------------------------------------
  * Creates data/vault.json entirely from the command line — the token never
  * passes through a browser. Same format as the /setup/ page:
- *   PBKDF2-SHA256 (300k iterations) → AES-256-GCM.
+ *   PBKDF2-SHA256 (600k iterations) → AES-256-GCM.
  *
  * Usage:
  *   node tools/make-vault.mjs --owner USER --repo Online_list --branch main
@@ -24,7 +24,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.join(ROOT, 'data', 'vault.json');
-const ITERATIONS = 300_000;
+const ITERATIONS = 600_000;
 
 function parseArgs(args) {
   const out = {};
@@ -141,12 +141,19 @@ async function validateToken({ token, owner, repo }) {
   }
 }
 
+// Same implementation the web UI uses — no duplicated heuristics.
+import { isCommonPassword, passwordEntropyBits, estimateCrackSeconds } from '../assets/js/crypto.js';
+
 function strengthIssue(password) {
   if (!password || password.length < 10) return 'رمز باید حداقل ۱۰ کاراکتر باشد.';
-  if (/^(.)\1+$/.test(password)) return 'رمز نباید تکرار یک کاراکتر باشد.';
-  if (/^\d+$/.test(password)) return 'رمز نباید فقط عدد باشد.';
-  const common = ['password', '12345678', 'qwerty', 'admin123', 'iloveyou'];
-  if (common.some((c) => password.toLowerCase().includes(c))) return 'رمز بسیار ساده است.';
+  if (isCommonPassword(password)) return 'این رمز در فهرست رمزهای رایج است؛ عبارت دیگری انتخاب کنید.';
+  const seconds = estimateCrackSeconds(password);
+  if (seconds < 7 * 86_400) {
+    const human = seconds >= 86_400
+      ? `${Math.round(seconds / 86_400)} روز`
+      : `${Math.max(1, Math.round(seconds / 3600))} ساعت`;
+    return `رمز در برابر حملهٔ آفلاین فقط حدود ${human} دوام می‌آورد؛ چهار کلمهٔ بی‌ربط بگذارید.`;
+  }
   return null;
 }
 
@@ -274,7 +281,12 @@ async function main() {
   }
 }
 
-main().catch((err) => {
-  console.error(`✖ ${err.message}`);
-  exit(1);
-});
+// Only run when executed directly, so tools/test.mjs can import the helpers.
+const invokedDirectly = process.argv[1]
+  && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (invokedDirectly) {
+  main().catch((err) => {
+    console.error(`✖ ${err.message}`);
+    exit(1);
+  });
+}

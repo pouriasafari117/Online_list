@@ -5,11 +5,11 @@
    ========================================================================== */
 
 import { createGitHub, isValidRepoPart, looksLikeToken, pagesUrl } from './api.js';
-import { cryptoAvailable, passwordScore, sealVault } from './crypto.js';
+import { cryptoAvailable, estimateCrackSeconds, passwordScore, sealVault } from './crypto.js';
 import { makeDefaultData, serializeStore, SETTINGS_DEFAULTS, STORE_DEFAULTS } from './model.js';
 import { icon, hydrateIcons } from './icons.js';
 import {
-  copyText, download, escapeHtml, formatJalaliStamp, storageGet
+  copyText, download, escapeHtml, formatCrackTime, formatJalaliStamp, storageGet
 } from './util.js';
 
 const $ = (sel) => document.querySelector(sel);
@@ -23,6 +23,14 @@ const resultPanel = $('#resultPanel');
    This page seals a GitHub token, so it must only run on the owner's machine.
    Anywhere else it renders a short explanation and disables everything.
    ─────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * A vault file is public, so the password is attacked offline. Anything that a
+ * GPU can chew through in under a week is refused outright; under a year only
+ * gets a warning, because the owner may still prefer a memorable phrase.
+ */
+const WEAK_SECONDS = 7 * 86_400;
+const YEAR_SECONDS = 365 * 86_400;
 
 const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]', '::1', '0.0.0.0']);
 
@@ -245,6 +253,10 @@ async function generate(event) {
     setFieldError(pwInput, 'رمز ضعیف است؛ حروف و عدد یا عبارت بلندتری به کار ببرید.');
     valid = false;
   }
+  if (estimateCrackSeconds(values.password) < WEAK_SECONDS) {
+    setFieldError(pwInput, `این رمز در برابر حملهٔ آفلاین فقط ${formatCrackTime(estimateCrackSeconds(values.password))} دوام می‌آورد؛ چهار کلمهٔ بی‌ربط بگذارید.`);
+    valid = false;
+  }
   if (values.password !== values.password2) {
     setFieldError(pw2Input, 'تکرار رمز مطابقت ندارد.');
     valid = false;
@@ -381,16 +393,26 @@ function initPasswordMeter() {
   const pw = form.elements.namedItem('password');
   const meter = $('#pwMeter');
   const hint = $('#pwHint');
+  const estimate = $('#pwEstimate');
   pw.addEventListener('input', () => {
-    const score = passwordScore(pw.value);
+    const value = pw.value;
+    const score = passwordScore(value);
     meter.dataset.score = String(score);
-    hint.textContent = pw.value.length === 0
+    hint.textContent = value.length === 0
       ? 'یک عبارت طولانی و یکتا انتخاب کنید؛ مثل «کافه-۱۲۴-آفتاب».'
-      : pw.value.length < 10
+      : value.length < 10
         ? 'حداقل ۱۰ کاراکتر لازم است.'
         : score >= 3
           ? 'رمز خوبی است.'
           : 'بهتر است طولانی‌تر باشد یا عدد و علامت هم داشته باشد.';
+    if (!estimate) return;
+    if (!value) { estimate.hidden = true; estimate.textContent = ''; return; }
+    const seconds = estimateCrackSeconds(value);
+    estimate.hidden = false;
+    estimate.dataset.level = seconds < WEAK_SECONDS ? 'weak' : seconds < YEAR_SECONDS ? 'ok' : 'strong';
+    estimate.textContent = seconds < WEAK_SECONDS
+      ? `در برابر حملهٔ آفلاین ${formatCrackTime(seconds)} دوام می‌آورد — برای این کار کافی نیست.`
+      : `تخمین در برابر حملهٔ آفلاین (${formatCrackTime(seconds)}) با فرض واژه‌نامه و یک کارت گرافیک.`;
   });
 }
 

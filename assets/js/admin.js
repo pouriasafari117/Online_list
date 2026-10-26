@@ -3,7 +3,9 @@
    ========================================================================== */
 
 import { ApiError, createGitHub, fetchVault, isValidRepoPart, looksLikeToken, parseJsonLoose } from './api.js';
-import { CryptoError, cryptoAvailable, isVault, openVault, passwordScore, sealVault } from './crypto.js';
+import {
+  CryptoError, cryptoAvailable, estimateCrackSeconds, isVault, openVault, passwordScore, sealVault
+} from './crypto.js';
 import {
   CATEGORY_ICONS, CONDITION_OPTIONS, RESET_PHRASE, clearInventory, computeDiff,
   defaultCategory, defaultField, diffSummary, getCategory, makeDefaultData, normalizeStore,
@@ -19,7 +21,7 @@ import {
   setButtonBusy, toast
 } from './ui.js';
 import {
-  deepClone, download, escapeHtml, formatJalaliDateTime, formatJalaliStamp,
+  deepClone, download, escapeHtml, formatCrackTime, formatJalaliDateTime, formatJalaliStamp,
   formatNum, parseNumber, slugify, storageGet, storageSet, toCsv, uid
 } from './util.js';
 import { icon } from './icons.js';
@@ -33,6 +35,11 @@ const REQUIRED_ACTIONS = new Set([
 ]);
 
 const GATE_KEY = 'ol.loginGate.v1';
+
+/* The vault file is public, so a password is always attacked offline.
+   Under a week on a single GPU is refused; under a year only warns. */
+const WEAK_SECONDS = 7 * 86_400;
+const YEAR_SECONDS = 365 * 86_400;
 
 /* ── Small form helpers ─────────────────────────────────────────────────── */
 
@@ -1315,7 +1322,8 @@ function openSecurity() {
             <button class="icon-btn" type="button" data-toggle-password aria-label="نمایش رمز">${icon('visibility', { size: 19 })}</button>
           </div>
           <div class="pw-meter" data-pw-meter data-score="0" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
-          <span class="field__hint">پیشنهاد: یک عبارت طولانی و یکتا که جای دیگری استفاده نکرده‌اید.</span>
+          <div class="pw-estimate" data-pw-estimate data-level="weak" role="status" hidden></div>
+          <span class="field__hint">پیشنهاد: چهار کلمهٔ بی‌ربط با خط تیره؛ مثل «کتاب-پرنده-آبی-ماه».</span>
           <span class="field__error"></span>
         </div>
         ${fieldHtml({ label: 'تکرار رمز جدید', name: 'password2', type: 'password', autocomplete: 'new-password', required: true })}
@@ -1339,7 +1347,20 @@ function openSecurity() {
       const pw = form.elements.namedItem('password');
       const meter = c.el.querySelector('[data-pw-meter]');
       const saveBtn = c.el.querySelector('[data-save]');
-      pw.addEventListener('input', () => { meter.dataset.score = String(passwordScore(pw.value)); });
+      const estimate = c.el.querySelector('[data-pw-estimate]');
+      const renderEstimate = () => {
+        const value = pw.value;
+        meter.dataset.score = String(passwordScore(value));
+        if (!estimate) return;
+        if (!value) { estimate.hidden = true; estimate.textContent = ''; return; }
+        const seconds = estimateCrackSeconds(value);
+        estimate.hidden = false;
+        estimate.dataset.level = seconds < WEAK_SECONDS ? 'weak' : seconds < YEAR_SECONDS ? 'ok' : 'strong';
+        estimate.textContent = seconds < WEAK_SECONDS
+          ? `در برابر حملهٔ آفلاین ${formatCrackTime(seconds)} دوام می‌آورد — کافی نیست.`
+          : `تخمین در برابر حملهٔ آفلاین (${formatCrackTime(seconds)}) با فرض واژه‌نامه و یک کارت گرافیک.`;
+      };
+      pw.addEventListener('input', renderEstimate);
       c.el.querySelector('[data-toggle-password]')?.addEventListener('click', (event) => {
         const show = pw.type === 'password';
         pw.type = show ? 'text' : 'password';
@@ -1369,6 +1390,11 @@ function openSecurity() {
         }
         if (passwordScore(password) < 2) {
           showError(c, 'رمز ضعیف است؛ از حروف و عدد یا یک عبارت بلندتر استفاده کنید.');
+          return;
+        }
+        if (estimateCrackSeconds(password) < WEAK_SECONDS) {
+          fieldError(pw, `این رمز در برابر حملهٔ آفلاین فقط ${formatCrackTime(estimateCrackSeconds(password))} دوام می‌آورد؛ چهار کلمهٔ بی‌ربط بگذارید.`);
+          pw.focus();
           return;
         }
         if (newToken && !looksLikeToken(newToken)) {

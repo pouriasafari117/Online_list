@@ -337,7 +337,7 @@ await testAsync('رمزگذاری و رمزگشایی رفت‌وبرگشت دا
   });
   assert.ok(crypto.isVault(vault));
   assert.ok(!JSON.stringify(vault).includes(token), 'توکن نباید در نتیجه باشد');
-  assert.equal(vault.kdf.iterations >= 300000, true);
+  assert.equal(vault.kdf.iterations, 600000, 'پیش‌فرض باید ۶۰۰٬۰۰۰ دور باشد');
   assert.equal(vault.repo.branch, 'main');
 
   const opened = await crypto.openVault(vault, password);
@@ -358,6 +358,27 @@ await testAsync('دستکاری ciphertext تشخیص داده می‌شود', a
   await assert.rejects(() => crypto.openVault(vault, 'درست-۱۲۳-۴۵۶-۷۸۹'), (err) => err.code === 'bad-password');
 });
 
+await testAsync('رمز رایج یا کوتاه در لایهٔ رمزنگاری رد می‌شود', async () => {
+  await assert.rejects(
+    () => crypto.sealVault({ password: 'password', token: fakeToken('ghp_', 30) }),
+    (err) => err.code === 'weak-password'
+  );
+  await assert.rejects(
+    () => crypto.sealVault({ password: '1234567890', token: fakeToken('ghp_', 30) }),
+    (err) => err.code === 'weak-password'
+  );
+});
+
+await testAsync('vault قدیمی با ۳۰۰٬۰۰۰ دور همچنان باز می‌شود', async () => {
+  const password = 'درست-۱۲۳-۴۵۶-۷۸۹';
+  const legacy = await crypto.sealVault({
+    password, token: fakeToken('ghp_', 30), iterations: 300000
+  });
+  assert.equal(legacy.kdf.iterations, 300000);
+  const opened = await crypto.openVault(legacy, password);
+  assert.equal(opened.token, fakeToken('ghp_', 30));
+});
+
 await testAsync('رمز کوتاه پذیرفته نمی‌شود', async () => {
   await assert.rejects(
     () => crypto.sealVault({ password: '123', token: fakeToken('ghp_', 30) }),
@@ -373,6 +394,37 @@ test('ساختار vault ناقص رد می‌شود', () => {
   assert.equal(crypto.isVault(null), false);
   assert.equal(crypto.isVault({ v: 1 }), false);
   assert.equal(crypto.isVault({ v: 1, kdf: { name: 'PBKDF2', salt: 'x' }, cipher: { iv: 'y', data: 'z' } }), true);
+});
+
+test('تخمین شکستن رمز محافظه‌کارانه و یکنوا است', () => {
+  const weak = crypto.estimateCrackSeconds('shop1404');
+  const year = crypto.estimateCrackSeconds('mahdi1385');
+  const twoWords = crypto.estimateCrackSeconds('کافه-آفتاب');
+  const fourWords = crypto.estimateCrackSeconds('کتاب-پرنده-آبی-ماه-۱۲۴');
+  assert.ok(weak < 86400, `واژه + سال باید زیر یک روز شکسته شود، نه ${Math.round(weak)} ثانیه`);
+  assert.ok(year < 86400, 'رمز با سال تولد باید زیر یک روز شکسته شود');
+  assert.ok(fourWords > twoWords, 'عبارت چهارکلمه‌ای باید قوی‌تر از دوکلمه‌ای باشد');
+  assert.ok(fourWords > 365 * 86400, 'عبارت چهارکلمه‌ای باید بیش از یک سال دوام بیاورد');
+  assert.equal(crypto.estimateCrackSeconds(''), 0);
+  // The estimator must price years as years, not as 4 random digits.
+  assert.ok(crypto.passwordEntropyBits('سال۱۴۰۵') < crypto.passwordEntropyBits('سال۹۴۷۲'));
+});
+
+test('دور بیشتر KDF زمان شکستن را طولانی‌تر می‌کند', () => {
+  const pw = 'کتاب-پرنده-آبی-ماه-۱۲۴';
+  const at600 = crypto.estimateCrackSeconds(pw, { iterations: 600000 });
+  const at300 = crypto.estimateCrackSeconds(pw, { iterations: 300000 });
+  assert.ok(at600 > at300 * 1.9, 'افزایش دورها باید هزینهٔ حمله را دو برابر کند');
+});
+
+test('CLI ساخت vault از همان منطق رمزِ سایت استفاده می‌کند', async () => {
+  // Regression guard: the CLI used to carry a copy of the heuristics, which
+  // could silently drift away from the browser policy.
+  const src = fs.readFileSync(path.join(ROOT, 'tools/make-vault.mjs'), 'utf8');
+  assert.ok(src.includes("from '../assets/js/crypto.js'"), 'CLI باید از crypto.js وارد کند');
+  assert.ok(!/function passwordEntropyBits/.test(src), 'CLI نباید نسخهٔ جداگانه‌ای داشته باشد');
+  const cli = await import(path.join(ROOT, 'tools/make-vault.mjs'));
+  assert.equal(typeof cli.default, 'undefined');
 });
 
 test('امتیاز رمز منطقی است', () => {
