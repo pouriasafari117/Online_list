@@ -1,0 +1,39 @@
+name: گزارش خطا
+description: چیزی درست کار نمی‌کند؟ اینجا بنویسید.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: چه اتفاقی افتاد؟
+      description: رفتار واقعی و رفتار مورد انتظار را بنویسید.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: مراحل بازتولید
+      placeholder: |
+        ۱. صفحه اصلی را باز کردم
+        ۲. روی «ورود مدیر» زدم
+        ۳. ...
+    validations:
+      required: true
+  - type: dropdown
+    id: device
+    attributes:
+      label: دستگاه
+      options: ["موبایل", "تبلت", "دسکتاپ"]
+  - type: input
+    id: browser
+    attributes:
+      label: مرورگر و نسخه
+      placeholder: Chrome 141 / Safari 18
+  - type: checkboxes
+    id: secrets
+    attributes:
+      label: تأیید امنیتی
+      options:
+        - label: در این گزارش هیچ توکن یا رمزی را ننوشته‌ام.
+          required: true

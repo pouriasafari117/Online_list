@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="fa" dir="rtl" data-theme="auto">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>پوریا استور — لیست موجودی آنلاین</title>
+  <meta name="description" content="لیست موجودی موبایل، لپ‌تاپ، کنسول بازی و لوازم جانبی پوریا استور؛ همیشه به‌روز، بدون تماس اضافه.">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#f4f2ed" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0e0e0c" media="(prefers-color-scheme: dark)">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="پوریا استور — لیست موجودی آنلاین">
+  <meta property="og:description" content="موجودی موبایل و لپ‌تاپ را قبل از تماس ببینید. همیشه به‌روز.">
+  <meta property="og:locale" content="fa_IR">
+  <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preload" href="assets/fonts/Vazirmatn-Variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="assets/css/tokens.css">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/app.css">
+  <script src="assets/js/theme-boot.js"></script>
+  <script type="module" src="assets/js/app.js"></script>
+</head>
+<body>
+  <div class="skip"><a class="skip-link" href="#list">رفتن به لیست موجودی</a></div>
+
+  <!-- ── Header ─────────────────────────────────────────────────────────── -->
+  <header class="appbar" id="appbar">
+    <div class="appbar__inner container">
+      <a class="brand" href="./" aria-label="صفحه اصلی">
+        <span class="brand__mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
+            <path d="M4 6.5h10M4 12h16M4 17.5h7" />
+            <circle cx="18.5" cy="6.5" r="1.6" fill="currentColor" stroke="none" />
+            <circle cx="15" cy="17.5" r="1.6" fill="currentColor" stroke="none" />
+          </svg>
+        </span>
+        <span class="brand__text">
+          <span class="brand__name" data-store-name>پوریا استور</span>
+          <span class="brand__sub">لیست موجودی آنلاین</span>
+        </span>
+      </a>
+
+      <nav class="appbar__nav" aria-label="ناوبری اصلی">
+        <a class="appbar__link" href="#list" aria-current="page">موجودی</a>
+        <a class="appbar__link" href="#categories">دسته‌بندی‌ها</a>
+        <a class="appbar__link" href="#contact">تماس</a>
+      </nav>
+
+      <div class="appbar__actions">
+        <button class="icon-btn" id="searchJump" type="button" data-action="search-jump" aria-label="جستجو" data-tip="جستجو">
+          <span data-icon="search"></span>
+        </button>
+        <button class="icon-btn" id="historyBtn" type="button" data-action="history" aria-label="تاریخچه به‌روزرسانی" data-tip="تاریخچه">
+          <span data-icon="history"></span>
+        </button>
+        <button class="icon-btn" id="themeBtn" type="button" data-action="theme" aria-label="تغییر پوسته" data-tip="پوسته روشن / تاریک">
+          <span data-icon="light_mode" data-theme-icon></span>
+        </button>
+        <span class="appbar__divider" aria-hidden="true"></span>
+        <button class="btn btn--filled btn--sm" id="headerPublish" type="button" data-action="publish" hidden>
+          <span data-icon="cloud_upload"></span>
+          <span class="header-publish__label">انتشار</span>
+        </button>
+        <button class="btn btn--outlined btn--sm login-btn" id="loginBtn" type="button" data-action="login">
+          <span data-icon="lock"></span>
+          <span>ورود مدیر</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ── Hero ─────────────────────────────────────────────────────────── -->
+    <section class="hero" aria-labelledby="heroTitle">
+      <div class="container">
+        <div class="hero__grid">
+          <div class="hero__intro">
+            <span class="hero__eyebrow">
+              <span class="live-dot" aria-hidden="true"></span>
+              موجودی زنده · بدون واسطه
+            </span>
+            <h1 class="hero__title" id="heroTitle">
+              <span class="hero__name" data-store-name>پوریا استور</span>
+              <span class="hero__headline">قبل از تماس، موجودی را ببین.</span>
+            </h1>
+            <p class="hero__lead" data-store-description>
+              لیست موجودی موبایل، لپ‌تاپ، کنسول بازی و لوازم جانبی — دقیق، همیشه به‌روز و بدون یک تماس اضافه.
+              هر تغییری که فروشنده ثبت می‌کند، همان لحظه اینجا دیده می‌شود.
+            </p>
+            <div class="hero__cta">
+              <a class="btn btn--filled btn--lg" href="#list">
+                <span data-icon="grid_view"></span>
+                دیدن موجودی
+              </a>
+              <a class="btn btn--outlined btn--lg" id="heroCall" href="tel:+989121234567">
+                <span data-icon="call"></span>
+                تماس با فروشگاه
+              </a>
+            </div>
+            <ul class="hero__meta" id="heroMeta">
+              <li><span data-icon="location_on"></span><span data-store-address>تهران، خیابان ولیعصر</span></li>
+              <li><span data-icon="schedule"></span><span data-store-hours>شنبه تا پنجشنبه، ۱۰ تا ۲۰</span></li>
+            </ul>
+          </div>
+
+          <aside class="update-card" aria-labelledby="updateCardTitle">
+            <div class="update-card__head">
+              <span class="update-card__icon"><span data-icon="cloud_done"></span></span>
+              <div>
+                <div class="update-card__label" id="updateCardTitle">آخرین به‌روزرسانی مدیر</div>
+                <div class="update-card__sub" data-update-source>در انتظار دریافت اطلاعات…</div>
+              </div>
+            </div>
+            <div class="update-card__time">
+              <span class="update-card__ago" data-update-ago>—</span>
+              <span class="update-card__exact" data-update-exact>—</span>
+            </div>
+            <div class="update-card__author">
+              <span data-icon="badge"></span>
+              ثبت‌شده توسط <b data-update-by>مدیر فروشگاه</b>
+            </div>
+            <div class="update-card__stats" role="group" aria-label="آمار فروشگاه">
+              <div class="stat">
+                <span class="stat__value" data-stat="devices">۰</span>
+                <span class="stat__label">مدل دستگاه</span>
+              </div>
+              <div class="stat">
+                <span class="stat__value" data-stat="inStock">۰</span>
+                <span class="stat__label">موجود در انبار</span>
+              </div>
+              <div class="stat">
+                <span class="stat__value" data-stat="categories">۰</span>
+                <span class="stat__label">دسته‌بندی</span>
+              </div>
+            </div>
+            <div class="update-card__foot">
+              <span class="t-xs t-muted" data-update-hint>هر تغییر بلافاصله منتشر می‌شود</span>
+              <button class="btn btn--text btn--sm" id="historyBtn2" type="button" data-action="history">
+                تاریخچه
+                <span data-icon="chevron_left"></span>
+              </button>
+            </div>
+          </aside>
+        </div>
+
+        <div class="trust reveal" role="list">
+          <div class="trust__item" role="listitem">
+            <span data-icon="bolt"></span>
+            <div>
+              <div class="trust__title">به‌روزرسانی واقعی</div>
+              <div class="trust__desc">موجودی را خود فروشنده ثبت می‌کند؛ نه حدس و گمان و نه لیست قدیمی.</div>
+            </div>
+          </div>
+          <div class="trust__item" role="listitem">
+            <span data-icon="sell"></span>
+            <div>
+              <div class="trust__title">قیمت و موجودی شفاف</div>
+              <div class="trust__desc">همان چیزی که اینجا می‌بینید، همان چیزی است که در فروشگاه می‌شنوید.</div>
+            </div>
+          </div>
+          <div class="trust__item" role="listitem">
+            <span data-icon="cloud_done"></span>
+            <div>
+              <div class="trust__title">همیشه در دسترس</div>
+              <div class="trust__desc">بدون سرور و دیتابیس؛ این لیست مستقیم از مخزن گیت‌هاب خوانده می‌شود.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Featured ─────────────────────────────────────────────────────── -->
+    <section class="section section--tight featured" id="featuredSection" hidden aria-labelledby="featuredTitle">
+      <div class="container">
+        <div class="section__head">
+          <div class="section__title-wrap">
+            <span class="t-eyebrow">انتخاب فروشگاه</span>
+            <h2 class="section__title" id="featuredTitle">پیشنهادهای این هفته</h2>
+          </div>
+          <div class="section__tools rail-nav">
+            <button class="icon-btn" id="railPrev" type="button" data-action="rail-prev" aria-label="اسلاید بعدی">
+              <span data-icon="chevron_right"></span>
+            </button>
+            <button class="icon-btn" id="railNext" type="button" data-action="rail-next" aria-label="اسلاید قبلی">
+              <span data-icon="chevron_left"></span>
+            </button>
+          </div>
+        </div>
+        <div class="rail-wrap">
+          <div class="rail" id="featuredRail" role="list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Catalog ──────────────────────────────────────────────────────── -->
+    <section class="section catalog" id="list" aria-labelledby="listTitle">
+      <div class="container">
+        <div class="section__head">
+          <div class="section__title-wrap">
+            <span class="t-eyebrow">فهرست کامل</span>
+            <h2 class="section__title" id="listTitle">لیست موجودی</h2>
+            <p class="section__sub" id="listSub">در حال بارگذاری…</p>
+          </div>
+          <div class="section__tools">
+            <button class="icon-btn" id="shareBtn" type="button" data-action="share" aria-label="اشتراک‌گذاری لیست" data-tip="اشتراک‌گذاری">
+              <span data-icon="share"></span>
+            </button>
+            <div class="segmented view-toggle" role="group" aria-label="نمایش">
+              <button class="segmented__item" type="button" data-view="list" aria-pressed="true" aria-label="نمایش فهرستی">
+                <span data-icon="view_agenda"></span>
+              </button>
+              <button class="segmented__item" type="button" data-view="grid" aria-pressed="false" aria-label="نمایش شبکه‌ای">
+                <span data-icon="grid_view"></span>
+              </button>
+            </div>
+            <button class="icon-btn" id="printBtn" type="button" data-action="print" aria-label="چاپ لیست" data-tip="چاپ لیست">
+              <span data-icon="print"></span>
+            </button>
+            <button class="icon-btn" id="refreshBtn" type="button" data-action="refresh" aria-label="دریافت آخرین تغییرات" data-tip="به‌روزرسانی">
+              <span data-icon="refresh"></span>
+            </button>
+          </div>
+        </div>
+
+        <div class="filterbar" id="filterbar" data-anchor="categories">
+          <div class="filterbar__top">
+            <div class="search" id="searchWrap">
+              <span data-icon="search"></span>
+              <input class="search__input" id="searchInput" type="search" inputmode="search" autocomplete="off"
+                     placeholder="جستجوی مدل، برند یا مشخصات…" aria-label="جستجوی دستگاه">
+              <span class="kbd" aria-hidden="true">/</span>
+              <button class="search__clear" id="searchClear" type="button" aria-label="پاک کردن جستجو">
+                <span data-icon="close"></span>
+              </button>
+            </div>
+          </div>
+          <div class="filterbar__tools">
+            <div class="segmented" role="group" aria-label="فیلتر موجودی" id="availabilityFilter">
+              <button class="segmented__item" type="button" data-avail="all" aria-pressed="true">همه</button>
+              <button class="segmented__item" type="button" data-avail="in" aria-pressed="false">موجود</button>
+              <button class="segmented__item" type="button" data-avail="low" aria-pressed="false">کمیاب</button>
+              <button class="segmented__item" type="button" data-avail="out" aria-pressed="false">ناموجود</button>
+            </div>
+            <div class="filterbar__tools" style="gap:8px">
+              <select class="select" id="sortSelect" aria-label="ترتیب نمایش" style="height:38px;min-height:38px;font-size:var(--fs-2xs);width:auto;padding-inline:32px 12px">
+                <option value="recommended">پیشنهاد فروشگاه</option>
+                <option value="price-asc">ارزان‌ترین</option>
+                <option value="price-desc">گران‌ترین</option>
+                <option value="stock-desc">بیشترین موجودی</option>
+                <option value="newest">جدیدترین</option>
+                <option value="name-asc">ترتیب الفبا</option>
+              </select>
+            </div>
+          </div>
+          <div class="filterbar__cats" id="categories" role="group" aria-label="دسته‌بندی‌ها"></div>
+        </div>
+
+        <div class="resultbar">
+          <span class="resultbar__count" id="resultCount" aria-live="polite">—</span>
+          <button class="btn btn--text btn--sm" id="resetFilters" type="button" hidden>
+            <span data-icon="close"></span>
+            پاک کردن فیلترها
+          </button>
+          <div class="resultbar__actions">
+            <button class="btn btn--tonal btn--sm" id="quickAdd" type="button" data-action="add-device" hidden>
+              <span data-icon="add"></span>
+              افزودن دستگاه
+            </button>
+          </div>
+        </div>
+
+        <div class="print-head">
+          <h1 data-print-title>لیست موجودی</h1>
+          <p data-print-meta></p>
+        </div>
+
+        <div id="listRoot" class="listRoot" aria-busy="true">
+          <div class="skeleton-row"><span class="sk"></span><span class="sk"></span><span class="sk"></span></div>
+          <div class="skeleton-row" style="margin-top:8px"><span class="sk"></span><span class="sk"></span><span class="sk"></span></div>
+          <div class="skeleton-row" style="margin-top:8px"><span class="sk"></span><span class="sk"></span><span class="sk"></span></div>
+        </div>
+        <div class="load-more" id="loadMoreWrap" hidden>
+          <button class="btn btn--outlined" id="loadMoreBtn" type="button" data-action="load-more"></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Contact ──────────────────────────────────────────────────────── -->
+    <section class="section" id="contact" aria-labelledby="contactTitle">
+      <div class="container">
+        <div class="contact-grid reveal">
+          <div>
+            <span class="t-eyebrow">تماس با ما</span>
+            <h2 class="contact__title" id="contactTitle">قیمت را دیدید؟ یک تماس کوتاه کافی است.</h2>
+            <p class="contact__desc">
+              قبل از مراجعه، موجودی و قیمت را همین‌جا ببینید. برای مشاوره خرید، معاوضه یا سفارش مدل خاص،
+              مستقیم با فروشگاه در تماس باشید.
+            </p>
+            <div class="contact__actions">
+              <a class="btn btn--filled" id="contactCall" href="tel:+989121234567">
+                <span data-icon="call"></span>
+                تماس تلفنی
+              </a>
+              <a class="btn btn--outlined" id="contactWhatsapp" href="#" target="_blank" rel="noopener">
+                <span data-icon="chat"></span>
+                واتساپ
+              </a>
+              <a class="btn btn--text" id="contactInstagram" href="#" target="_blank" rel="noopener">
+                <span data-icon="photo_camera"></span>
+                اینستاگرام
+              </a>
+            </div>
+          </div>
+          <div class="contact__list">
+            <div class="contact__row">
+              <span data-icon="location_on"></span>
+              <div>
+                <div class="k">آدرس فروشگاه</div>
+                <div class="v" data-store-address>—</div>
+              </div>
+            </div>
+            <div class="contact__row">
+              <span data-icon="schedule"></span>
+              <div>
+                <div class="k">ساعات کاری</div>
+                <div class="v" data-store-hours>—</div>
+              </div>
+            </div>
+            <div class="contact__row">
+              <span data-icon="call"></span>
+              <div>
+                <div class="k">تلفن</div>
+                <div class="v"><a id="contactPhone" href="tel:+989121234567" dir="ltr">—</a></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ── Footer ─────────────────────────────────────────────────────────── -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer__grid">
+        <div>
+          <div class="footer__brand">
+            <span class="brand__mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
+                <path d="M4 6.5h10M4 12h16M4 17.5h7" />
+                <circle cx="18.5" cy="6.5" r="1.6" fill="currentColor" stroke="none" />
+                <circle cx="15" cy="17.5" r="1.6" fill="currentColor" stroke="none" />
+              </svg>
+            </span>
+            <div>
+              <div class="brand__name" data-store-name>پوریا استور</div>
+              <div class="t-xs t-muted">لیست موجودی آنلاین</div>
+            </div>
+          </div>
+          <p class="footer__desc" data-store-description>لیست موجودی، همیشه به‌روز و بدون تماس اضافه.</p>
+        </div>
+        <div>
+          <div class="footer__title">دسته‌بندی‌ها</div>
+          <div class="footer__links" id="footerCategories"></div>
+        </div>
+        <div>
+          <div class="footer__title">دسترسی سریع</div>
+          <div class="footer__links">
+            <a href="#list">لیست موجودی</a>
+            <button type="button" data-action="history">تاریخچه به‌روزرسانی</button>
+            <button type="button" data-action="print">چاپ لیست</button>
+            <button type="button" data-action="theme">تغییر پوسته</button>
+          </div>
+        </div>
+        <div>
+          <div class="footer__title">مدیریت فروشگاه</div>
+          <div class="footer__links">
+            <button type="button" data-action="login" id="footerLogin">ورود مدیر</button>
+            <button type="button" data-action="install">نصب به‌عنوان اپلیکیشن</button>
+          </div>
+        </div>
+      </div>
+      <div class="footer__bottom">
+        <span>© <span id="year">۱۴۰۵</span> <span data-store-name>پوریا استور</span></span>
+        <span class="sep" aria-hidden="true"></span>
+        <span>ساخته‌شده با Online List — بدون سرور</span>
+        <span class="spacer"></span>
+        <span class="footer__status" id="dataStatus">
+          <span class="live-dot" aria-hidden="true"></span>
+          <span>متصل</span>
+        </span>
+        <span class="sep" aria-hidden="true"></span>
+        <span data-footer-update>—</span>
+      </div>
+    </div>
+  </footer>
+
+  <div class="toast-root" id="toastRoot" role="status" aria-live="polite" aria-atomic="false"></div>
+  <div id="dialogHost"></div>
+  <div id="adminDockHost"></div>
+
+  <noscript>
+    <div class="container" style="padding-block:24px">
+      <p class="form-note">برای دیدن لیست موجودی، جاوااسکریپت مرورگر را فعال کنید.</p>
+    </div>
+  </noscript>
+</body>
+</html>

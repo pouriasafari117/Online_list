@@ -1,0 +1,207 @@
+/* ==========================================================================
+   Online List — design tokens
+   A quiet, editorial, monochrome design system inspired by Material 3
+   Expressive (M3E) and shadcn-style composition. No external CSS or fonts.
+   ========================================================================== */
+
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("../fonts/Vazirmatn-Variable.woff2") format("woff2-variations"),
+       url("../fonts/Vazirmatn-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── Light (default) ─────────────────────────────────────────────────────── */
+:root {
+  color-scheme: light;
+
+  /* Surfaces — warm paper greys, deliberately unsaturated */
+  --bg: #f4f2ed;
+  --bg-deep: #ebe8e1;
+  --surface: #fbfaf7;
+  --surface-2: #f2efe9;
+  --surface-3: #e9e5dd;
+  --surface-4: #dfdad0;
+  --surface-inverse: #1a1916;
+
+  /* Text */
+  --text: #191814;
+  --text-2: #57534a;
+  --text-3: #857f73;
+  --text-inverse: #faf8f4;
+
+  /* Lines */
+  --outline: #d8d2c7;
+  --outline-strong: #c3bcaf;
+  --hairline: rgba(25, 24, 20, 0.08);
+
+  /* Primary — ink, not colour */
+  --primary: #1d1c18;
+  --on-primary: #faf8f3;
+  --primary-container: #e7e2d9;
+  --on-primary-container: #1d1c18;
+  --primary-soft: rgba(29, 28, 24, 0.06);
+
+  /* Semantic accents — muted so the whole page stays monochrome */
+  --ok: #3f6a50;
+  --ok-container: #e4ece4;
+  --low: #8a6323;
+  --low-container: #f1e8d6;
+  --out: #7c766b;
+  --danger: #8c332b;
+  --danger-container: #f3e2df;
+
+  /* Elevated surfaces */
+  --shadow-1: 0 1px 2px rgba(38, 32, 22, 0.05), 0 1px 1px rgba(38, 32, 22, 0.03);
+  --shadow-2: 0 1px 2px rgba(38, 32, 22, 0.05), 0 10px 24px -14px rgba(38, 32, 22, 0.28);
+  --shadow-3: 0 2px 4px rgba(38, 32, 22, 0.05), 0 24px 60px -24px rgba(38, 32, 22, 0.32);
+  --shadow-pop: 0 18px 48px -18px rgba(38, 32, 22, 0.4);
+
+  --glass: rgba(251, 250, 247, 0.82);
+  --scrim: rgba(23, 22, 19, 0.42);
+  --grain-opacity: 0.035;
+
+  /* Typography */
+  --font: "Vazirmatn", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --fs-display: clamp(2.25rem, 5.4vw, 4.15rem);
+  --fs-h1: clamp(1.75rem, 3.2vw, 2.5rem);
+  --fs-h2: clamp(1.35rem, 2.2vw, 1.75rem);
+  --fs-h3: 1.0625rem;
+  --fs-lead: clamp(0.975rem, 1.15vw, 1.0625rem);
+  --fs-body: 0.9375rem;
+  --fs-sm: 0.8125rem;
+  --fs-xs: 0.75rem;
+  --fs-2xs: 0.6875rem;
+
+  /* Space */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  --sp-8: 64px;
+  --sp-9: 96px;
+  --container: 1200px;
+  --gutter: clamp(16px, 4vw, 32px);
+
+  /* Shape */
+  --r-xs: 6px;
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 20px;
+  --r-xl: 28px;
+  --r-2xl: 36px;
+  --r-full: 999px;
+
+  /* Motion */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --ease-spring: cubic-bezier(0.34, 1.32, 0.64, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-1: 110ms;
+  --dur-2: 190ms;
+  --dur-3: 320ms;
+  --dur-4: 520ms;
+  --dur-5: 800ms;
+
+  --z-header: 40;
+  --z-adminbar: 45;
+  --z-fab: 44;
+  --z-dialog: 100;
+  --z-toast: 120;
+
+  --header-h: 68px;
+}
+
+/* ── Dark ────────────────────────────────────────────────────────────────── */
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0e0e0c;
+  --bg-deep: #0a0a09;
+  --surface: #161613;
+  --surface-2: #1c1b18;
+  --surface-3: #24221e;
+  --surface-4: #2d2a25;
+  --surface-inverse: #f4f1ea;
+
+  --text: #f1eee7;
+  --text-2: #b5afa2;
+  --text-3: #847e71;
+  --text-inverse: #171613;
+
+  --outline: #333028;
+  --outline-strong: #4a463c;
+  --hairline: rgba(255, 255, 255, 0.08);
+
+  --primary: #efebe2;
+  --on-primary: #1a1916;
+  --primary-container: #2a2721;
+  --on-primary-container: #f1eee7;
+  --primary-soft: rgba(255, 255, 255, 0.07);
+
+  --ok: #8fbd9e;
+  --ok-container: #1d2a21;
+  --low: #d4ac69;
+  --low-container: #2c2416;
+  --out: #918b7e;
+  --danger: #dd938b;
+  --danger-container: #2e1d1b;
+
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 28px -16px rgba(0, 0, 0, 0.7);
+  --shadow-3: 0 2px 6px rgba(0, 0, 0, 0.45), 0 30px 70px -28px rgba(0, 0, 0, 0.85);
+  --shadow-pop: 0 22px 56px -20px rgba(0, 0, 0, 0.9);
+
+  --glass: rgba(22, 22, 19, 0.82);
+  --scrim: rgba(0, 0, 0, 0.62);
+  --grain-opacity: 0.05;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0e0e0c;
+    --bg-deep: #0a0a09;
+    --surface: #161613;
+    --surface-2: #1c1b18;
+    --surface-3: #24221e;
+    --surface-4: #2d2a25;
+    --surface-inverse: #f4f1ea;
+
+    --text: #f1eee7;
+    --text-2: #b5afa2;
+    --text-3: #847e71;
+    --text-inverse: #171613;
+
+    --outline: #333028;
+    --outline-strong: #4a463c;
+    --hairline: rgba(255, 255, 255, 0.08);
+
+    --primary: #efebe2;
+    --on-primary: #1a1916;
+    --primary-container: #2a2721;
+    --on-primary-container: #f1eee7;
+    --primary-soft: rgba(255, 255, 255, 0.07);
+
+    --ok: #8fbd9e;
+    --ok-container: #1d2a21;
+    --low: #d4ac69;
+    --low-container: #2c2416;
+    --out: #918b7e;
+    --danger: #dd938b;
+    --danger-container: #2e1d1b;
+
+    --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-2: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 28px -16px rgba(0, 0, 0, 0.7);
+    --shadow-3: 0 2px 6px rgba(0, 0, 0, 0.45), 0 30px 70px -28px rgba(0, 0, 0, 0.85);
+    --shadow-pop: 0 22px 56px -20px rgba(0, 0, 0, 0.9);
+
+    --glass: rgba(22, 22, 19, 0.82);
+    --scrim: rgba(0, 0, 0, 0.62);
+    --grain-opacity: 0.05;
+  }
+}

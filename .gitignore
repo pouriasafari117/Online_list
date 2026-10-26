@@ -1,0 +1,30 @@
+# ── Secret files (NEVER commit) ─────────────────────────────────────────────
+# Any file that contains a plaintext GitHub token or the token↔password pair.
+.env
+.env.*
+!.env.example
+secrets/
+*.secret.json
+*.local.json
+data/local.secret.json
+setup.local.html
+
+# ── Dependencies / tooling ──────────────────────────────────────────────────
+node_modules/
+.pnpm-store/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-error.log*
+
+# ── OS / editor noise ───────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.swp
+
+# ── Local preview artifacts ─────────────────────────────────────────────────
+.tmp/
+screenshots/

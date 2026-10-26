@@ -1,0 +1,21 @@
+name: پیشنهاد ویژگی
+description: چه چیزهایی این لیست را بهتر می‌کند؟
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: مشکل / نیاز
+      description: چه کاری الان سخت است؟
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: راه‌حل پیشنهادی
+  - type: dropdown
+    id: area
+    attributes:
+      label: بخش مرتبط
+      options: ["ظاهر و تجربه کاربری", "لیست و دسته‌بندی", "پنل مدیریت", "امنیت و راه‌اندازی", "سرعت و دسترسی", "سایر"]

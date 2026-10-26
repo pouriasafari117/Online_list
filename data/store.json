@@ -1,0 +1,1138 @@
+{
+  "version": 1,
+  "store": {
+    "name": "پوریا استور",
+    "tagline": "قبل از تماس، موجودی را ببین.",
+    "description": "موجودی موبایل، لپ‌تاپ و گیمینگ — مستقیم از انبار فروشگاه، همیشه به‌روز و بدون یک تماس اضافه.",
+    "phone": "۰۹۱۲ ۳۴۵ ۶۷۸۹",
+    "whatsapp": "989123456789",
+    "instagram": "pourya.store",
+    "address": "تهران، خیابان ولیعصر، بالاتر از پارک ساعی، پلاک ۱۲۴ — واحد ۳",
+    "hours": "شنبه تا پنجشنبه، ۱۰:۰۰ تا ۲۰:۰۰"
+  },
+  "settings": {
+    "theme": "auto",
+    "showPrices": true,
+    "showExactStock": true,
+    "lowStockThreshold": 2,
+    "currency": "تومان",
+    "numerals": "fa",
+    "adminName": "پوریا صفری",
+    "updatedAtLabel": "آخرین به‌روزرسانی"
+  },
+  "categories": [
+    {
+      "id": "cat_phone",
+      "title": "موبایل",
+      "description": "گوشی نو، استوک و کارکرده",
+      "icon": "mobile_2",
+      "fields": [
+        {
+          "key": "storage",
+          "label": "حافظه داخلی",
+          "unit": "گیگابایت",
+          "type": "text",
+          "showInRow": true
+        },
+        {
+          "key": "ram",
+          "label": "رم",
+          "unit": "گیگابایت",
+          "type": "text",
+          "showInRow": true
+        },
+        {
+          "key": "color",
+          "label": "رنگ",
+          "unit": "",
+          "type": "text",
+          "showInRow": true
+        },
+        {
+          "key": "battery",
+          "label": "سلامت باتری",
+          "unit": "٪",
+          "type": "text",
+          "showInRow": false
+        },
+        {
+          "key": "sim",
+          "label": "سیم‌کارت",
+          "unit": "",
+          "type": "text",
+          "showInRow": false
+        }
+      ]
+    },
+    {
+      "id": "cat_laptop",
+      "title": "لپ‌تاپ",
+      "description": "اداری، دانشجویی و گیمینگ",
+      "icon": "laptop_mac",
+      "fields": [
+        {
+          "key": "cpu",
+          "label": "پردازنده",
+          "unit": "",
+          "type": "text",
+          "showInRow": true
+        },
+        {
+          "key": "ram",
+          "label": "رم",
+          "unit": "گیگابایت",
+          "type": "text",
+          "showInRow": true
+        },
+        {
+          "key": "storage",
+          "label": "حافظه",
+          "unit": "",
+          "type": "text",
+          "showInRow": true
+        },
+        {
+          "key": "gpu",
+          "label": "گرافیک",
+          "unit": "",
+          "type": "text",
+          "showInRow": true
+        },
+        {
+          "key": "display",
+          "label": "نمایشگر",
+          "unit": "اینچ",
+          "type": "text",
+          "showInRow": false
+        },
+        {
+          "key": "os",
+          "label": "سیستم‌عامل",
+          "unit": "",
+          "type": "text",
+          "showInRow": false
+        }
+      ]
+    },
+    {
+      "id": "cat_tablet",
+      "title": "تبلت",
+      "description": "آیپد و تبلت‌های اندرویدی",
+      "icon": "tablet_mac",
+      "fields": [
+        {
+          "key": "storage",
+          "label": "حافظه",
+          "unit": "گیگابایت",
+          "type": "text",
+          "showInRow": true
+        },
+        {
+          "key": "ram",
+          "label": "رم",
+          "unit": "گیگابایت",
+          "type": "text",
+          "showInRow": true
+        },
+        {
+          "key": "connectivity",
+          "label": "اتصال",
+          "unit": "",
+          "type": "text",
+          "showInRow": true
+        },
+        {
+          "key": "display",
+          "label": "نمایشگر",
+          "unit": "اینچ",
+          "type": "text",
+          "showInRow": false
+        },
+        {
+          "key": "pencil",
+          "label": "پشتیبانی از قلم",
+          "unit": "",
+          "type": "text",
+          "showInRow": false
+        }
+      ]
+    },
+    {
+      "id": "cat_console",
+      "title": "کنسول بازی",
+      "description": "پلی‌استیشن، ایکس‌باکس و نینتندو",
+      "icon": "sports_esports",
+      "fields": [
+        {
+          "key": "edition",
+          "label": "نسخه",
+          "unit": "",
+          "type": "text",
+          "showInRow": true
+        },
+        {
+          "key": "storage",
+          "label": "حافظه",
+          "unit": "",
+          "type": "text",
+          "showInRow": false
+        },
+        {
+          "key": "region",
+          "label": "ریجن",
+          "unit": "",
+          "type": "text",
+          "showInRow": false
+        },
+        {
+          "key": "controller",
+          "label": "دسته همراه",
+          "unit": "",
+          "type": "text",
+          "showInRow": false
+        }
+      ]
+    },
+    {
+      "id": "cat_audio",
+      "title": "صوتی و هدفون",
+      "description": "هدفون، ایرباد و اسپیکر",
+      "icon": "headphones",
+      "fields": [
+        {
+          "key": "type",
+          "label": "نوع",
+          "unit": "",
+          "type": "text",
+          "showInRow": true
+        },
+        {
+          "key": "connectivity",
+          "label": "اتصال",
+          "unit": "",
+          "type": "text",
+          "showInRow": true
+        },
+        {
+          "key": "anc",
+          "label": "حذف نویز",
+          "unit": "",
+          "type": "text",
+          "showInRow": false
+        },
+        {
+          "key": "battery",
+          "label": "شارژدهی",
+          "unit": "",
+          "type": "text",
+          "showInRow": false
+        }
+      ]
+    },
+    {
+      "id": "cat_watch",
+      "title": "ساعت هوشمند",
+      "description": "اپل واچ، گلکسی واچ و ورزشی",
+      "icon": "watch",
+      "fields": [
+        {
+          "key": "size",
+          "label": "سایز",
+          "unit": "میلی‌متر",
+          "type": "text",
+          "showInRow": true
+        },
+        {
+          "key": "connectivity",
+          "label": "اتصال",
+          "unit": "",
+          "type": "text",
+          "showInRow": false
+        },
+        {
+          "key": "battery",
+          "label": "شارژدهی",
+          "unit": "",
+          "type": "text",
+          "showInRow": false
+        },
+        {
+          "key": "gps",
+          "label": "GPS",
+          "unit": "",
+          "type": "text",
+          "showInRow": false
+        }
+      ]
+    },
+    {
+      "id": "cat_accessory",
+      "title": "لوازم جانبی",
+      "description": "پاوربانک، ماوس، کیبورد و دسته بازی",
+      "icon": "keyboard",
+      "fields": [
+        {
+          "key": "type",
+          "label": "نوع",
+          "unit": "",
+          "type": "text",
+          "showInRow": true
+        },
+        {
+          "key": "compatibility",
+          "label": "سازگاری",
+          "unit": "",
+          "type": "text",
+          "showInRow": true
+        },
+        {
+          "key": "connection",
+          "label": "اتصال",
+          "unit": "",
+          "type": "text",
+          "showInRow": false
+        }
+      ]
+    }
+  ],
+  "devices": [
+    {
+      "id": "dev_ip16pm",
+      "name": "آیفون ۱۶ پرو مکس ۲۵۶ گیگ",
+      "brand": "Apple",
+      "categoryId": "cat_phone",
+      "price": 84500000,
+      "priceOnRequest": false,
+      "stock": 3,
+      "condition": "نو",
+      "warranty": "۱۸ ماه گارانتی رسمی",
+      "specs": {
+        "storage": "۲۵۶",
+        "ram": "۸",
+        "color": "تیتانیوم طبیعی",
+        "battery": "۱۰۰",
+        "sim": "تک سیم‌کارت"
+      },
+      "note": "پلمب، رنگ تیتانیوم طبیعی",
+      "image": "",
+      "featured": true,
+      "hidden": false,
+      "order": 1,
+      "createdAt": "2026-07-01T08:00:00.000Z",
+      "updatedAt": "2026-10-26T06:45:00.000Z"
+    },
+    {
+      "id": "dev_ip16",
+      "name": "آیفون ۱۶ ۱۲۸ گیگ",
+      "brand": "Apple",
+      "categoryId": "cat_phone",
+      "price": 52900000,
+      "priceOnRequest": false,
+      "stock": 5,
+      "condition": "نو",
+      "warranty": "۱۲ ماه گارانتی",
+      "specs": {
+        "storage": "۱۲۸",
+        "ram": "۸",
+        "color": "آبی",
+        "battery": "۱۰۰",
+        "sim": "دو سیم‌کارت"
+      },
+      "note": "",
+      "image": "",
+      "featured": false,
+      "hidden": false,
+      "order": 2,
+      "createdAt": "2026-07-01T08:00:00.000Z",
+      "updatedAt": "2026-10-26T06:45:00.000Z"
+    },
+    {
+      "id": "dev_ip15p",
+      "name": "آیفون ۱۵ پرو ۲۵۶ گیگ",
+      "brand": "Apple",
+      "categoryId": "cat_phone",
+      "price": 68000000,
+      "priceOnRequest": false,
+      "stock": 0,
+      "condition": "استوک",
+      "warranty": "۶ ماه گارانتی فروشگاه",
+      "specs": {
+        "storage": "۲۵۶",
+        "ram": "۸",
+        "color": "تیتانیوم آبی",
+        "battery": "۹۲",
+        "sim": "تک سیم‌کارت"
+      },
+      "note": "استوک در حد نو، بدون خط و خش",
+      "image": "",
+      "featured": false,
+      "hidden": false,
+      "order": 3,
+      "createdAt": "2026-07-01T08:00:00.000Z",
+      "updatedAt": "2026-10-26T06:45:00.000Z"
+    },
+    {
+      "id": "dev_s25u",
+      "name": "سامسونگ گلکسی S25 اولترا ۵۱۲",
+      "brand": "Samsung",
+      "categoryId": "cat_phone",
+      "price": 73500000,
+      "priceOnRequest": false,
+      "stock": 2,
+      "condition": "نو",
+      "warranty": "۱۸ ماه گارانتی رسمی",
+      "specs": {
+        "storage": "۵۱۲",
+        "ram": "۱۲",
+        "color": "تیتانیوم نقره‌ای",
+        "battery": "۱۰۰",
+        "sim": "دو سیم‌کارت"
+      },
+      "note": "",
+      "image": "",
+      "featured": true,
+      "hidden": false,
+      "order": 4,
+      "createdAt": "2026-07-01T08:00:00.000Z",
+      "updatedAt": "2026-10-26T06:45:00.000Z"
+    },
+    {
+      "id": "dev_a56",
+      "name": "سامسونگ گلکسی A56 ۱۲۸",
+      "brand": "Samsung",
+      "categoryId": "cat_phone",
+      "price": 16800000,
+      "priceOnRequest": false,
+      "stock": 8,
+      "condition": "نو",
+      "warranty": "۱۸ ماه گارانتی رسمی",
+      "specs": {
+        "storage": "۱۲۸",
+        "ram": "۸",
+        "color": "مشکی",
+        "battery": "۱۰۰",
+        "sim": "دو سیم‌کارت"
+      },
+      "note": "",
+      "image": "",
+      "featured": false,
+      "hidden": false,
+      "order": 5,
+      "createdAt": "2026-07-01T08:00:00.000Z",
+      "updatedAt": "2026-10-26T06:45:00.000Z"
+    },
+    {
+      "id": "dev_mi15",
+      "name": "شیائومی ۱۵ ۲۵۶ گیگ",
+      "brand": "Xiaomi",
+      "categoryId": "cat_phone",
+      "price": 46000000,
+      "priceOnRequest": false,
+      "stock": 4,
+      "condition": "نو",
+      "warranty": "۱۸ ماه گارانتی",
+      "specs": {
+        "storage": "۲۵۶",
+        "ram": "۱۲",
+        "color": "سبز",
+        "battery": "۱۰۰",
+        "sim": "دو سیم‌کارت"
+      },
+      "note": "",
+      "image": "",
+      "featured": false,
+      "hidden": false,
+      "order": 6,
+      "createdAt": "2026-07-01T08:00:00.000Z",
+      "updatedAt": "2026-10-26T06:45:00.000Z"
+    },
+    {
+      "id": "dev_pixel9",
+      "name": "گوگل پیکسل ۹ پرو ۱۲۸",
+      "brand": "Google",
+      "categoryId": "cat_phone",
+      "price": 39500000,
+      "priceOnRequest": false,
+      "stock": 1,
+      "condition": "کارکرده",
+      "warranty": "۳ ماه گارانتی فروشگاه",
+      "specs": {
+        "storage": "۱۲۸",
+        "ram": "۱۶",
+        "color": "مشکی",
+        "battery": "۹۸",
+        "sim": "تک سیم‌کارت"
+      },
+      "note": "کارکرده در حد صفر، همراه جعبه",
+      "image": "",
+      "featured": false,
+      "hidden": false,
+      "order": 7,
+      "createdAt": "2026-07-01T08:00:00.000Z",
+      "updatedAt": "2026-10-26T06:45:00.000Z"
+    },
+    {
+      "id": "dev_np3a",
+      "name": "ناتینگ فون ۳a ۱۲۸",
+      "brand": "Nothing",
+      "categoryId": "cat_phone",
+      "price": 19900000,
+      "priceOnRequest": false,
+      "stock": 6,
+      "condition": "نو",
+      "warranty": "۱۲ ماه گارانتی",
+      "specs": {
+        "storage": "۱۲۸",
+        "ram": "۸",
+        "color": "مشکی",
+        "battery": "۱۰۰",
+        "sim": "دو سیم‌کارت"
+      },
+      "note": "",
+      "image": "",
+      "featured": false,
+      "hidden": false,
+      "order": 8,
+      "createdAt": "2026-07-01T08:00:00.000Z",
+      "updatedAt": "2026-10-26T06:45:00.000Z"
+    },
+    {
+      "id": "dev_mba_m3",
+      "name": "مک‌بوک ایر ۱۳ اینچ M3",
+      "brand": "Apple",
+      "categoryId": "cat_laptop",
+      "price": 61000000,
+      "priceOnRequest": false,
+      "stock": 3,
+      "condition": "نو",
+      "warranty": "۱۲ ماه گارانتی شرکتی",
+      "specs": {
+        "cpu": "Apple M3",
+        "ram": "۸",
+        "storage": "۲۵۶ SSD",
+        "gpu": "8-core GPU",
+        "display": "۱۳.۶",
+        "os": "macOS"
+      },
+      "note": "",
+      "image": "",
+      "featured": true,
+      "hidden": false,
+      "order": 9,
+      "createdAt": "2026-07-01T08:00:00.000Z",
+      "updatedAt": "2026-10-26T06:45:00.000Z"
+    },
+    {
+      "id": "dev_mbp_m4",
+      "name": "مک‌بوک پرو ۱۴ اینچ M4 Pro",
+      "brand": "Apple",
+      "categoryId": "cat_laptop",
+      "price": 112000000,
+      "priceOnRequest": false,
+      "stock": 1,
+      "condition": "نو",
+      "warranty": "۱۸ ماه گارانتی شرکتی",
+      "specs": {
+        "cpu": "Apple M4 Pro",
+        "ram": "۲۴",
+        "storage": "۵۱۲ SSD",
+        "gpu": "16-core GPU",
+        "display": "۱۴.۲",
+        "os": "macOS"
+      },
+      "note": "",
+      "image": "",
+      "featured": false,
+      "hidden": false,
+      "order": 10,
+      "createdAt": "2026-07-01T08:00:00.000Z",
+      "updatedAt": "2026-10-26T06:45:00.000Z"
+    },
+    {
+      "id": "dev_rog",
+      "name": "ایسوس ROG Strix G16",
+      "brand": "ASUS",
+      "categoryId": "cat_laptop",
+      "price": 78500000,
+      "priceOnRequest": false,
+      "stock": 2,
+      "condition": "نو",
+      "warranty": "۱۸ ماه گارانتی",
+      "specs": {
+        "cpu": "Core i7-13650HX",
+        "ram": "۱۶",
+        "storage": "۵۱۲ SSD",
+        "gpu": "RTX 4060 8GB",
+        "display": "۱۶",
+        "os": "Windows 11"
+      },
+      "note": "",
+      "image": "",
+      "featured": true,
+      "hidden": false,
+      "order": 11,
+      "createdAt": "2026-07-01T08:00:00.000Z",
+      "updatedAt": "2026-10-26T06:45:00.000Z"
+    },
+    {
+      "id": "dev_loq",
+      "name": "لنوو LOQ ۱۵",
+      "brand": "Lenovo",
+      "categoryId": "cat_laptop",
+      "price": 39900000,
+      "priceOnRequest": false,
+      "stock": 7,
+      "condition": "نو",
+      "warranty": "۱۲ ماه گارانتی",
+      "specs": {
+        "cpu": "Core i5-12450H",
+        "ram": "۱۶",
+        "storage": "۵۱۲ SSD",
+        "gpu": "RTX 3050 6GB",
+        "display": "۱۵.۶",
+        "os": "Windows 11"
+      },
+      "note": "",
+      "image": "",
+      "featured": false,
+      "hidden": false,
+      "order": 12,
+      "createdAt": "2026-07-01T08:00:00.000Z",
+      "updatedAt": "2026-10-26T06:45:00.000Z"
+    },
+    {
+      "id": "dev_victus",
+      "name": "اچ‌پی Victus ۱۵",
+      "brand": "HP",
+      "categoryId": "cat_laptop",
+      "price": 31500000,
+      "priceOnRequest": false,
+      "stock": 4,
+      "condition": "نو",
+      "warranty": "۱۲ ماه گارانتی",
+      "specs": {
+        "cpu": "Ryzen 5 7640HS",
+        "ram": "۱۶",
+        "storage": "۵۱۲ SSD",
+        "gpu": "RTX 3050 6GB",
+        "display": "۱۵.۶",
+        "os": "Windows 11"
+      },
+      "note": "",
+      "image": "",
+      "featured": false,
+      "hidden": false,
+      "order": 13,
+      "createdAt": "2026-07-01T08:00:00.000Z",
+      "updatedAt": "2026-10-26T06:45:00.000Z"
+    },
+    {
+      "id": "dev_x1",
+      "name": "لنوو ThinkPad X1 Carbon نسل ۱۲",
+      "brand": "Lenovo",
+      "categoryId": "cat_laptop",
+      "price": 89000000,
+      "priceOnRequest": false,
+      "stock": 0,
+      "condition": "استوک",
+      "warranty": "۶ ماه گارانتی فروشگاه",
+      "specs": {
+        "cpu": "Core Ultra 7 155U",
+        "ram": "۱۶",
+        "storage": "۵۱۲ SSD",
+        "gpu": "Intel Graphics",
+        "display": "۱۴",
+        "os": "Windows 11"
+      },
+      "note": "استوک اداری، بدنه بدون خط و خش",
+      "image": "",
+      "featured": false,
+      "hidden": false,
+      "order": 14,
+      "createdAt": "2026-07-01T08:00:00.000Z",
+      "updatedAt": "2026-10-26T06:45:00.000Z"
+    },
+    {
+      "id": "dev_ipad_air",
+      "name": "آیپد ایر ۱۱ اینچ M3",
+      "brand": "Apple",
+      "categoryId": "cat_tablet",
+      "price": 44900000,
+      "priceOnRequest": false,
+      "stock": 2,
+      "condition": "نو",
+      "warranty": "۱۲ ماه گارانتی",
+      "specs": {
+        "storage": "۲۵۶",
+        "ram": "۸",
+        "connectivity": "Wi-Fi",
+        "display": "۱۱",
+        "pencil": "Apple Pencil Pro"
+      },
+      "note": "",
+      "image": "",
+      "featured": true,
+      "hidden": false,
+      "order": 15,
+      "createdAt": "2026-07-01T08:00:00.000Z",
+      "updatedAt": "2026-10-26T06:45:00.000Z"
+    },
+    {
+      "id": "dev_ipad_pro",
+      "name": "آیپد پرو ۱۳ اینچ M4",
+      "brand": "Apple",
+      "categoryId": "cat_tablet",
+      "price": 98000000,
+      "priceOnRequest": false,
+      "stock": 1,
+      "condition": "نو",
+      "warranty": "۱۲ ماه گارانتی",
+      "specs": {
+        "storage": "۵۱۲",
+        "ram": "۸",
+        "connectivity": "Wi-Fi",
+        "display": "۱۳",
+        "pencil": "Apple Pencil Pro"
+      },
+      "note": "",
+      "image": "",
+      "featured": false,
+      "hidden": false,
+      "order": 16,
+      "createdAt": "2026-07-01T08:00:00.000Z",
+      "updatedAt": "2026-10-26T06:45:00.000Z"
+    },
+    {
+      "id": "dev_tabs10",
+      "name": "سامسونگ گلکسی تب S10 FE",
+      "brand": "Samsung",
+      "categoryId": "cat_tablet",
+      "price": 26500000,
+      "priceOnRequest": false,
+      "stock": 3,
+      "condition": "نو",
+      "warranty": "۱۸ ماه گارانتی",
+      "specs": {
+        "storage": "۱۲۸",
+        "ram": "۸",
+        "connectivity": "Wi-Fi",
+        "display": "۱۰.۹",
+        "pencil": "S Pen"
+      },
+      "note": "",
+      "image": "",
+      "featured": false,
+      "hidden": false,
+      "order": 17,
+      "createdAt": "2026-07-01T08:00:00.000Z",
+      "updatedAt": "2026-10-26T06:45:00.000Z"
+    },
+    {
+      "id": "dev_pad7",
+      "name": "شیائومی پد ۷ ۲۵۶",
+      "brand": "Xiaomi",
+      "categoryId": "cat_tablet",
+      "price": 17900000,
+      "priceOnRequest": false,
+      "stock": 5,
+      "condition": "نو",
+      "warranty": "۱۲ ماه گارانتی",
+      "specs": {
+        "storage": "۲۵۶",
+        "ram": "۸",
+        "connectivity": "Wi-Fi",
+        "display": "۱۱.۲",
+        "pencil": "Xiaomi Focus Pen"
+      },
+      "note": "",
+      "image": "",
+      "featured": false,
+      "hidden": false,
+      "order": 18,
+      "createdAt": "2026-07-01T08:00:00.000Z",
+      "updatedAt": "2026-10-26T06:45:00.000Z"
+    },
+    {
+      "id": "dev_ps5",
+      "name": "پلی‌استیشن ۵ اسلیم دیسک‌خور",
+      "brand": "Sony",
+      "categoryId": "cat_console",
+      "price": 44900000,
+      "priceOnRequest": false,
+      "stock": 2,
+      "condition": "نو",
+      "warranty": "۱۲ ماه گارانتی",
+      "specs": {
+        "edition": "دیسک‌خور",
+        "storage": "1TB",
+        "region": "ریجن ۲",
+        "controller": "یک دسته DualSense"
+      },
+      "note": "",
+      "image": "",
+      "featured": true,
+      "hidden": false,
+      "order": 19,
+      "createdAt": "2026-07-01T08:00:00.000Z",
+      "updatedAt": "2026-10-26T06:45:00.000Z"
+    },
+    {
+      "id": "dev_ps5pro",
+      "name": "پلی‌استیشن ۵ پرو",
+      "brand": "Sony",
+      "categoryId": "cat_console",
+      "price": 78900000,
+      "priceOnRequest": false,
+      "stock": 1,
+      "condition": "نو",
+      "warranty": "۱۲ ماه گارانتی",
+      "specs": {
+        "edition": "استاندارد",
+        "storage": "2TB",
+        "region": "ریجن ۲",
+        "controller": "یک دسته DualSense"
+      },
+      "note": "",
+      "image": "",
+      "featured": false,
+      "hidden": false,
+      "order": 20,
+      "createdAt": "2026-07-01T08:00:00.000Z",
+      "updatedAt": "2026-10-26T06:45:00.000Z"
+    },
+    {
+      "id": "dev_xbox",
+      "name": "ایکس‌باکس سری X ۱ ترابایت",
+      "brand": "Microsoft",
+      "categoryId": "cat_console",
+      "price": 39500000,
+      "priceOnRequest": false,
+      "stock": 3,
+      "condition": "نو",
+      "warranty": "۱۲ ماه گارانتی",
+      "specs": {
+        "edition": "استاندارد",
+        "storage": "1TB",
+        "region": "ریجن ۱",
+        "controller": "یک دسته بی‌سیم"
+      },
+      "note": "",
+      "image": "",
+      "featured": false,
+      "hidden": false,
+      "order": 21,
+      "createdAt": "2026-07-01T08:00:00.000Z",
+      "updatedAt": "2026-10-26T06:45:00.000Z"
+    },
+    {
+      "id": "dev_switch2",
+      "name": "نینتندو سوییچ ۲",
+      "brand": "Nintendo",
+      "categoryId": "cat_console",
+      "price": 38000000,
+      "priceOnRequest": false,
+      "stock": 4,
+      "condition": "نو",
+      "warranty": "۱۲ ماه گارانتی",
+      "specs": {
+        "edition": "استاندارد",
+        "storage": "256GB",
+        "region": "اروپا",
+        "controller": "Joy-Con 2"
+      },
+      "note": "",
+      "image": "",
+      "featured": false,
+      "hidden": false,
+      "order": 22,
+      "createdAt": "2026-07-01T08:00:00.000Z",
+      "updatedAt": "2026-10-26T06:45:00.000Z"
+    },
+    {
+      "id": "dev_airpods3",
+      "name": "ایرپاد پرو ۳",
+      "brand": "Apple",
+      "categoryId": "cat_audio",
+      "price": 9800000,
+      "priceOnRequest": false,
+      "stock": 6,
+      "condition": "نو",
+      "warranty": "۱۲ ماه گارانتی",
+      "specs": {
+        "type": "ایرباد",
+        "connectivity": "بلوتوث ۵.۳",
+        "anc": "دارد",
+        "battery": "۶ ساعت (۳۰ ساعت با کیس)"
+      },
+      "note": "",
+      "image": "",
+      "featured": false,
+      "hidden": false,
+      "order": 23,
+      "createdAt": "2026-07-01T08:00:00.000Z",
+      "updatedAt": "2026-10-26T06:45:00.000Z"
+    },
+    {
+      "id": "dev_xm6",
+      "name": "سونی WH-1000XM6",
+      "brand": "Sony",
+      "categoryId": "cat_audio",
+      "price": 18500000,
+      "priceOnRequest": false,
+      "stock": 2,
+      "condition": "نو",
+      "warranty": "۱۸ ماه گارانتی",
+      "specs": {
+        "type": "هدفون دور گوشی",
+        "connectivity": "بلوتوث ۵.۳",
+        "anc": "دارد",
+        "battery": "۳۰ ساعت"
+      },
+      "note": "",
+      "image": "",
+      "featured": false,
+      "hidden": false,
+      "order": 24,
+      "createdAt": "2026-07-01T08:00:00.000Z",
+      "updatedAt": "2026-10-26T06:45:00.000Z"
+    },
+    {
+      "id": "dev_jbl",
+      "name": "جی‌بی‌ال Tune 770NC",
+      "brand": "JBL",
+      "categoryId": "cat_audio",
+      "price": 4200000,
+      "priceOnRequest": false,
+      "stock": 9,
+      "condition": "نو",
+      "warranty": "۱۲ ماه گارانتی",
+      "specs": {
+        "type": "هدفون دور گوشی",
+        "connectivity": "بلوتوث ۵.۳",
+        "anc": "دارد",
+        "battery": "۷۰ ساعت"
+      },
+      "note": "",
+      "image": "",
+      "featured": false,
+      "hidden": false,
+      "order": 25,
+      "createdAt": "2026-07-01T08:00:00.000Z",
+      "updatedAt": "2026-10-26T06:45:00.000Z"
+    },
+    {
+      "id": "dev_marshall",
+      "name": "مارشال Emberton III",
+      "brand": "Marshall",
+      "categoryId": "cat_audio",
+      "price": 7900000,
+      "priceOnRequest": false,
+      "stock": 1,
+      "condition": "نو",
+      "warranty": "۱۲ ماه گارانتی",
+      "specs": {
+        "type": "اسپیکر بلوتوثی",
+        "connectivity": "بلوتوث ۵.۳",
+        "anc": "ندارد",
+        "battery": "۳۲ ساعت"
+      },
+      "note": "",
+      "image": "",
+      "featured": false,
+      "hidden": false,
+      "order": 26,
+      "createdAt": "2026-07-01T08:00:00.000Z",
+      "updatedAt": "2026-10-26T06:45:00.000Z"
+    },
+    {
+      "id": "dev_aw11",
+      "name": "اپل واچ سری ۱۱ ۴۶ میلی‌متری",
+      "brand": "Apple",
+      "categoryId": "cat_watch",
+      "price": 22900000,
+      "priceOnRequest": false,
+      "stock": 3,
+      "condition": "نو",
+      "warranty": "۱۲ ماه گارانتی",
+      "specs": {
+        "size": "۴۶",
+        "connectivity": "GPS + Cellular",
+        "battery": "۱۸ ساعت",
+        "gps": "دارد"
+      },
+      "note": "",
+      "image": "",
+      "featured": false,
+      "hidden": false,
+      "order": 27,
+      "createdAt": "2026-07-01T08:00:00.000Z",
+      "updatedAt": "2026-10-26T06:45:00.000Z"
+    },
+    {
+      "id": "dev_gw8",
+      "name": "سامسونگ گلکسی واچ ۸ ۴۴ میلی‌متری",
+      "brand": "Samsung",
+      "categoryId": "cat_watch",
+      "price": 14500000,
+      "priceOnRequest": false,
+      "stock": 4,
+      "condition": "نو",
+      "warranty": "۱۸ ماه گارانتی",
+      "specs": {
+        "size": "۴۴",
+        "connectivity": "Bluetooth",
+        "battery": "۲ روز",
+        "gps": "دارد"
+      },
+      "note": "",
+      "image": "",
+      "featured": false,
+      "hidden": false,
+      "order": 28,
+      "createdAt": "2026-07-01T08:00:00.000Z",
+      "updatedAt": "2026-10-26T06:45:00.000Z"
+    },
+    {
+      "id": "dev_instinct",
+      "name": "گارمین Instinct 3",
+      "brand": "Garmin",
+      "categoryId": "cat_watch",
+      "price": 19900000,
+      "priceOnRequest": false,
+      "stock": 1,
+      "condition": "نو",
+      "warranty": "۱۲ ماه گارانتی",
+      "specs": {
+        "size": "۴۵",
+        "connectivity": "Bluetooth",
+        "battery": "۲۸ روز",
+        "gps": "دارد"
+      },
+      "note": "",
+      "image": "",
+      "featured": false,
+      "hidden": false,
+      "order": 29,
+      "createdAt": "2026-07-01T08:00:00.000Z",
+      "updatedAt": "2026-10-26T06:45:00.000Z"
+    },
+    {
+      "id": "dev_anker",
+      "name": "پاوربانک انکر 737 ۲۴٬۰۰۰",
+      "brand": "Anker",
+      "categoryId": "cat_accessory",
+      "price": 3300000,
+      "priceOnRequest": false,
+      "stock": 10,
+      "condition": "نو",
+      "warranty": "۱۸ ماه گارانتی",
+      "specs": {
+        "type": "پاوربانک",
+        "compatibility": "گوشی، تبلت و لپ‌تاپ",
+        "connection": "USB-C 140W"
+      },
+      "note": "",
+      "image": "",
+      "featured": false,
+      "hidden": false,
+      "order": 30,
+      "createdAt": "2026-07-01T08:00:00.000Z",
+      "updatedAt": "2026-10-26T06:45:00.000Z"
+    },
+    {
+      "id": "dev_mx3s",
+      "name": "لاجیتک MX Master 3S",
+      "brand": "Logitech",
+      "categoryId": "cat_accessory",
+      "price": 5600000,
+      "priceOnRequest": false,
+      "stock": 5,
+      "condition": "نو",
+      "warranty": "۱۲ ماه گارانتی",
+      "specs": {
+        "type": "ماوس بی‌سیم",
+        "compatibility": "ویندوز، مک و لینوکس",
+        "connection": "بلوتوث / دانگل USB"
+      },
+      "note": "",
+      "image": "",
+      "featured": false,
+      "hidden": false,
+      "order": 31,
+      "createdAt": "2026-07-01T08:00:00.000Z",
+      "updatedAt": "2026-10-26T06:45:00.000Z"
+    },
+    {
+      "id": "dev_dualsense",
+      "name": "دسته بازی DualSense",
+      "brand": "Sony",
+      "categoryId": "cat_accessory",
+      "price": 4900000,
+      "priceOnRequest": false,
+      "stock": 6,
+      "condition": "نو",
+      "warranty": "۱۲ ماه گارانتی",
+      "specs": {
+        "type": "دسته بازی",
+        "compatibility": "PS5 و PC",
+        "connection": "بلوتوث / USB-C"
+      },
+      "note": "",
+      "image": "",
+      "featured": false,
+      "hidden": false,
+      "order": 32,
+      "createdAt": "2026-07-01T08:00:00.000Z",
+      "updatedAt": "2026-10-26T06:45:00.000Z"
+    }
+  ],
+  "meta": {
+    "updatedAt": "2026-10-26T06:45:00.000Z",
+    "updatedBy": "پوریا صفری",
+    "history": [
+      {
+        "id": "h4",
+        "at": "2026-10-26T06:45:00.000Z",
+        "by": "پوریا صفری",
+        "action": "publish",
+        "summary": "به‌روزرسانی موجودی؛ آیفون ۱۵ پرو و تینک‌پد ناموجود شدند.",
+        "stats": {
+          "added": 0,
+          "updated": 4,
+          "removed": 0
+        }
+      },
+      {
+        "id": "h3",
+        "at": "2026-10-25T08:00:00.000Z",
+        "by": "پوریا صفری",
+        "action": "publish",
+        "summary": "افزودن پلی‌استیشن ۵ پرو و سامسونگ A56.",
+        "stats": {
+          "added": 2,
+          "updated": 0,
+          "removed": 0
+        }
+      },
+      {
+        "id": "h2",
+        "at": "2026-10-19T08:00:00.000Z",
+        "by": "پوریا صفری",
+        "action": "publish",
+        "summary": "به‌روزرسانی قیمت‌ها و افزودن آیفون ۱۶.",
+        "stats": {
+          "added": 1,
+          "updated": 12,
+          "removed": 0
+        }
+      },
+      {
+        "id": "h1",
+        "at": "2026-10-12T08:00:00.000Z",
+        "by": "پوریا صفری",
+        "action": "seed",
+        "summary": "راه‌اندازی لیست موجودی و ثبت اولین دستگاه‌ها."
+      }
+    ]
+  }
+}

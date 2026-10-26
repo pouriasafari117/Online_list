@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="fa" dir="rtl" data-theme="auto">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>راه‌اندازی امن — Online List</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="color-scheme" content="light dark">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self' https://api.github.com">
+  <meta name="theme-color" content="#f4f2ed">
+  <link rel="icon" href="../assets/icons/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="../assets/fonts/Vazirmatn-Variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../assets/css/tokens.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/setup.css">
+  <script src="../assets/js/theme-boot.js"></script>
+  <script type="module" src="../assets/js/setup.js"></script>
+</head>
+<body class="setup-page">
+  <header class="setup-header">
+    <div class="container setup-header__inner">
+      <a class="brand" href="../" aria-label="بازگشت به سایت">
+        <span class="brand__mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
+            <path d="M4 6.5h10M4 12h16M4 17.5h7" />
+            <circle cx="18.5" cy="6.5" r="1.6" fill="currentColor" stroke="none" />
+            <circle cx="15" cy="17.5" r="1.6" fill="currentColor" stroke="none" />
+          </svg>
+        </span>
+        <span class="brand__text">
+          <span class="brand__name">Online List</span>
+          <span class="brand__sub">راه‌اندازی امن</span>
+        </span>
+      </a>
+      <span class="setup-badge">
+        <span data-icon="lock"></span>
+        فقط برای مدیر فروشگاه
+      </span>
+      <a class="btn btn--outlined btn--sm" href="../" style="margin-inline-start:auto">
+        <span data-icon="chevron_right"></span>
+        بازگشت به سایت
+      </a>
+    </div>
+  </header>
+
+  <main class="container setup-main">
+    <section class="setup-intro">
+      <span class="t-eyebrow">گام صفر · یک‌بار برای همیشه</span>
+      <h1 class="t-display">توکن را با یک رمز<br><span class="setup-intro__accent">سینک کنید.</span></h1>
+      <p class="t-lead">
+        این صفحه یک توکن گیت‌هاب می‌گیرد، آن را با رمز دلخواه شما رمزگذاری می‌کند و نسخه‌ی رمزی را در مخزن می‌گذارد.
+        از این به بعد، هر کسی با دانستن رمز شما می‌تواند وارد پنل مدیریت سایت شود — بدون توکن، بدون سرور و بدون هزینه.
+      </p>
+      <div class="setup-warn">
+        <span data-icon="warning"></span>
+        <p>
+          این صفحه توکن را در هیچ‌جا ذخیره نمی‌کند. با این حال، آن را در جای عمومی یا اشتراکی باز نکنید.
+          توکن ساخته‌شده را بعداً می‌توانید از گیت‌هاب لغو (Revoke) کنید.
+        </p>
+      </div>
+    </section>
+
+    <div class="setup-grid">
+      <form class="setup-form" id="setupForm" novalidate>
+        <!-- Step 1 -->
+        <section class="setup-card">
+          <div class="step-head">
+            <span class="step-num">۱</span>
+            <div>
+              <h2 class="step-title">توکن گیت‌هاب بسازید</h2>
+              <p class="step-sub">دسترسی محدود به همین مخزن؛ فقط خواندن و نوشتن فایل‌ها.</p>
+            </div>
+          </div>
+          <ol class="setup-checklist">
+            <li>
+              <span data-icon="open_in_new"></span>
+              <div>
+                <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener noreferrer">ساخت توکن Fine-grained</a>
+                (پیشنهاد می‌شود) — یا
+                <a href="https://github.com/settings/tokens/new?scopes=repo&amp;description=Online%20List" target="_blank" rel="noopener noreferrer">توکن کلاسیک با دسترسی repo</a>.
+              </div>
+            </li>
+            <li><span data-icon="category"></span><div>در بخش <b>Repository access</b> فقط مخزن فروشگاه را انتخاب کنید (Only select repositories).</div></li>
+            <li><span data-icon="key"></span><div>در بخش <b>Permissions</b> مقدار <b>Contents</b> را روی <b>Read and write</b> بگذارید. (Metadata خودکار Read-only است.)</div></li>
+            <li><span data-icon="schedule"></span><div>یک تاریخ انقضا انتخاب کنید؛ مثلاً ۹۰ روز یا ۱ سال. تمدید بعدی ساده است.</div></li>
+          </ol>
+          <div class="field">
+            <span class="field__label">توکن گیت‌هاب<span class="req">*</span></span>
+            <div class="password-wrap">
+              <input class="input" type="password" name="token" id="token" dir="ltr" autocomplete="off" spellcheck="false"
+                     placeholder="github_pat_… یا ghp_…">
+              <button class="icon-btn" type="button" id="toggleToken" aria-label="نمایش توکن">
+                <span data-icon="visibility"></span>
+              </button>
+            </div>
+            <span class="field__hint">توکن فقط در حافظه‌ی همین صفحه می‌ماند و رمزگذاری‌شده منتشر می‌شود.</span>
+            <span class="field__error"></span>
+          </div>
+        </section>
+
+        <!-- Step 2 -->
+        <section class="setup-card">
+          <div class="step-head">
+            <span class="step-num">۲</span>
+            <div>
+              <h2 class="step-title">مخزن را وصل کنید</h2>
+              <p class="step-sub">همان مخزنی که سایت روی GitHub Pages از آن سرو می‌شود.</p>
+            </div>
+          </div>
+          <div class="grid-3">
+            <label class="field">
+              <span class="field__label">مالک مخزن<span class="req">*</span></span>
+              <input class="input" name="owner" id="owner" dir="ltr" autocomplete="off" placeholder="username">
+              <span class="field__error"></span>
+            </label>
+            <label class="field">
+              <span class="field__label">نام مخزن<span class="req">*</span></span>
+              <input class="input" name="repo" id="repo" dir="ltr" autocomplete="off" placeholder="Online_list">
+              <span class="field__error"></span>
+            </label>
+            <label class="field">
+              <span class="field__label">شاخه<span class="req">*</span></span>
+              <input class="input" name="branch" id="branch" dir="ltr" autocomplete="off" value="main">
+              <span class="field__error"></span>
+            </label>
+          </div>
+          <div class="setup-test-row">
+            <button class="btn btn--outlined btn--sm" type="button" id="testBtn">
+              <span data-icon="sync"></span>
+              بررسی اتصال و دسترسی
+            </button>
+            <span class="t-xs t-muted" id="testHint">قبل از ساخت فایل امنیتی، اتصال را تست کنید.</span>
+          </div>
+          <div class="status-list" id="testStatus" hidden></div>
+        </section>
+
+        <!-- Step 3 -->
+        <section class="setup-card">
+          <div class="step-head">
+            <span class="step-num">۳</span>
+            <div>
+              <h2 class="step-title">رمز مدیریت را تعیین کنید</h2>
+              <p class="step-sub">این رمز، کلید باز کردن توکن در مرورگر است. هر جا لازم شد، همین رمز را وارد می‌کنید.</p>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="field">
+              <span class="field__label">رمز عبور<span class="req">*</span></span>
+              <div class="password-wrap">
+                <input class="input" type="password" name="password" id="password" autocomplete="new-password" placeholder="حداقل ۱۰ کاراکتر">
+                <button class="icon-btn" type="button" id="togglePw" aria-label="نمایش رمز">
+                  <span data-icon="visibility"></span>
+                </button>
+              </div>
+              <div class="pw-meter" id="pwMeter" data-score="0" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+              <span class="field__hint" id="pwHint">یک عبارت طولانی و یکتا انتخاب کنید؛ مثل «کافه-۱۲۴-آفتاب».</span>
+              <span class="field__error"></span>
+            </div>
+            <label class="field">
+              <span class="field__label">تکرار رمز<span class="req">*</span></span>
+              <input class="input" type="password" name="password2" id="password2" autocomplete="new-password" placeholder="دوباره بنویسید">
+              <span class="field__error"></span>
+            </label>
+          </div>
+          <div class="grid-2">
+            <label class="field">
+              <span class="field__label">یادآور رمز (اختیاری)</span>
+              <input class="input" name="hint" id="hint" maxlength="80" placeholder="مثلاً: شماره پلاک + اسم فروشگاه">
+              <span class="field__hint">این متن برای همه قابل دیدن است؛ خود رمز را ننویسید.</span>
+              <span class="field__error"></span>
+            </label>
+            <label class="field">
+              <span class="field__label">نام نمایشی مدیر (اختیاری)</span>
+              <input class="input" name="adminName" id="adminName" maxlength="60" placeholder="مثلاً: پوریا صفری">
+              <span class="field__hint">زیر «آخرین به‌روزرسانی» در سایت نمایش داده می‌شود.</span>
+              <span class="field__error"></span>
+            </label>
+          </div>
+          <div class="form-note" style="margin-top:14px">
+            <span data-icon="shield"></span>
+            <span>رمز شما هرگز منتشر نمی‌شود؛ فقط یک «اثر انگشت» رمزگذاری‌شده به شکل فایل <span dir="ltr">data/vault.json</span> در مخزن قرار می‌گیرد. رمزنگاری با PBKDF2-SHA256 (۳۰۰٬۰۰۰ دور) و AES-256-GCM است.</span>
+          </div>
+        </section>
+
+        <div class="setup-actions">
+          <button class="btn btn--filled btn--lg" type="submit" id="generateBtn">
+            <span data-icon="shield"></span>
+            ساخت فایل امنیتی
+          </button>
+          <span class="t-xs t-muted">هیچ داده‌ای بدون تأیید شما در گیت‌هاب نوشته نمی‌شود.</span>
+        </div>
+      </form>
+
+      <aside class="setup-side">
+        <div class="side-card">
+          <div class="side-card__title"><span data-icon="security"></span> چرا این روش امن است؟</div>
+          <ul class="side-list">
+            <li>توکن هرگز به‌صورت متن ساده در مخزن یا سایت قرار نمی‌گیرد.</li>
+            <li>رمزنگاری و رمزگشایی فقط در مرورگر انجام می‌شود؛ هیچ سروری در میان نیست.</li>
+            <li>توکن را می‌توانید فقط به «محتوای» یک مخزن محدود کنید.</li>
+            <li>با هر بار خروج، توکن از حافظه پاک می‌شود.</li>
+            <li>در صورت لو رفتن رمز، از همین صفحه رمز و توکن را عوض کنید.</li>
+          </ul>
+        </div>
+        <div class="side-card">
+          <div class="side-card__title"><span data-icon="terminal"></span> روش جایگزین: خط فرمان</div>
+          <p class="side-text">اگر ترجیح می‌دهید توکن از مرورگر عبور نکند، فایل امنیتی را لوکال بسازید و کامیت کنید:</p>
+          <div class="code-block">node tools/make-vault.mjs \
+  --owner USER --repo Online_list \
+  --branch main</div>
+          <p class="side-text" style="margin-top:8px">نکته: این اسکریپت همان الگوریتم رمزنگاری صفحه را استفاده می‌کند و فایل <span dir="ltr">data/vault.json</span> را می‌سازد.</p>
+        </div>
+        <div class="side-card">
+          <div class="side-card__title"><span data-icon="help"></span> سوال‌های رایج</div>
+          <details class="side-faq">
+            <summary>رمز را فراموش کردم</summary>
+            <p>دوباره از همین صفحه با توکن جدید (یا همان توکن) فایل امنیتی بسازید. فایل قبلی بازنویسی می‌شود.</p>
+          </details>
+          <details class="side-faq">
+            <summary>توکن را کجا نگه دارم؟</summary>
+            <p>هیچ‌جا. فقط نسخه رمزگذاری‌شده در مخزن می‌ماند. اگر توکن لو رفت، از GitHub آن را Revoke کنید و از این صفحه توکن تازه بسازید.</p>
+          </details>
+          <details class="side-faq">
+            <summary>سایت روی دامنه شخصی است</summary>
+            <p>در <span dir="ltr">data/site.json</span> مقدار مالک و مخزن را تنظیم کنید؛ همین صفحه آن را می‌نویسد.</p>
+          </details>
+          <details class="side-faq">
+            <summary>بعد از راه‌اندازی چه کنم؟</summary>
+            <p>به سایت برگردید، دکمه «ورود مدیر» را بزنید و رمز را وارد کنید. حالا می‌توانید دستگاه اضافه کنید و تغییرات را منتشر کنید.</p>
+          </details>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Result -->
+    <section class="setup-result" id="resultPanel" hidden aria-live="polite">
+      <div class="setup-card">
+        <div class="step-head">
+          <span class="step-num step-num--ok"><span data-icon="check"></span></span>
+          <div>
+            <h2 class="step-title">فایل امنیتی ساخته شد</h2>
+            <p class="step-sub">این فایل را در مخزن بنویسید تا ورود مدیر فعال شود.</p>
+          </div>
+        </div>
+        <div class="result-grid">
+          <div>
+            <div class="code-block" id="vaultPreview" style="max-height:280px"></div>
+            <div class="row" style="gap:8px;flex-wrap:wrap;margin-top:10px">
+              <button class="btn btn--outlined btn--sm" type="button" id="copyVault">
+                <span data-icon="content_copy"></span> کپی
+              </button>
+              <button class="btn btn--text btn--sm" type="button" id="downloadVault">
+                <span data-icon="download"></span> دانلود vault.json
+              </button>
+            </div>
+          </div>
+          <div class="result-actions">
+            <div class="form-note form-note--danger">
+              <span data-icon="warning"></span>
+              <span>این فایل امن است (رمزگذاری‌شده)، اما رمز را با هیچ‌کس به اشتراک نگذارید.</span>
+            </div>
+            <label class="check" style="margin-top:12px">
+              <input type="checkbox" id="seedStore" checked>
+              <span>اگر <span dir="ltr">data/store.json</span> وجود نداشت، یک لیست خالی بساز (دسته‌های موبایل و لپ‌تاپ).</span>
+            </label>
+            <button class="btn btn--filled btn--block" type="button" id="commitBtn" style="margin-top:14px">
+              <span data-icon="cloud_upload"></span>
+              نوشتن در مخزن گیت‌هاب
+            </button>
+            <div class="status-list" id="writeStatus" hidden></div>
+            <div id="successBox" hidden class="success-box">
+              <div class="success-box__title"><span data-icon="check_circle"></span> همه‌چیز آماده است</div>
+              <p>در همین مرورگر به سایت برگردید و با رمز جدید وارد شوید. اگر از دستگاه دیگری وارد می‌شوید، فقط رمز را لازم دارید.</p>
+              <a class="btn btn--filled btn--sm" href="../">رفتن به سایت</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="setup-footer">
+    <div class="container">
+      <span>Online List · لیست موجودی بدون سرور</span>
+      <span class="sep"></span>
+      <span>PBKDF2-SHA256 · AES-256-GCM · Web Crypto API</span>
+      <span class="spacer"></span>
+      <a href="../">بازگشت به سایت</a>
+    </div>
+  </footer>
+</body>
+</html>

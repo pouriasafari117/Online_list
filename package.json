@@ -1,0 +1,42 @@
+{
+  "name": "online-list",
+  "version": "1.0.0",
+  "private": true,
+  "description": "لیست موجودی فروشگاه بدون سرور و دیتابیس — روی GitHub Pages، با مدیریت امن توکن",
+  "type": "module",
+  "homepage": "https://pouriasafari117.github.io/Online_list/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pouriasafari117/Online_list.git"
+  },
+  "license": "MIT",
+  "scripts": {
+    "start": "node tools/serve.mjs --port 8080",
+    "dev": "node tools/serve.mjs --port 8080",
+    "serve": "node tools/serve.mjs",
+    "vault": "node tools/make-vault.mjs",
+    "verify": "node tools/verify.mjs",
+    "test": "node tools/test.mjs",
+    "check": "node tools/verify.mjs && node tools/test.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "inventory",
+    "github-pages",
+    "static-site",
+    "persian",
+    "no-backend"
+  ],
+  "files": [
+    "assets",
+    "data",
+    "setup",
+    "tools",
+    "index.html",
+    "404.html",
+    "sw.js",
+    "manifest.webmanifest"
+  ]
+}
