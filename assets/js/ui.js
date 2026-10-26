@@ -276,7 +276,11 @@ export function openMenu(anchor, items, { align = 'end', label = '' } = {}) {
     closeMenu();
   };
   const onKey = (event) => {
-    if (event.key === 'Escape') { closeMenu(); anchor.focus?.(); }
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeMenu();
+      anchor.focus?.();
+    }
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       const focusables = [...menu.querySelectorAll('.menu__item:not([disabled])')];
       if (!focusables.length) return;

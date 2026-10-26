@@ -277,7 +277,9 @@ test('فایل واقعی store.json معتبر و کامل است', () => {
   const text = fs.readFileSync(path.join(ROOT, 'data/store.json'), 'utf8');
   const data = model.parseStoreJson(text);
   assert.equal(model.serializeStore(data), text, 'store.json باید با خروجی سریالایزر یکسان باشد');
-  assert.ok(data.devices.length > 0);
+  // An empty inventory is valid (the admin can reset everything on purpose).
+  assert.ok(Array.isArray(data.devices));
+  assert.ok(Array.isArray(data.categories));
   assert.ok(data.categories.every((c) => c.fields.every((f) => f.label)));
 });
 
@@ -598,6 +600,80 @@ test('ریست کلی رمزها فایل امنیتی را حذف می‌کند
   assert.ok(/deleteFile\(\{\s*\n?\s*path: 'data\/vault\.json'/.test(src),
     'ریست کلی باید vault.json را حذف کند');
   assert.ok(/CREDENTIAL_RESET_PHRASE/.test(src), 'تأیید متنی برای ریست کلی لازم است');
+});
+
+test('قالب‌های آمادهٔ مشخصات، فیلدهای تازه و مستقل می‌سازند', () => {
+  const phone = model.presetFields('phone');
+  assert.ok(phone.length >= 3, 'قالب موبایل باید چند مشخصه داشته باشد');
+  assert.ok(phone.every((f) => f.label && f.key));
+  assert.ok(phone.some((f) => f.showInRow), 'حداقل یک مشخصه باید در ردیف نمایش داده شود');
+  const again = model.presetFields('phone');
+  assert.notEqual(phone[0], again[0], 'هر بار باید شیء تازه ساخته شود');
+  assert.equal(phone[0].key, again[0].key, 'کلید مشخصه باید پایدار باشد');
+  assert.deepEqual(model.presetFields('nope'), []);
+});
+
+test('مشخصات اضافهٔ هر کالا ذخیره، پاک‌سازی و گرد می‌شوند', () => {
+  const data = model.normalizeStore({
+    store: { name: 'فروشگاه' },
+    categories: [{ id: 'c1', title: 'موبایل', fields: [{ key: 'ram', label: 'رم' }] }],
+    devices: [{
+      id: 'd1', name: 'گوشی', categoryId: 'c1', stock: 1,
+      specs: { ram: '۸' },
+      extraSpecs: [
+        { label: 'ایراد فنی', value: 'خش کوچک' },
+        { label: 'ایراد فنی', value: 'تکراری' },
+        { label: '', value: 'بدون عنوان' },
+        { label: ' جعبه ', value: ' دارد ' }
+      ]
+    }]
+  });
+  const extra = model.deviceExtraSpecs(data.devices[0]);
+  assert.deepEqual(extra, [
+    { label: 'ایراد فنی', value: 'خش کوچک' },
+    { label: 'جعبه', value: 'دارد' }
+  ]);
+  const json = JSON.parse(model.serializeStore(data));
+  assert.deepEqual(json.devices[0].extraSpecs, extra, 'خروجی JSON باید مشخصات اضافه را نگه دارد');
+  assert.deepEqual(model.deviceExtraSpecs({}), [], 'کالای بدون مشخصات اضافه نباید خطا بدهد');
+});
+
+test('پنل مدیریت یک صفحه است، نه پنجرهٔ شناور', () => {
+  const src = fs.readFileSync(path.join(ROOT, 'assets/js/manage.js'), 'utf8');
+  assert.ok(!/openSheet/.test(src), 'پنل نباید از دیالوگ شناور استفاده کند');
+  assert.ok(/is-manage-page/.test(src), 'کلاس صفحهٔ مدیریت تنظیم نمی‌شود');
+  assert.ok(/data-mp-back/.test(src), 'دکمهٔ بازگشت به لیست در پنل نیست');
+  assert.ok(/closeManagePanel/.test(src), 'تابع بستن صفحه تعریف نشده');
+  const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+  assert.ok(/managePageHost/.test(html), 'میزبان صفحهٔ مدیریت در index.html نیست');
+  assert.ok(!/adminDockHost/.test(html), 'میزبان نوار مدیریت قدیمی هنوز در HTML است');
+  const css = fs.readFileSync(path.join(ROOT, 'assets/css/app.css'), 'utf8');
+  assert.ok(/\.mpage__foot/.test(css), 'نوار پایین صفحهٔ مدیریت استایل ندارد');
+  assert.ok(!/\.adminbar/.test(css), 'استایل نوار مدیریت قدیمی باقی مانده');
+});
+
+test('رنگ‌های تأکیدی فقط روی همین چند عنصر پنل اعمال می‌شوند', () => {
+  const css = fs.readFileSync(path.join(ROOT, 'assets/css/app.css'), 'utf8');
+  assert.ok(/\.mp-badge--ok/.test(css) && /\.mp-badge--low/.test(css) && /\.mp-badge--out/.test(css),
+    'برچسب وضعیت باید سه رنگ داشته باشد');
+  assert.ok(/\.mp-stepper__btn--inc[^{]*\{[^}]*var\(--ok\)/.test(css), 'دکمهٔ افزایش باید سبز باشد');
+  assert.ok(/\.mp-stepper__btn--dec[^{]*\{[^}]*var\(--low\)/.test(css), 'دکمهٔ کاهش باید زرد باشد');
+  assert.ok(/\.mp-row__danger[^{]*\{[^}]*var\(--danger\)/.test(css), 'حذف باید قرمز باشد');
+  const base = fs.readFileSync(path.join(ROOT, 'assets/css/base.css'), 'utf8');
+  assert.ok(/\.btn--ok\s*\{/.test(base), 'دکمهٔ سبز تأیید تعریف نشده');
+});
+
+test('دسته‌ها قالب مشخصات دارند و کالاها می‌توانند مشخصهٔ اضافه بگیرند', () => {
+  const admin = fs.readFileSync(path.join(ROOT, 'assets/js/admin.js'), 'utf8');
+  assert.ok(/FIELD_PRESETS/.test(admin), 'قالب‌های آماده در ویرایش دسته استفاده نشده‌اند');
+  assert.ok(/data-preset/.test(admin), 'دکمهٔ قالب مشخصات در ویرایش دسته نیست');
+  assert.ok(/extraSpecsHost/.test(admin), 'بخش مشخصات اضافه در فرم کالا نیست');
+  assert.ok(/specs,\s*\n\s*extraSpecs/.test(admin), 'مشخصات اضافه هنگام ذخیره ثبت نمی‌شود');
+  const modelSrc = fs.readFileSync(path.join(ROOT, 'assets/js/model.js'), 'utf8');
+  assert.ok(/export const FIELD_PRESETS/.test(modelSrc));
+  assert.ok(/extraSpecs: normalizeExtraSpecs/.test(modelSrc));
+  const render = fs.readFileSync(path.join(ROOT, 'assets/js/render.js'), 'utf8');
+  assert.ok(/deviceExtraSpecs\(device\)/.test(render), 'مشخصات اضافه در جزئیات کالا دیده نمی‌شود');
 });
 
 /* ── Summary ──────────────────────────────────────────────────────────── */

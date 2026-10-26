@@ -7,9 +7,9 @@ import {
   CryptoError, cryptoAvailable, estimateCrackSeconds, isVault, openVault, passwordScore, sealVault
 } from './crypto.js';
 import {
-  CATEGORY_ICONS, CONDITION_OPTIONS, CREDENTIAL_RESET_PHRASE, RESET_PHRASE, clearInventory, computeDiff,
-  defaultCategory, defaultField, diffSummary, getCategory, makeDefaultData, normalizeStore,
-  parseStoreJson, serializeStore
+  CATEGORY_ICONS, CONDITION_OPTIONS, CREDENTIAL_RESET_PHRASE, FIELD_PRESETS, RESET_PHRASE, clearInventory,
+  computeDiff, defaultCategory, defaultField, deviceExtraSpecs, diffSummary, getCategory, makeDefaultData,
+  normalizeStore, parseStoreJson, presetFields, serializeStore
 } from './model.js';
 import {
   clearDraft, currentNumerals, discardDraftAndReset, endAdminSession, flushDraftNow,
@@ -25,7 +25,6 @@ import {
   formatNum, parseNumber, slugify, storageGet, storageSet, toCsv, uid
 } from './util.js';
 import { icon } from './icons.js';
-import { computeStats } from './model.js';
 import { hydrateIcons } from './render.js';
 
 const REQUIRED_ACTIONS = new Set([
@@ -115,83 +114,6 @@ function repoConfig(raw) {
   const repo = String(raw?.repo || '').trim();
   if (!isValidRepoPart(owner) || !isValidRepoPart(repo) || !isValidRepoPart(branch)) return null;
   return { owner, repo, branch };
-}
-
-/* ── Dock ───────────────────────────────────────────────────────────────── */
-
-let dockSignature = '';
-
-export function renderAdmin() {
-  const host = document.getElementById('adminDockHost');
-  if (!host) return;
-  document.body.classList.toggle('has-adminbar', isAdmin());
-  if (!isAdmin()) { host.innerHTML = ''; dockSignature = ''; return; }
-
-  const dirty = !!state.dirty;
-  const demo = isDemo();
-  const name = state.data?.settings?.adminName || state.user?.name || 'مدیر';
-  const initial = (name || 'م').trim().charAt(0);
-  const statusLabel = demo ? 'پیش‌نمایش' : dirty ? 'منتشرنشده' : 'همگام با مخزن';
-  const stats = computeStats(state.data, { includeHidden: true });
-  const hiddenCount = (state.data?.devices || []).filter((d) => d.hidden).length;
-  const warnBits = [];
-  if (stats.out) warnBits.push({ label: `${formatNum(stats.out, currentNumerals())} ناموجود`, kind: 'out' });
-  if (hiddenCount) warnBits.push({ label: `${formatNum(hiddenCount, currentNumerals())} پنهان`, kind: 'hidden' });
-
-  // The dock is re-rendered after every stock tap; skip the DOM work when
-  // nothing visible has changed (this used to rebuild the whole bar 30+ times
-  // per minute while editing).
-  const signature = [name, statusLabel, demo, stats.out, hiddenCount].join('|');
-  if (signature === dockSignature && host.childElementCount) return;
-  dockSignature = signature;
-  host.innerHTML = `
-    <div class="adminbar ${dirty ? 'is-dirty' : 'is-live'} ${demo ? 'is-demo' : ''}" role="region" aria-label="نوار مدیریت">
-      <div class="adminbar__inner">
-        <span class="adminbar__avatar" aria-hidden="true" title="${escapeHtml(name)}">${escapeHtml(initial)}</span>
-        <span class="adminbar__status">
-          <span class="dot" aria-hidden="true"></span>
-          <span class="label">${escapeHtml(statusLabel)}</span>
-        </span>
-        <span class="adminbar__divider" aria-hidden="true"></span>
-        ${warnBits.length ? `<div class="adminbar__warns">
-          ${warnBits.map((w) => `<button class="adminbar__warn" type="button" data-admin-focus="${w.kind}">${w.label}</button>`).join('')}
-        </div>` : ''}
-        <div class="adminbar__actions">
-          <button class="btn btn--tonal btn--sm btn--manage" type="button" data-action="manage">
-            ${icon('inventory_2', { size: 17 })}
-            <span class="label">پنل</span>
-          </button>
-          <button class="btn btn--filled btn--sm btn--publish" type="button" data-action="publish">
-            ${icon('cloud_upload', { size: 17 })}
-            <span class="label">${demo ? 'پیش‌نمایش' : 'انتشار'}</span>
-          </button>
-          <button class="btn btn--icon btn--sm btn--tonal" type="button" data-action="add-menu" aria-label="افزودن" aria-haspopup="menu" data-tip="افزودن">
-            ${icon('add', { size: 19 })}
-          </button>
-          <button class="btn btn--icon btn--sm btn--text" type="button" data-action="settings" aria-label="تنظیمات" data-tip="تنظیمات">
-            ${icon('settings', { size: 19 })}
-          </button>
-          ${dirty ? `<button class="btn btn--icon btn--sm btn--text" type="button" data-action="discard" aria-label="بازگردانی تغییرات" data-tip="بازگردانی">
-            ${icon('replay', { size: 19 })}
-          </button>` : ''}
-          <button class="btn btn--icon btn--sm btn--text" type="button" data-action="logout" aria-label="${demo ? 'خروج از پیش‌نمایش' : 'قفل کردن'}" data-tip="${demo ? 'خروج' : 'قفل'}">
-            ${icon(demo ? 'logout' : 'lock', { size: 19 })}
-          </button>
-        </div>
-      </div>
-    </div>
-  `;
-  host.querySelectorAll('[data-admin-focus]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const kind = btn.dataset.adminFocus;
-      if (kind === 'out') {
-        document.dispatchEvent(new CustomEvent('ol:admin-focus', { detail: { avail: 'out' } }));
-      } else {
-        document.dispatchEvent(new CustomEvent('ol:admin-focus', { detail: { hidden: true } }));
-      }
-    });
-  });
-  hydrateIcons(host);
 }
 
 /* ── Login gate (brute-force friction, client side) ─────────────────────── */
@@ -635,20 +557,28 @@ async function doLogout() {
 /* ── Admin menus ────────────────────────────────────────────────────────── */
 
 function openAdminMenu(anchor) {
-  openMenu(anchor, [
-    { label: 'انتشار تغییرات', icon: 'cloud_upload', onSelect: openPublish },
-    { label: 'افزودن دستگاه', icon: 'add', onSelect: () => openDeviceEditor({}) },
-    { label: 'دسته‌بندی جدید', icon: 'category', onSelect: () => openCategoryEditor({}) },
+  const items = [
+    { label: 'پنل مدیریت', icon: 'inventory_2', onSelect: openManage },
     { separator: true },
     { label: 'تنظیمات فروشگاه', icon: 'settings', onSelect: openSettings },
     { label: 'رمز و توکن', icon: 'key', onSelect: openSecurity },
     { label: 'نسخه پشتیبان', icon: 'download', onSelect: exportBackup },
     { label: 'راهنمای مدیر', icon: 'help', onSelect: openHelp },
-    { label: 'تاریخچه', icon: 'history', onSelect: () => document.dispatchEvent(new CustomEvent('ol:history')) },
-    { separator: true },
-    { label: 'بازنشانی لیست', icon: 'delete_forever', danger: true, onSelect: openResetSheet },
-    { label: isDemo() ? 'خروج از پیش‌نمایش' : 'قفل کردن', icon: 'lock', danger: true, onSelect: doLogout }
-  ], { align: 'end' });
+    { label: 'تاریخچه', icon: 'history', onSelect: () => document.dispatchEvent(new CustomEvent('ol:history')) }
+  ];
+  if (state.dirty) {
+    items.push({ separator: true });
+    items.push({ label: 'بازگردانی تغییرات', icon: 'replay', onSelect: discardChanges });
+  }
+  items.push({ separator: true });
+  items.push({ label: 'بازنشانی لیست', icon: 'delete', danger: true, onSelect: openResetSheet });
+  items.push({
+    label: isDemo() ? 'خروج از پیش‌نمایش' : 'قفل کردن',
+    icon: isDemo() ? 'logout' : 'lock',
+    danger: true,
+    onSelect: doLogout
+  });
+  openMenu(anchor, items);
 }
 
 function openAddMenu(anchor) {
@@ -812,14 +742,20 @@ function openDeviceEditor({ id = null, categoryId = '' } = {}) {
           ${fieldHtml({ label: 'آدرس تصویر (اختیاری)', name: 'image', value: draft.image, ltr: true, autocomplete: 'off', placeholder: 'https://…', hint: 'اگر خالی باشد، آیکون دسته نمایش داده می‌شود.' })}
         </div>
 
-        <div class="sheet__section">
-          <div class="sheet__legend">${icon('tune', { size: 18 })} مشخصات دسته</div>
+        <fieldset class="sheet__section spec-section">
+          <legend class="sheet__legend">${icon('tune', { size: 18 })} مشخصات کالا</legend>
+          <p class="spec-section__hint">فقط همین چند فیلد را پر کنید؛ عنوان‌ها از دستهٔ انتخاب‌شده می‌آیند.</p>
           <div id="specsHost" class="grid-2"></div>
-          <div class="form-note">
-            ${icon('info', { size: 18 })}
-            <span>این فیلدها از دسته‌بندی انتخاب‌شده می‌آیند. برای تغییر عنوان‌ها، دسته را ویرایش کنید.</span>
+        </fieldset>
+
+        <fieldset class="sheet__section spec-section">
+          <legend class="sheet__legend">${icon('edit_note', { size: 18 })} مشخصات اضافه (اختیاری)</legend>
+          <p class="spec-section__hint">اگر این کالا چیز خاصی دارد که در فیلدهای دسته نیست، همین‌جا برای همین آگهی اضافه کنید.</p>
+          <div id="extraSpecsHost" class="extra-specs"></div>
+          <div>
+            <button class="btn btn--text btn--sm" type="button" data-add-extra>${icon('add', { size: 17 })} افزودن مشخصهٔ دلخواه</button>
           </div>
-        </div>
+        </fieldset>
 
         <div class="sheet__section">
           <div class="sheet__legend">${icon('edit_note', { size: 18 })} توضیح و نمایش</div>
@@ -840,8 +776,27 @@ function openDeviceEditor({ id = null, categoryId = '' } = {}) {
     onMount: (c) => {
       const form = c.el.querySelector('#deviceForm');
       const specsHost = c.el.querySelector('#specsHost');
+      const extraHost = c.el.querySelector('#extraSpecsHost');
       const categorySelect = form.elements.namedItem('categoryId');
       const saveBtn = c.el.querySelector('[data-save]');
+
+      const addExtraRow = (row = {}) => {
+        if (extraHost.querySelectorAll('[data-extra-row]').length >= 8) {
+          toast('حداکثر ۸ مشخصهٔ اضافه برای هر کالا.', { type: 'warn' });
+          return;
+        }
+        const el = extraSpecRow(row);
+        extraHost.append(el);
+        hydrateIcons(el);
+        return el;
+      };
+      (deviceExtraSpecs(draft)).forEach((row) => addExtraRow(row));
+      c.el.querySelector('[data-add-extra]')?.addEventListener('click', () => {
+        addExtraRow()?.querySelector('[data-extra-label]')?.focus();
+      });
+      extraHost.addEventListener('click', (event) => {
+        if (event.target.closest('[data-remove-extra]')) event.target.closest('[data-extra-row]')?.remove();
+      });
 
       const renderSpecs = () => {
         const typed = {};
@@ -915,6 +870,23 @@ function openDeviceEditor({ id = null, categoryId = '' } = {}) {
             specs[key] = preserved[key];
           }
         }
+        const extraSpecs = [];
+        const seenExtra = new Set();
+        for (const row of extraHost.querySelectorAll('[data-extra-row]')) {
+          const label = row.querySelector('[data-extra-label]').value.trim();
+          const value = row.querySelector('[data-extra-value]').value.trim();
+          if (!label && !value) continue;
+          if (!label || !value) {
+            row.classList.add('is-invalid');
+            row.querySelector(label ? '[data-extra-value]' : '[data-extra-label]')?.focus();
+            showError(c, 'برای هر مشخصهٔ اضافه، هم عنوان و هم مقدار را بنویسید.');
+            return;
+          }
+          const key = label.toLowerCase();
+          if (seenExtra.has(key)) continue;
+          seenExtra.add(key);
+          extraSpecs.push({ label, value });
+        }
         const patch = {
           name,
           brand: fieldValue(form, 'brand'),
@@ -928,7 +900,8 @@ function openDeviceEditor({ id = null, categoryId = '' } = {}) {
           note: fieldValue(form, 'note'),
           featured: fieldChecked(form, 'featured'),
           hidden: fieldChecked(form, 'hidden'),
-          specs
+          specs,
+          extraSpecs
         };
         setButtonBusy(saveBtn, true, 'ذخیره…');
         try {
@@ -994,6 +967,19 @@ function catFieldRow(field) {
   return row;
 }
 
+function extraSpecRow({ label = '', value = '' } = {}) {
+  const row = document.createElement('div');
+  row.className = 'extra-spec';
+  row.dataset.extraRow = '1';
+  row.innerHTML = `
+    <input class="input" data-extra-label value="${escapeHtml(label)}" placeholder="عنوان (مثلاً ایراد فنی)" maxlength="40" aria-label="عنوان مشخصهٔ اضافه">
+    <input class="input" data-extra-value value="${escapeHtml(value)}" placeholder="مقدار" maxlength="300" aria-label="مقدار مشخصهٔ اضافه">
+    <button class="icon-btn" type="button" data-remove-extra aria-label="حذف مشخصه" style="color:var(--danger)">${icon('close', { size: 16 })}</button>
+  `;
+  row.addEventListener('input', () => row.classList.remove('is-invalid'));
+  return row;
+}
+
 function openCategoryEditor({ id = null } = {}) {
   if (!isAdmin()) { openLogin(); return; }
   const category = id ? state.data.categories.find((c) => c.id === id) : null;
@@ -1028,10 +1014,18 @@ function openCategoryEditor({ id = null } = {}) {
             <span class="spacer"></span>
             <button class="btn btn--tonal btn--sm" type="button" data-add-field>${icon('add', { size: 17 })} افزودن مشخصه</button>
           </div>
+          <div class="cat-presets" role="group" aria-label="قالب آمادهٔ مشخصات">
+            <span class="cat-presets__label">شروع با قالب آماده:</span>
+            ${FIELD_PRESETS.map((preset) => `
+              <button class="cat-preset" type="button" data-preset="${preset.id}">
+                ${icon(preset.icon, { size: 15 })} ${escapeHtml(preset.title)}
+              </button>`).join('')}
+          </div>
           <div class="cat-fields" id="catFields"></div>
           <div class="form-note">
             ${icon('info', { size: 18 })}
-            <span>این عنوان‌ها هنگام ویرایش دستگاه‌های این دسته نمایش داده می‌شوند. تیک «نمایش در ردیف» باعث می‌شود مقدار آن مشخصه کنار نام دستگاه در لیست دیده شود.</span>
+            <span>این عنوان‌ها هنگام افزودن کالا در همین دسته، از قبل آماده‌اند؛ مدیر فقط مقدارها را پر می‌کند.
+            تیک «نمایش در ردیف» باعث می‌شود مقدار آن مشخصه کنار نام کالا در لیست دیده شود.</span>
           </div>
         </div>
         <div data-delete-zone></div>
@@ -1075,6 +1069,33 @@ function openCategoryEditor({ id = null } = {}) {
           row.parentElement.insertBefore(row.nextElementSibling, row);
         }
         row.querySelector('[data-field-label]')?.focus();
+      });
+
+      c.el.querySelectorAll('[data-preset]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const rows = [...host.querySelectorAll('[data-field-row]')];
+          const taken = new Set(rows
+            .map((row) => row.querySelector('[data-field-label]').value.trim().toLowerCase())
+            .filter(Boolean));
+          const emptyRow = rows.find((row) => !row.querySelector('[data-field-label]').value.trim());
+          let added = 0;
+          for (const field of presetFields(btn.dataset.preset)) {
+            if (taken.has(field.label.toLowerCase())) continue;
+            const row = catFieldRow(field);
+            if (emptyRow && !added) {
+              emptyRow.replaceWith(row);
+            } else {
+              host.append(row);
+            }
+            added += 1;
+            if (rows.length + added >= 12) break;
+          }
+          if (!added) {
+            toast('همهٔ مشخصه‌های این قالب از قبل هست.', { type: 'info' });
+            return;
+          }
+          toast(`${formatNum(added, currentNumerals())} مشخصه از قالب «${btn.textContent.trim()}» اضافه شد.`, { type: 'ok' });
+        });
       });
 
       c.el.querySelector('[data-add-field]')?.addEventListener('click', () => {
@@ -1793,8 +1814,14 @@ async function openManage() {
     add: (categoryId) => openDeviceEditor({ categoryId }),
     addCategory: () => openCategoryEditor({}),
     settings: () => openSettings(),
-    apply: (message) => publishPending(message),
-    onChange: () => renderAdmin()
+    security: () => openSecurity(),
+    backup: () => exportBackup(),
+    history: () => document.dispatchEvent(new CustomEvent('ol:history')),
+    help: () => openHelp(),
+    discard: () => discardChanges(),
+    reset: () => openResetSheet(),
+    logout: () => doLogout(),
+    apply: (message) => publishPending(message)
   });
 }
 
@@ -2141,7 +2168,7 @@ function exportCsv() {
     ['توسط', data.meta.updatedBy],
     []
   ];
-  const header = ['نام دستگاه', 'دسته', 'برند', 'وضعیت', 'موجودی', `قیمت (${data.settings.currency})`, 'گارانتی', ...fieldLabels, 'توضیح'];
+  const header = ['نام دستگاه', 'دسته', 'برند', 'وضعیت', 'موجودی', `قیمت (${data.settings.currency})`, 'گارانتی', ...fieldLabels, 'مشخصات اضافه', 'توضیح'];
   const rows = data.devices.map((device) => {
     const cat = data.categories.find((c) => c.id === device.categoryId);
     return [
@@ -2157,6 +2184,7 @@ function exportCsv() {
         if (catId !== device.categoryId) return '';
         return device.specs?.[fieldKey] || '';
       }),
+      deviceExtraSpecs(device).map((row) => `${row.label}: ${row.value}`).join(' | '),
       device.note
     ];
   });
@@ -2207,7 +2235,10 @@ export function initAdmin() {
     try {
       switch (action) {
         case 'login':
-          await openLogin();
+          // Once the admin is signed in, the same button is the way back into
+          // the management page (the floating dock no longer exists).
+          if (isAdmin()) await openManage();
+          else await openLogin();
           break;
         case 'logout':
         case 'lock':
@@ -2286,7 +2317,11 @@ export function initAdmin() {
     if (!isAdmin()) return;
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') {
       event.preventDefault();
-      openPublish();
+      if (!state.dirty) { toast('تغییری برای اعمال نیست.', { type: 'info' }); return; }
+      // Publishing always happens through the panel's explicit confirmation.
+      openManage()
+        .then(() => document.dispatchEvent(new CustomEvent('ol:apply-request')))
+        .catch((err) => console.error('[manage]', err));
     }
   });
 }

@@ -42,7 +42,6 @@ function loadAdmin() {
       .then((mod) => {
         adminModule = mod;
         mod.initAdmin();
-        mod.renderAdmin();
         return mod;
       })
       .catch((err) => {
@@ -51,10 +50,6 @@ function loadAdmin() {
       });
   }
   return adminLoading;
-}
-
-function adminRender() {
-  if (adminModule) adminModule.renderAdmin();
 }
 
 /* Catch admin clicks that happen before the lazy bundle has landed. */
@@ -533,7 +528,6 @@ async function boot() {
     const open = !!event.detail?.open;
     if (panelOpen && !open) {
       panelOpen = false;
-      adminRender();
       renderAll({ animateStats: false });
       return;
     }
@@ -554,12 +548,8 @@ async function boot() {
     }
     if (reason === 'loading') return;
     if (reason === 'auth' || reason === 'data') document.documentElement.dataset.mode = state.mode;
-    if (panelOpen) {
-      adminRender();
-      return;
-    }
+    if (panelOpen) return;
     renderAll({ animateStats: reason === 'data' });
-    adminRender();
     if (reason === 'data') handleDeepLink();
   });
 

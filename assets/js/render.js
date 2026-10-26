@@ -5,10 +5,10 @@
 
 import { hydrateIcons, icon } from './icons.js';
 import {
-  categoryTitle, computeStats, countByCategory, getCategory, specText,
+  categoryTitle, computeStats, countByCategory, deviceExtraSpecs, getCategory, specText,
   stockState, visibleDevices
 } from './model.js';
-import { currentNumerals, isAdmin, isDemo, state } from './state.js';
+import { currentNumerals, isAdmin, state } from './state.js';
 import {
   escapeHtml, formatJalaliDate, formatJalaliDateTime, formatNum,
   instagramHref, matchesQuery, pickTone, prefersReducedMotion, safeUrl,
@@ -121,7 +121,7 @@ export function renderFooter() {
       : '<span class="t-muted">هنوز دسته‌بندی‌ای ثبت نشده است.</span>';
   }
   const footerLogin = document.getElementById('footerLogin');
-  if (footerLogin) footerLogin.textContent = isAdmin() ? 'تنظیمات مدیریت' : 'ورود مدیر';
+  if (footerLogin) footerLogin.textContent = isAdmin() ? 'پنل مدیریت' : 'ورود مدیر';
 }
 
 export function renderHeader() {
@@ -139,22 +139,8 @@ export function renderHeader() {
     loginBtn.setAttribute('data-action', 'login');
     loginBtn.removeAttribute('aria-haspopup');
   }
-  const quickAdd = document.getElementById('quickAdd');
-  if (quickAdd) quickAdd.hidden = !isAdmin();
-  const headerPublish = document.getElementById('headerPublish');
-  if (headerPublish) {
-    const compact = window.matchMedia('(max-width: 719px)').matches;
-    const showPublish = isAdmin() && !isDemo() && state.dirty && !compact;
-    headerPublish.hidden = !showPublish;
-    headerPublish.classList.toggle('is-visible', showPublish);
-    headerPublish.classList.toggle('has-changes', !!state.dirty);
-    const label = headerPublish.querySelector('.header-publish__label');
-    if (label) label.textContent = state.dirty ? 'انتشار تغییرات' : 'منتشرشده';
-    headerPublish.setAttribute('aria-disabled', String(!state.dirty));
-    headerPublish.title = state.dirty ? 'تغییرات منتظر انتشار است' : 'همه تغییرات منتشر شده است';
-  }
   const loginLink = document.getElementById('footerLogin');
-  if (loginLink) loginLink.textContent = isAdmin() ? 'تنظیمات مدیریت' : 'ورود مدیر';
+  if (loginLink) loginLink.textContent = isAdmin() ? 'پنل مدیریت' : 'ورود مدیر';
 }
 
 /* ── Stats & last update ────────────────────────────────────────────────── */
@@ -740,7 +726,8 @@ export function openDeviceDetail(deviceId) {
     ['برند', device.brand],
     ['وضعیت', device.condition],
     ['گارانتی', device.warranty],
-    ...fields.map((f) => [f.label, specText(f, device)])
+    ...fields.map((f) => [f.label, specText(f, device)]),
+    ...deviceExtraSpecs(device).map((row) => [row.label, row.value])
   ].filter(([, v]) => v);
 
   const sheet = openSheet({

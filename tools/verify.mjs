@@ -104,7 +104,9 @@ if (!store) {
 } else {
   if (store.version !== 1) warn(`نسخه داده ${store.version} است (انتظار ۱).`);
   if (!store.store?.name) fail('نام فروشگاه در data/store.json خالی است.');
-  if (!Array.isArray(store.categories) || store.categories.length === 0) fail('دسته‌بندی‌ای تعریف نشده است.');
+  // An empty shop is a valid state: «بازنشانی همه داده‌ها» clears categories on purpose.
+  if (!Array.isArray(store.categories)) fail('آرایه categories معتبر نیست.');
+  else if (!store.categories.length) warn('هنوز دسته‌بندی‌ای ثبت نشده است (لیست خالی است).');
   if (!Array.isArray(store.devices)) fail('آرایه devices معتبر نیست.');
   const ids = new Set();
   const catIds = new Set((store.categories || []).map((c) => c.id));

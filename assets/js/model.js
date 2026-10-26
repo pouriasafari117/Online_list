@@ -57,6 +57,92 @@ export function defaultField({ label = 'مشخصه', key = uid('f'), unit = '', 
   return { key, label, unit, type: 'text', showInRow };
 }
 
+/* Ready-made spec sheets. A shop owner picks one while creating a category, and
+   every new item of that category then asks exactly those fields. */
+export const FIELD_PRESETS = [
+  {
+    id: 'phone',
+    title: 'موبایل',
+    icon: 'mobile_2',
+    fields: [
+      { key: 'storage', label: 'حافظه داخلی', unit: 'گیگابایت', showInRow: true },
+      { key: 'ram', label: 'رم', unit: 'گیگابایت' },
+      { key: 'color', label: 'رنگ' },
+      { key: 'battery_health', label: 'سلامت باتری', unit: '٪' }
+    ]
+  },
+  {
+    id: 'laptop',
+    title: 'لپ‌تاپ',
+    icon: 'laptop_mac',
+    fields: [
+      { key: 'cpu', label: 'پردازنده' },
+      { key: 'gpu', label: 'گرافیک' },
+      { key: 'ram', label: 'رم', unit: 'گیگابایت', showInRow: true },
+      { key: 'storage', label: 'حافظه', unit: 'گیگابایت', showInRow: true },
+      { key: 'screen', label: 'صفحه‌نمایش', unit: 'اینچ' }
+    ]
+  },
+  {
+    id: 'tablet',
+    title: 'تبلت',
+    icon: 'tablet_mac',
+    fields: [
+      { key: 'storage', label: 'حافظه داخلی', unit: 'گیگابایت', showInRow: true },
+      { key: 'ram', label: 'رم', unit: 'گیگابایت' },
+      { key: 'screen', label: 'صفحه‌نمایش', unit: 'اینچ' },
+      { key: 'connectivity', label: 'اتصال' }
+    ]
+  },
+  {
+    id: 'console',
+    title: 'کنسول بازی',
+    icon: 'sports_esports',
+    fields: [
+      { key: 'capacity', label: 'ظرفیت', unit: 'گیگابایت', showInRow: true },
+      { key: 'edition', label: 'نسخه' },
+      { key: 'controllers', label: 'تعداد دسته' }
+    ]
+  },
+  {
+    id: 'watch',
+    title: 'ساعت هوشمند',
+    icon: 'watch',
+    fields: [
+      { key: 'case_size', label: 'سایز قاب', unit: 'میلی‌متر' },
+      { key: 'connectivity', label: 'اتصال' },
+      { key: 'band', label: 'جنس بند' }
+    ]
+  },
+  {
+    id: 'accessory',
+    title: 'لوازم جانبی',
+    icon: 'headphones',
+    fields: [
+      { key: 'kind', label: 'نوع' },
+      { key: 'compatibility', label: 'سازگاری' },
+      { key: 'connectivity', label: 'اتصال' }
+    ]
+  }
+];
+
+/** Fresh field objects for a preset (new objects each call, no shared state). */
+export function presetFields(presetId) {
+  const preset = FIELD_PRESETS.find((p) => p.id === presetId);
+  if (!preset) return [];
+  return preset.fields.map((f) => defaultField({ label: f.label, key: f.key, unit: f.unit || '', showInRow: !!f.showInRow }));
+}
+
+/** Per-listing specs the owner typed by hand (not part of the category). */
+export function deviceExtraSpecs(device) {
+  const list = Array.isArray(device?.extraSpecs) ? device.extraSpecs : [];
+  return list
+    .filter((row) => isPlainObject(row))
+    .map((row) => ({ label: asString(row.label).trim().slice(0, 40), value: asString(row.value).trim().slice(0, 300) }))
+    .filter((row) => row.label && row.value)
+    .slice(0, 8);
+}
+
 /** Valid data used before the first store.json exists. */
 export function makeDefaultData(now = new Date().toISOString()) {
   return {
@@ -64,8 +150,8 @@ export function makeDefaultData(now = new Date().toISOString()) {
     store: { ...deepClone(STORE_DEFAULTS) },
     settings: { ...deepClone(SETTINGS_DEFAULTS) },
     categories: [
-      { id: 'cat_phone', title: 'موبایل', description: 'گوشی‌های نو و استوک', icon: 'mobile_2', fields: [] },
-      { id: 'cat_laptop', title: 'لپ‌تاپ', description: 'لپ‌تاپ‌های اداری و گیمینگ', icon: 'laptop_mac', fields: [] }
+      { id: 'cat_phone', title: 'موبایل', description: 'گوشی‌های نو و استوک', icon: 'mobile_2', fields: presetFields('phone') },
+      { id: 'cat_laptop', title: 'لپ‌تاپ', description: 'لپ‌تاپ‌های اداری و گیمینگ', icon: 'laptop_mac', fields: presetFields('laptop') }
     ],
     devices: [],
     meta: {
@@ -152,6 +238,24 @@ function normalizeSpecs(specs) {
   return out;
 }
 
+function normalizeExtraSpecs(rows) {
+  if (!Array.isArray(rows)) return [];
+  const out = [];
+  const seen = new Set();
+  for (const raw of rows) {
+    if (!isPlainObject(raw)) continue;
+    const label = asString(raw.label).trim().slice(0, 40);
+    const value = asString(raw.value).trim().slice(0, 300);
+    if (!label || !value) continue;
+    const key = label.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push({ label, value });
+    if (out.length >= 8) break;
+  }
+  return out;
+}
+
 function normalizeDevices(devices, categoryIds) {
   if (!Array.isArray(devices)) return [];
   const seen = new Set();
@@ -176,6 +280,7 @@ function normalizeDevices(devices, categoryIds) {
       condition: CONDITION_OPTIONS.includes(raw.condition) ? raw.condition : CONDITION_OPTIONS[0],
       warranty: asString(raw.warranty).trim().slice(0, 80),
       specs: normalizeSpecs(raw.specs),
+      extraSpecs: normalizeExtraSpecs(raw.extraSpecs),
       note: asString(raw.note).trim().slice(0, 400),
       image: safeUrl(raw.image),
       featured: asBool(raw.featured, false),
@@ -267,6 +372,7 @@ export function serializeStore(data) {
       condition: d.condition,
       warranty: d.warranty,
       specs: d.specs,
+      extraSpecs: d.extraSpecs,
       note: d.note,
       image: d.image,
       featured: d.featured,
