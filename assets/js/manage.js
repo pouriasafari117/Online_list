@@ -35,7 +35,7 @@ export function openManagePanel(api = {}) {
   if (!isAdmin() || !state.data) return null;
   if (!page) {
     const el = buildPage();
-    page = { el, api, view: { q: '', status: 'all', cat: 'all' }, confirmApply: false, savedScroll: 0 };
+    page = { el, api, view: { q: '', status: 'all', cat: 'all' }, confirmApply: false, savedScroll: 0, pushed: false };
     mount(el);
   }
   page.api = api;
@@ -51,6 +51,13 @@ function show() {
     page.savedScroll = window.scrollY;
     page.el.hidden = false;
     document.body.classList.add('is-manage-page');
+    // Keep the browser's own scroll restoration out of the way while the page
+    // is on screen; the panel restores the list position when it closes.
+    try { history.scrollRestoration = 'manual'; } catch { /* older browsers */ }
+    try {
+      history.pushState({ ...(history.state || {}), olManage: true }, '', location.href);
+      page.pushed = true;
+    } catch { page.pushed = false; }
     window.scrollTo(0, 0);
   }
   page.paintAll?.();
@@ -66,18 +73,38 @@ function show() {
     });
   }
   document.dispatchEvent(new CustomEvent('ol:manage-state', { detail: { open: true } }));
-  // Move focus into the page for keyboard and screen-reader users.
-  page.el.querySelector('[data-mp-search]')?.focus({ preventScroll: true });
+  // Move focus into the page for keyboard and screen-reader users. Focusing the
+  // search input here popped the soft keyboard on every phone open, so the
+  // page itself takes the focus instead.
+  page.el.focus({ preventScroll: true });
 }
 
 /** Closes the page and hands the screen back to the public list. */
-export function closeManagePanel() {
+export function closeManagePanel({ fromHistory = false } = {}) {
   if (!page || page.el.hidden) return;
+  // The panel pushed one history entry when it opened, so the browser Back
+  // button (or a phone's back gesture) pops it and lands back on the list
+  // instead of leaving the site.
+  if (!fromHistory && page.pushed && history.state && history.state.olManage) {
+    page.pushed = false;
+    try { history.back(); return; } catch { /* fall through to a plain close */ }
+  }
+  finishClose();
+}
+
+function finishClose() {
+  if (!page || page.el.hidden) return;
+  // Leaving the page with a sheet still open would strand the dialog over the
+  // shop (and keep its scroll lock on).
+  document.querySelectorAll('dialog.sheet[open]').forEach((d) => { try { d.close(); } catch { /* ignore */ } });
   page.el.hidden = true;
+  page.pushed = false;
   page.confirmApply = false;
   document.body.classList.remove('is-manage-page');
+  try { history.scrollRestoration = 'auto'; } catch { /* ignore */ }
   const previous = page.savedScroll;
   window.scrollTo(0, previous);
+  requestAnimationFrame(() => { if (page?.el.hidden) window.scrollTo(0, previous); });
   document.getElementById('loginBtn')?.focus({ preventScroll: true });
   document.dispatchEvent(new CustomEvent('ol:manage-state', { detail: { open: false } }));
 }
@@ -119,7 +146,10 @@ function mount(el) {
   el.querySelectorAll('[data-mp-status]').forEach((btn) => {
     btn.addEventListener('click', () => {
       page.view.status = btn.dataset.mpStatus;
-      el.querySelectorAll('[data-mp-status]').forEach((b) => b.classList.toggle('is-active', b === btn));
+      el.querySelectorAll('[data-mp-status]').forEach((b) => {
+        b.classList.toggle('is-active', b === btn);
+        b.setAttribute('aria-pressed', String(b === btn));
+      });
       paintRows();
     });
   });
@@ -151,9 +181,20 @@ function mount(el) {
   list.addEventListener('change', (event) => {
     const input = event.target.closest('[data-mp-act="input"]');
     if (!input) return;
-    const id = input.closest('[data-mp-row]')?.dataset.id;
+    const row = input.closest('[data-mp-row]');
+    const device = state.data.devices.find((d) => d.id === row?.dataset.id);
+    if (!device) return;
     const value = parseNumber(input.value);
-    setStock(id, Number.isFinite(value) ? value : 0, input);
+    // An emptied box (or Persian digits typed into a number input, which the
+    // browser drops) must restore the old stock — not silently zero it.
+    if (!input.value.trim() || !Number.isFinite(value)) {
+      input.value = String(device.stock);
+      input.classList.add('is-invalid');
+      setTimeout(() => input.classList.remove('is-invalid'), 900);
+      return;
+    }
+    input.classList.remove('is-invalid');
+    setStock(row.dataset.id, value);
   });
 
   /* ── apply (the admin's confirmation lives here) ────────────────────── */
@@ -168,7 +209,9 @@ function mount(el) {
     if (button) { button.disabled = true; button.dataset.busy = '1'; }
     const ok = await api().apply?.(message);
     if (button) { button.disabled = false; delete button.dataset.busy; }
-    page.confirmApply = false;
+    // A failed publish keeps the confirmation open with the message intact so
+    // the admin can simply try again.
+    page.confirmApply = !ok;
     if (ok) paintAll(); else paintApply();
   });
 
@@ -180,13 +223,24 @@ function mount(el) {
     el.querySelector('[data-mp-applybox]')?.scrollIntoView({ block: 'center', behavior: 'smooth' });
   });
 
-  /* Escape is a "dismiss", not a "leave": on a page it closes the apply box,
-     never the page itself (an accidental tap of Esc must not throw the admin
-     back to the public list). Sheets and menus close themselves first. */
+  window.addEventListener('popstate', () => {
+    if (!page || page.el.hidden) return;
+    if (!(history.state && history.state.olManage)) closeManagePanel({ fromHistory: true });
+  });
+
   document.addEventListener('keydown', (event) => {
-    if (event.key !== 'Escape' || !page || page.el.hidden) return;
+    if (!page || page.el.hidden) return;
+    const typing = event.target.closest?.('input, textarea, select, [contenteditable="true"]');
+    if (!typing && (event.key === '/' || ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k'))) {
+      event.preventDefault();
+      search.focus();
+      return;
+    }
+    if (event.key !== 'Escape') return;
     if (event.defaultPrevented || document.querySelector('.menu')) return;
     if (document.querySelector('dialog[open]')) return;
+    // A half-finished “really delete?” row is dismissed before the box is.
+    if (list.querySelector('[data-ask]')) { paintRows({ keepScroll: true }); return; }
     if (el.querySelector('[data-mp-applybox]')) {
       page.confirmApply = false;
       paintApply();
@@ -194,7 +248,7 @@ function mount(el) {
   });
 
   /* ── stock ──────────────────────────────────────────────────────────── */
-  function setStock(id, raw, inputEl = null) {
+  function setStock(id, raw) {
     const device = state.data.devices.find((d) => d.id === id);
     if (!device) return;
     const next = clamp(Math.round(Number(raw)), 0, 9999);
@@ -208,7 +262,9 @@ function mount(el) {
     const row = list.querySelector(`[data-mp-row][data-id="${cssEscape(id)}"]`);
     if (row) {
       const input = row.querySelector('[data-mp-act="input"]');
-      if (input && input !== inputEl) input.value = String(next);
+      // Also write back into the field the admin is typing in: 99999 clamps to
+      // 9999 and the box used to keep showing the number that was refused.
+      if (input) input.value = String(next);
       row.dataset.stock = stockStateKey(next);
       row.classList.toggle('is-oos', next <= 0);
       const badge = row.querySelector('[data-mp-badge]');
@@ -441,19 +497,29 @@ function mount(el) {
   function paintApply() {
     const existing = applyHost.querySelector('[data-mp-applybox]');
     const applyBtn = el.querySelector('[data-mp-apply]');
+    // Nothing staged (discarded, reset, or just published) → nothing to confirm.
+    if (!state.dirty) page.confirmApply = false;
     if (!page.confirmApply) {
       existing?.remove();
       applyBtn?.removeAttribute('data-open');
       return;
     }
     applyBtn?.setAttribute('data-open', '1');
-    if (existing) { existing.querySelector('[data-mp-message]')?.focus({ preventScroll: true }); return; }
+    // Focus is only moved when the box is created: re-focusing on every repaint
+    // stole the caret from the search field while the box was open.
+    if (existing) return;
     const diff = computeDiff(state.baseline, state.data);
     const names = [
       ...diff.added.map((d) => `+ ${d.name}`),
       ...diff.updated.map((d) => `~ ${d.name}`),
-      ...diff.removed.map((d) => `− ${d.name}`)
+      ...diff.removed.map((d) => `− ${d.name}`),
+      ...diff.catAdded.map((c) => `+ دسته: ${c.title}`),
+      ...diff.catUpdated.map((c) => `~ دسته: ${c.title}`),
+      ...diff.catRemoved.map((c) => `− دسته: ${c.title}`),
+      ...(diff.storeChanged ? ['~ اطلاعات فروشگاه'] : []),
+      ...(diff.settingsChanged ? ['~ تنظیمات نمایش'] : [])
     ];
+    const touched = names.length;
     const demo = isDemo();
     const block = document.createElement('div');
     block.className = 'mp-apply';
@@ -465,7 +531,7 @@ function mount(el) {
           <b>${demo ? 'در پیش‌نمایش امکان انتشار نیست' : 'اعمال تغییرات روی سایت؟'}</b>
           <span>${demo
             ? 'این حالت توکن ندارد؛ فقط ظاهر پنل را می‌بینید.'
-            : `${formatNum(diff.total, currentNumerals())} تغییر در ${formatNum(diff.added.length + diff.updated.length + diff.removed.length, currentNumerals())} کالا. با تأیید، فایل مخزن به‌روز می‌شود.`}</span>
+            : `${formatNum(diff.total, currentNumerals())} تغییر در ${formatNum(touched, currentNumerals())} مورد. با تأیید، فایل مخزن به‌روز می‌شود.`}</span>
         </div>
       </div>
       ${names.length ? `<ul class="mp-apply__list">${names.slice(0, 6).map((n) => `<li>${escapeHtml(n)}</li>`).join('')}${names.length > 6 ? `<li>و ${formatNum(names.length - 6, currentNumerals())} مورد دیگر…</li>` : ''}</ul>` : ''}
@@ -482,6 +548,12 @@ function mount(el) {
     `;
     applyHost.append(block);
     hydrateIcons(block);
+    // On a phone, focusing the commit message raises the keyboard and covers
+    // the confirm button; the box itself takes the focus there (screen readers
+    // land on the confirmation, the buttons stay one Tab away).
+    const fine = window.matchMedia?.('(pointer: fine)').matches;
+    if (fine) block.querySelector('[data-mp-message]')?.focus({ preventScroll: true });
+    else { block.tabIndex = -1; block.focus({ preventScroll: true }); }
   }
 
   function paintAll() {
@@ -529,6 +601,7 @@ function buildPage() {
   el.className = 'mpage';
   el.id = 'managePage';
   el.hidden = true;
+  el.tabIndex = -1;
   el.setAttribute('aria-labelledby', 'manageTitle');
   el.innerHTML = `
     <header class="mpage__bar">
@@ -566,12 +639,12 @@ function buildPage() {
         <select class="select mp__cat" data-mp-cat aria-label="دسته‌بندی"></select>
         <div class="mp__seg" role="group" aria-label="وضعیت موجودی">
           ${Object.entries(STATUS_LABELS).map(([key, label]) => `
-            <button type="button" class="mp__seg-btn ${key === 'all' ? 'is-active' : ''}" data-mp-status="${key}">${label}</button>
+            <button type="button" class="mp__seg-btn ${key === 'all' ? 'is-active' : ''}" data-mp-status="${key}" aria-pressed="${key === 'all'}">${label}</button>
           `).join('')}
         </div>
       </div>
       <div class="mp__note" data-mp-note hidden></div>
-      <div class="mp__list" data-mp-list aria-live="polite"></div>
+      <div class="mp__list" data-mp-list></div>
       <div class="mp__applyhost" data-mp-applyhost></div>
     </div>
 
@@ -580,7 +653,7 @@ function buildPage() {
         <button class="btn btn--ok-soft btn--sm" type="button" data-mp-add>${icon('add', { size: 17 })} افزودن کالا</button>
         <button class="btn btn--text btn--sm" type="button" data-mp-cat-add aria-label="دسته‌بندی جدید" data-tip="دسته‌بندی جدید">${icon('category', { size: 17 })} <span class="label">دسته‌بندی</span></button>
         <span class="spacer"></span>
-        <span class="mp__pending" data-mp-pending></span>
+        <span class="mp__pending" data-mp-pending role="status" aria-live="polite"></span>
         <button class="btn btn--ok btn--sm" type="button" data-mp-apply disabled>${icon('cloud_upload', { size: 17 })} اعمال تغییرات</button>
       </div>
     </div>

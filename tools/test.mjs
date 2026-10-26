@@ -676,6 +676,52 @@ test('دسته‌ها قالب مشخصات دارند و کالاها می‌ت
   assert.ok(/deviceExtraSpecs\(device\)/.test(render), 'مشخصات اضافه در جزئیات کالا دیده نمی‌شود');
 });
 
+test('انتشار، «آخرین به‌روزرسانی» و تاریخچه را به‌روز می‌کند', () => {
+  const base = model.normalizeStore({ store: { name: 'فروشگاه' }, settings: { adminName: 'پوریا' }, categories: [], devices: [] });
+  const at = '2026-10-26T12:00:00.000Z';
+  const next = model.stampMeta(base, { at, action: 'publish', summary: '۲ دستگاه', stats: { added: 2 } });
+  assert.equal(next.meta.updatedAt, at, 'زمان به‌روزرسانی باید عوض شود');
+  assert.equal(next.meta.updatedBy, 'پوریا', 'نام مدیر از تنظیمات خوانده شود');
+  assert.equal(next.meta.history[0].action, 'publish');
+  assert.equal(next.meta.history[0].summary, '۲ دستگاه');
+  assert.deepEqual(next.meta.history[0].stats, { added: 2 });
+
+  // the history never grows past the cap the site documents
+  const many = model.normalizeStore({
+    ...JSON.parse(model.serializeStore(base)),
+    meta: { updatedAt: at, history: Array.from({ length: 60 }, (_, i) => ({ id: 'h' + i, at, by: 'x', action: 'publish', summary: 's' })) }
+  });
+  const capped = model.stampMeta(many, { at, summary: 'تازه' });
+  assert.equal(capped.meta.history.length, 60, 'تاریخچه باید روی ۶۰ مورد بماند');
+  assert.equal(capped.meta.history[0].summary, 'تازه');
+
+  assert.equal(model.diffHeadline(model.computeDiff(base, next), 'پیام'), 'بدون تغییر');
+  assert.equal(model.diffHeadline(null, 'پیام'), 'پیام');
+});
+
+test('انتشار از پنل (نه فقط برگهٔ انتشار) هم متادیتا را ثبت می‌کند', () => {
+  const admin = fs.readFileSync(path.join(ROOT, 'assets/js/admin.js'), 'utf8');
+  const start = admin.indexOf('async function publishPending');
+  assert.ok(start > -1, 'publishPending پیدا نشد');
+  const fn = admin.slice(start, admin.indexOf('function defaultCommitMessage'));
+  assert.ok(/stampMeta\(/.test(fn), 'انتشار پنل باید stampMeta را صدا بزند');
+  assert.ok(/commitStore\(next, finalMessage\)/.test(fn), 'انتشار پنل باید همان سند مهرشده را بنویسد');
+  assert.ok(/historySummary\(/.test(fn), 'خط تاریخچه باید با ارقام فارسی نوشته شود');
+});
+
+test('پنل با کلیدهای میان‌بر، فوکوس و دکمهٔ بازگشت مرورگر سازگار است', () => {
+  const src = fs.readFileSync(path.join(ROOT, 'assets/js/manage.js'), 'utf8');
+  assert.ok(/pushState\(\{ \.\.\.\(history\.state \|\| \{\}\), olManage: true \}/.test(src), 'پنل باید یک ورودی تاریخچه بگذارد');
+  assert.ok(/addEventListener\('popstate'/.test(src), 'دکمهٔ بازگشت مرورگر باید پنل را ببندد');
+  assert.ok(/el\.tabIndex = -1/.test(src), 'صفحه باید فوکوس‌پذیر باشد');
+  assert.ok(!/\[data-mp-search\]'\)\?\.focus\(\{ preventScroll: true \}\)/.test(src),
+    'باز شدن خودکار صفحه نباید کیبورد گوشی را بالا بیاورد');
+  assert.ok(/if \(!state\.dirty\) page\.confirmApply = false/.test(src), 'کادر تأیید با پیش‌نویس خالی نباید باز بماند');
+  assert.ok(/page\.confirmApply = !ok/.test(src), 'انتشار ناموفق باید کادر تأیید را باز نگه دارد');
+  const css = fs.readFileSync(path.join(ROOT, 'assets/css/app.css'), 'utf8');
+  assert.ok(/body\.is-manage-page #main \{ display: block !important; \}/.test(css), 'چاپ از داخل پنل نباید صفحهٔ سفید بدهد');
+});
+
 /* ── Summary ──────────────────────────────────────────────────────────── */
 const line = '─'.repeat(58);
 console.log(`\n${line}`);

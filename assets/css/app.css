@@ -1456,11 +1456,20 @@ body.is-manage-page #main,
 body.is-manage-page .site-footer,
 body.is-manage-page .skip { display: none !important; }
 
+/* Printing while the management page is open should give the list, not a blank
+   sheet: the page hides the shop, so put the list back for paper only. */
+@media print {
+  body.is-manage-page #main { display: block !important; }
+}
+
 .mpage {
   min-height: 100dvh;
   padding-bottom: calc(88px + env(safe-area-inset-bottom));
   background: var(--bg);
 }
+/* The page takes focus when it opens (so screen readers announce it and phones
+   do not pop the keyboard); it must not paint a focus ring for that. */
+.mpage:focus { outline: none; }
 
 /* ── Page header ────────────────────────────────────────────────────────── */
 .mpage__bar {
@@ -1820,6 +1829,7 @@ body.is-manage-page .skip { display: none !important; }
   font-variant-numeric: tabular-nums;
   -moz-appearance: textfield;
 }
+.mp-stepper__input.is-invalid { color: var(--danger); }
 .mp-stepper__input::-webkit-outer-spin-button,
 .mp-stepper__input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .mp-stepper__input:focus { outline: 2px solid var(--text-3); outline-offset: 0; border-radius: 8px; }
@@ -1853,6 +1863,7 @@ body.is-manage-page .skip { display: none !important; }
   flex-direction: column;
   gap: 10px;
 }
+.mp-apply:focus { outline: none; }
 .mp-apply__head { display: flex; align-items: flex-start; gap: 10px; }
 .mp-apply__icon {
   display: grid;

@@ -35,6 +35,10 @@ const ADMIN_ACTIONS = new Set([
 let adminModule = null;
 let adminLoading = null;
 
+/* True while the management page covers the shop. Module scope: the keyboard
+   handler (initDelegation) and the render subscription (boot) both need it. */
+let managePageOpen = false;
+
 function loadAdmin() {
   if (adminModule) return Promise.resolve(adminModule);
   if (!adminLoading) {
@@ -335,6 +339,9 @@ function initDelegation() {
       }
       return;
     }
+    // While the management page is open the public search is off screen; the
+    // panel handles «/» itself.
+    if (managePageOpen) return;
     if (event.key === '/' || ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k')) {
       event.preventDefault();
       focusSearch();
@@ -347,6 +354,8 @@ function initDelegation() {
 
   document.addEventListener('keydown', (event) => {
     if (event.key !== 'Enter' && event.key !== ' ') return;
+    // Buttons/links inside a row (edit, menu, stock badge) keep their own keys.
+    if (event.target.closest?.('button, a, input, select, textarea, label')) return;
     const row = event.target.closest?.('.device[data-clickable="true"]');
     if (!row) return;
     event.preventDefault();
@@ -522,16 +531,16 @@ async function boot() {
 
   /* While the management panel covers the page, re-rendering the public list
      behind it is wasted work (and the main source of jank on a phone). The
-     dock still updates, and one catch-up render runs when the panel closes. */
-  let panelOpen = false;
+     panel keeps its own screen up to date, and one catch-up render runs when
+     the panel closes. */
   document.addEventListener('ol:manage-state', (event) => {
     const open = !!event.detail?.open;
-    if (panelOpen && !open) {
-      panelOpen = false;
+    if (managePageOpen && !open) {
+      managePageOpen = false;
       renderAll({ animateStats: false });
       return;
     }
-    panelOpen = open;
+    managePageOpen = open;
   });
 
   subscribe((reason) => {
@@ -548,7 +557,7 @@ async function boot() {
     }
     if (reason === 'loading') return;
     if (reason === 'auth' || reason === 'data') document.documentElement.dataset.mode = state.mode;
-    if (panelOpen) return;
+    if (managePageOpen) return;
     renderAll({ animateStats: reason === 'data' });
     if (reason === 'data') handleDeepLink();
   });

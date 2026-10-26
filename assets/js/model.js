@@ -559,6 +559,34 @@ export function clearInventory(data, {
   return { data: normalizeStore(next), removedDevices, removedCategories };
 }
 
+/**
+ * Stamps a publish on a (cloned) document: bumps the admin timestamp and pushes
+ * one history row. Every write to the repo must go through this so the public
+ * «آخرین به‌روزرسانی مدیر» card and the history sheet stay truthful.
+ * Mutates and returns the document it is given.
+ */
+export function stampMeta(data, { at = new Date().toISOString(), by = '', action = 'publish', summary = '', stats = {} } = {}) {
+  const next = data;
+  const author = String(by || next.settings?.adminName || next.meta?.updatedBy || 'مدیر فروشگاه').trim();
+  next.meta = next.meta || {};
+  next.meta.updatedAt = at;
+  next.meta.updatedBy = author;
+  next.meta.history = [{
+    id: uid('h'),
+    at,
+    by: author,
+    action,
+    summary: String(summary || '').slice(0, 200),
+    stats
+  }, ...(next.meta.history || [])].slice(0, 60);
+  return next;
+}
+
+/** One-line description of a diff, for the history row. */
+export function diffHeadline(diff, fallback = '') {
+  return diffSummary(diff) || String(fallback || '');
+}
+
 /** The exact phrase an admin has to type before a destructive reset. */
 export const RESET_PHRASE = 'حذف همه';
 /** Typed confirmation for deleting the vault (password + token) entirely. */

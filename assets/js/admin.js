@@ -8,8 +8,8 @@ import {
 } from './crypto.js';
 import {
   CATEGORY_ICONS, CONDITION_OPTIONS, CREDENTIAL_RESET_PHRASE, FIELD_PRESETS, RESET_PHRASE, clearInventory,
-  computeDiff, defaultCategory, defaultField, deviceExtraSpecs, diffSummary, getCategory, makeDefaultData,
-  normalizeStore, parseStoreJson, presetFields, serializeStore
+  computeDiff, defaultCategory, defaultField, deviceExtraSpecs, diffHeadline, getCategory,
+  makeDefaultData, normalizeStore, parseStoreJson, presetFields, serializeStore, stampMeta
 } from './model.js';
 import {
   clearDraft, currentNumerals, discardDraftAndReset, endAdminSession, flushDraftNow,
@@ -22,7 +22,7 @@ import {
 } from './ui.js';
 import {
   deepClone, download, escapeHtml, formatCrackTime, formatJalaliDateTime, formatJalaliStamp,
-  formatNum, parseNumber, slugify, storageGet, storageSet, toCsv, uid
+  formatNum, parseNumber, slugify, storageGet, storageSet, toCsv, toFaDigits, uid
 } from './util.js';
 import { icon } from './icons.js';
 import { hydrateIcons } from './render.js';
@@ -1829,6 +1829,12 @@ async function openManage() {
  * Commits the staged document — the "confirm" step of the panel. Returns true
  * when the commit succeeded so the panel can reset its confirmation state.
  */
+/** History lines are read in Persian; Latin counters («1 دستگاه جدید») look off. */
+function historySummary(text) {
+  const numerals = state.data?.settings?.numerals === 'en' ? 'en' : 'fa';
+  return numerals === 'fa' ? toFaDigits(String(text || '')) : String(text || '');
+}
+
 async function publishPending(message = '') {
   if (isDemo()) {
     await alertDialog({
@@ -1841,8 +1847,21 @@ async function publishPending(message = '') {
   if (!state.api) { await openLogin(); return false; }
   if (!state.dirty) { toast('تغییری برای اعمال نیست.', { type: 'info' }); return true; }
   const finalMessage = message || defaultCommitMessage();
+  const diff = computeDiff(state.baseline, state.data);
   try {
-    const res = await commitStore(deepClone(state.data), finalMessage);
+    // Same bookkeeping as the publish sheet: without it the public
+    // «آخرین به‌روزرسانی مدیر» card kept showing the previous commit.
+    const next = stampMeta(deepClone(state.data), {
+      by: state.data?.settings?.adminName || state.user?.name || 'مدیر فروشگاه',
+      action: 'publish',
+      summary: historySummary(diff?.stockOnly ? 'به‌روزرسانی موجودی' : diffHeadline(diff, finalMessage)),
+      stats: {
+        added: diff?.added.length || 0,
+        updated: diff?.updated.length || 0,
+        removed: diff?.removed.length || 0
+      }
+    });
+    const res = await commitStore(next, finalMessage);
     // The panel already carries its own confirmation; a toast is enough
     // feedback and does not stack a third dialog on top of it.
     const short = res?.commitSha ? res.commitSha.slice(0, 7) : '';
@@ -2085,18 +2104,12 @@ async function openPublish() {
         setButtonBusy(submit, true, 'در حال انتشار…');
         c.setBusy(true);
         try {
-          const next = deepClone(state.data);
-          const now = new Date().toISOString();
-          next.meta.updatedAt = now;
-          next.meta.updatedBy = next.settings.adminName || state.user?.name || 'مدیر فروشگاه';
-          next.meta.history = [{
-            id: uid('h'),
-            at: now,
-            by: next.meta.updatedBy,
+          const next = stampMeta(deepClone(state.data), {
+            by: state.data?.settings?.adminName || state.user?.name || 'مدیر فروشگاه',
             action: 'publish',
-            summary: diff.stockOnly ? 'به‌روزرسانی موجودی' : diffSummary(diff) || message,
+            summary: historySummary(diff.stockOnly ? 'به‌روزرسانی موجودی' : diffHeadline(diff, message)),
             stats: { added: diff.added.length, updated: diff.updated.length, removed: diff.removed.length }
-          }, ...(next.meta.history || [])].slice(0, 60);
+          });
           const res = await commitStore(next, message);
           c.close();
           openPublishSuccess(res);
@@ -2316,6 +2329,7 @@ export function initAdmin() {
   document.addEventListener('keydown', (event) => {
     if (!isAdmin()) return;
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') {
+      if (document.querySelector('dialog[open]')) return;
       event.preventDefault();
       if (!state.dirty) { toast('تغییری برای اعمال نیست.', { type: 'info' }); return; }
       // Publishing always happens through the panel's explicit confirmation.
