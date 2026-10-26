@@ -239,6 +239,13 @@ npm run vault      # ساخت vault از خط فرمان
 بدون مرحله build، بدون `node_modules`. کل سایت با HTML/CSS/JS خالص کار می‌کند و
 فونت وزیرمتن + آیکون‌های Material Symbols داخل مخزن هستند (هیچ درخواست خارجی برای آیکون/فونت نداریم).
 
+### انتشار روی GitHub Pages
+
+گردش‌کار `.github/workflows/pages.yml` با هر push به `main` سایت را منتشر می‌کند. فقط یک
+کار یک‌باره لازم است: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+(دسترسی مدیریت مخزن لازم است و با `GITHUB_TOKEN` قابل انجام نیست؛ اگر این گام انجام نشده
+باشد، اجرای workflow با پیام روشن متوقف می‌شود و چیزی خراب نمی‌شود.)
+
 **قبل از انتشار**، `data/site.json` را بررسی کنید:
 
 ```json
