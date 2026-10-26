@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:">
+<title>صفحه پیدا نشد — Online List</title>
+<style>
+  :root { color-scheme: light dark; --bg:#f4f2ed; --text:#191814; --muted:#7d776c; --line:#d8d2c7; --card:#fbfaf7; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0e0e0c; --text:#f1eee7; --muted:#8a8477; --line:#333028; --card:#161613; } }
+  * { box-sizing: border-box; }
+  body { margin:0; min-height:100dvh; display:grid; place-items:center; padding:24px; background:var(--bg); color:var(--text);
+         font-family:"Segoe UI", Tahoma, system-ui, sans-serif; line-height:1.8; }
+  main { width:min(520px,100%); text-align:center; }
+  .num { font-size:clamp(5rem,18vw,8.5rem); font-weight:800; letter-spacing:-.06em; line-height:1; margin:0;
+         background:linear-gradient(180deg,var(--text),color-mix(in srgb,var(--text) 35%,transparent));
+         -webkit-background-clip:text; background-clip:text; color:transparent; }
+  h1 { font-size:1.4rem; margin:12px 0 8px; }
+  p { color:var(--muted); margin:0 auto 24px; max-width:38ch; }
+  .actions { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
+  a { display:inline-flex; align-items:center; gap:8px; height:46px; padding:0 22px; border-radius:999px;
+      text-decoration:none; font-size:.9rem; font-weight:600; border:1px solid var(--line); color:var(--text);
+      background:var(--card); transition:transform .2s, background .2s; }
+  a.primary { background:var(--text); color:var(--bg); border-color:var(--text); }
+  a:hover { transform:translateY(-2px); }
+  .rule { width:56px; height:2px; background:var(--text); opacity:.25; margin:26px auto 18px; }
+  .meta { font-size:.75rem; color:var(--muted); }
+</style>
+</head>
+<body>
+  <main>
+    <p class="num" aria-hidden="true">۴۰۴</p>
+    <h1>این صفحه پیدا نشد</h1>
+    <p>آدرسی که دنبالش هستید وجود ندارد یا جابه‌جا شده است. لیست موجودی همیشه در صفحه اصلی در دسترس است.</p>
+    <div class="actions">
+      <a class="primary" id="homeLink" href="./">بازگشت به لیست موجودی</a>
+      <a href="#" id="backLink">صفحه قبل</a>
+    </div>
+    <div class="rule" aria-hidden="true"></div>
+    <p class="meta">Online List — لیست موجودی بدون سرور</p>
+  </main>
+  <script src="assets/js/404.js"></script>
+</body>
+</html>

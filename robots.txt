@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /setup/
+
+# The setup page is for the shop owner only and is noindex.
