@@ -369,6 +369,21 @@ await testAsync('رمز رایج یا کوتاه در لایهٔ رمزنگار�
   );
 });
 
+await testAsync('ریست رمز: رمز قبلی بی‌اعتبار و توکن حفظ می‌شود', async () => {
+  const oldPassword = 'نمونه-رمز-۱۲۳-آزمایشی';
+  const newPassword = 'کتاب-پرنده-آبی-ماه-۱۲۴';
+  const token = fakeToken('ghp_', 30);
+  const before = await crypto.sealVault({ password: oldPassword, token });
+  // What the admin dialog does: open with the current password, then re-seal.
+  const opened = await crypto.openVault(before, oldPassword);
+  assert.equal(opened.token, token);
+  const after = await crypto.sealVault({ password: newPassword, token: opened.token });
+  assert.equal(after.kdf.iterations, 600000);
+  assert.notEqual(after.kdf.salt, before.kdf.salt, 'salt باید تازه باشد');
+  assert.equal((await crypto.openVault(after, newPassword)).token, token);
+  await assert.rejects(() => crypto.openVault(after, oldPassword), (err) => err.code === 'bad-password');
+});
+
 await testAsync('vault قدیمی با ۳۰۰٬۰۰۰ دور همچنان باز می‌شود', async () => {
   const password = 'درست-۱۲۳-۴۵۶-۷۸۹';
   const legacy = await crypto.sealVault({

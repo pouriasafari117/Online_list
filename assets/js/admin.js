@@ -1312,15 +1312,27 @@ function openSecurity() {
   }
   const sheet = openSheet({
     title: 'رمز و توکن',
-    subtitle: 'تغییر رمز مدیریت یا جایگزینی توکن گیت‌هاب',
+    subtitle: 'ریست رمز با رمز فعلی، یا جایگزینی توکن گیت‌هاب',
     size: 'narrow',
     body: `
       <form id="securityForm" class="stack" style="gap:14px" novalidate>
         ${errorNote('')}
         <div class="form-note">
           ${icon('security', { size: 18 })}
-          <span>رمز جدید فقط برای باز کردن توکن استفاده می‌شود؛ خود توکن رمزگذاری‌شده در <span dir="ltr">data/vault.json</span> می‌ماند و هیچ‌گاه به‌صورت متن ساده منتشر نمی‌شود.</span>
+          <span>برای عوض کردن رمز، <b>رمز فعلی</b> را هم می‌پرسیم تا فقط خودتان بتوانید این کار را بکنید.
+          توکن دست‌نخورده می‌ماند و فایل رمزگذاری‌شده در <span dir="ltr">data/vault.json</span> بازنویسی می‌شود.</span>
         </div>
+        <div class="field">
+          <span class="field__label">رمز فعلی<span class="req">*</span></span>
+          <div class="password-wrap">
+            <input class="input" type="password" name="currentPassword" id="currentPassword" autocomplete="current-password" placeholder="همان رمزی که با آن وارد شدید">
+            <button class="icon-btn" type="button" data-toggle-current aria-label="نمایش رمز فعلی">${icon('visibility', { size: 19 })}</button>
+          </div>
+          <span class="field__hint">فقط برای تأیید هویت؛ نه ذخیره می‌شود و نه جایی فرستاده می‌شود.</span>
+          <span class="field__error"></span>
+        </div>
+        <div class="sheet__section">
+          <div class="sheet__legend">${icon('lock', { size: 18 })} ریست رمز عبور</div>
         <div class="field">
           <span class="field__label">رمز عبور جدید<span class="req">*</span></span>
           <div class="password-wrap">
@@ -1333,6 +1345,7 @@ function openSecurity() {
           <span class="field__error"></span>
         </div>
         ${fieldHtml({ label: 'تکرار رمز جدید', name: 'password2', type: 'password', autocomplete: 'new-password', required: true })}
+        </div>
         ${fieldHtml({ label: 'یادآور رمز (اختیاری)', name: 'hint', value: state.vault.hint || '', maxlength: 80, hint: 'مثلاً «شماره پلاک + اسم فروشگاه» — خود رمز را ننویسید.' })}
         <div class="sheet__section">
           <div class="sheet__legend">${icon('key', { size: 18 })} توکن گیت‌هاب</div>
@@ -1347,6 +1360,8 @@ function openSecurity() {
             فایل امنیتی (رمز و توکنِ رمزگذاری‌شده) از مخزن حذف می‌شود. بعد از آن ورود با رمز ممکن نیست
             تا دوباره صفحهٔ راه‌اندازی را باز کنید و <b>توکن تازه + رمز تازه</b> بسازید.
             لیست کالاها، دسته‌ها و تنظیمات فروشگاه پاک نمی‌شود.
+            <br>
+            اگر فقط می‌خواهید رمز را عوض کنید و توکن بماند، از بخش <b>ریست رمز عبور</b> بالا استفاده کنید.
           </p>
           <button class="btn btn--text btn--sm btn--danger" type="button" data-reset-credential>
             ${icon('refresh', { size: 17 })} بازنشانی رمز و توکن
@@ -1362,9 +1377,16 @@ function openSecurity() {
     onMount: (c) => {
       const form = c.el.querySelector('#securityForm');
       const pw = form.elements.namedItem('password');
+      const currentPw = form.elements.namedItem('currentPassword');
       const meter = c.el.querySelector('[data-pw-meter]');
       const saveBtn = c.el.querySelector('[data-save]');
       const estimate = c.el.querySelector('[data-pw-estimate]');
+      c.el.querySelector('[data-toggle-current]')?.addEventListener('click', (event) => {
+        const show = currentPw.type === 'password';
+        currentPw.type = show ? 'text' : 'password';
+        event.currentTarget.innerHTML = icon(show ? 'visibility_off' : 'visibility', { size: 19 });
+        currentPw.focus();
+      });
       const renderEstimate = () => {
         const value = pw.value;
         meter.dataset.score = String(passwordScore(value));
@@ -1396,27 +1418,40 @@ function openSecurity() {
       form.addEventListener('submit', async (event) => {
         event.preventDefault();
         hideError(c);
+        const current = fieldValue(form, 'currentPassword');
         const password = pw.value;
         const password2 = fieldValue(form, 'password2');
         const hint = fieldValue(form, 'hint');
         const newToken = fieldValue(form, 'token');
-        if (password.length < 10) {
-          fieldError(pw, 'رمز جدید باید حداقل ۱۰ کاراکتر باشد.');
+        if (!current) {
+          fieldError(currentPw, 'برای تأیید، رمز فعلی را وارد کنید.');
+          currentPw.focus();
+          return;
+        }
+        if (!password && !newToken) {
+          fieldError(pw, 'رمز جدید را وارد کنید (یا برای تغییر فقط توکن، توکن تازه را بگذارید).');
           pw.focus();
           return;
         }
-        if (password !== password2) {
-          fieldError(form.elements.namedItem('password2'), 'تکرار رمز مطابقت ندارد.');
-          return;
-        }
-        if (passwordScore(password) < 2) {
-          showError(c, 'رمز ضعیف است؛ از حروف و عدد یا یک عبارت بلندتر استفاده کنید.');
-          return;
-        }
-        if (estimateCrackSeconds(password) < WEAK_SECONDS) {
-          fieldError(pw, `این رمز در برابر حملهٔ آفلاین فقط ${formatCrackTime(estimateCrackSeconds(password))} دوام می‌آورد؛ چهار کلمهٔ بی‌ربط بگذارید.`);
-          pw.focus();
-          return;
+        if (password) {
+          if (password.length < 10) {
+            fieldError(pw, 'رمز جدید باید حداقل ۱۰ کاراکتر باشد.');
+            pw.focus();
+            return;
+          }
+          if (password !== password2) {
+            fieldError(form.elements.namedItem('password2'), 'تکرار رمز مطابقت ندارد.');
+            return;
+          }
+          if (passwordScore(password) < 2) {
+            showError(c, 'رمز ضعیف است؛ از حروف و عدد یا یک عبارت بلندتر استفاده کنید.');
+            return;
+          }
+          if (estimateCrackSeconds(password) < WEAK_SECONDS) {
+            fieldError(pw, `این رمز در برابر حملهٔ آفلاین فقط ${formatCrackTime(estimateCrackSeconds(password))} دوام می‌آورد؛ چهار کلمهٔ بی‌ربط بگذارید.`);
+            pw.focus();
+            return;
+          }
         }
         if (newToken && !looksLikeToken(newToken)) {
           showError(c, 'مقدار توکن جدید معتبر به نظر نمی‌رسد.');
@@ -1424,15 +1459,31 @@ function openSecurity() {
         }
         setButtonBusy(saveBtn, true, 'ذخیره امن…');
         try {
-          let token = state.api.token;
+          // The vault is already open in this tab, but re-deriving the key from
+          // the typed password proves that the person at the keyboard owns it.
+          let opened;
+          try {
+            opened = await openVault(state.vault, current);
+          } catch (err) {
+            setButtonBusy(saveBtn, false);
+            if (err?.code === 'bad-password' || err?.code === 'crypto') {
+              fieldError(currentPw, 'رمز فعلی نادرست است.');
+              currentPw.select();
+              return;
+            }
+            throw err;
+          }
+          let token = opened.token || state.api.token;
           if (newToken) {
             const probe = createGitHub({ token: newToken, ...state.repo });
             const info = await probe.getRepo();
             if (info.canPush === false) throw new ApiError('توکن جدید دسترسی نوشتن ندارد.');
             token = newToken;
           }
+          // Empty password + new token = keep the current password, rotate only
+          // the token. Otherwise the typed password becomes the new one.
           const sealed = await sealVault({
-            password,
+            password: password || current,
             token,
             login: state.user?.login || '',
             repo: state.repo,
@@ -1450,8 +1501,14 @@ function openSecurity() {
           if (newToken) {
             state.api = createGitHub({ token, ...state.repo });
           }
+          resetGate();
           c.close();
-          toast('رمز و توکن با موفقیت به‌روزرسانی شد.', { type: 'ok' });
+          const what = password && newToken
+            ? 'رمز و توکن با موفقیت به‌روزرسانی شد.'
+            : password
+              ? 'رمز با موفقیت تغییر کرد؛ از این به بعد با رمز جدید وارد شوید.'
+              : 'توکن با موفقیت جایگزین شد؛ رمز فعلی دست‌نخورده ماند.';
+          toast(what, { type: 'ok' });
           if (res?.commitUrl) {
             console.info('[vault] updated:', res.commitUrl);
           }
