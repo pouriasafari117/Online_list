@@ -54,8 +54,13 @@ export function openSheet({
   className = ''
 } = {}) {
   const dlg = document.createElement('dialog');
-  dlg.className = ['sheet', size === 'wide' ? 'sheet--wide' : '', size === 'narrow' ? 'sheet--narrow' : '', className]
-    .filter(Boolean).join(' ');
+  dlg.className = [
+    'sheet',
+    size === 'wide' ? 'sheet--wide' : '',
+    size === 'narrow' ? 'sheet--narrow' : '',
+    size === 'full' ? 'sheet--full' : '',
+    className
+  ].filter(Boolean).join(' ');
   dlg.innerHTML = `
     <div class="sheet__head">
       <div>
@@ -79,14 +84,16 @@ export function openSheet({
   const cleanup = (result) => {
     if (resolved) return;
     resolved = true;
-    if (!document.querySelector('dialog.sheet[open]:not(.is-closing)')) {
-      document.body.classList.remove('has-dialog');
-    }
+    // Mark this dialog first: the body lock must be released only when no
+    // *other* sheet is still open. Checking before closing used to leave
+    // `has-dialog` (and therefore `body { overflow: hidden }`) behind, which
+    // froze page scrolling after the first dialog in a session.
+    dlg.classList.add('is-closing');
     if (dlg.open) {
-      dlg.classList.add('is-closing');
       try { dlg.close(result); } catch { /* ignore */ }
     }
     dlg.remove();
+    syncDialogLock();
     if (typeof onClose === 'function') onClose(result);
   };
 
@@ -139,12 +146,19 @@ export function openSheet({
   return controller;
 }
 
+/** Keeps the body scroll lock in sync with the sheets that are really open. */
+export function syncDialogLock() {
+  const anyOpen = !!document.querySelector('dialog.sheet[open]:not(.is-closing)');
+  document.body.classList.toggle('has-dialog', anyOpen);
+}
+
 export function closeAllSheets() {
   document.querySelectorAll('dialog.sheet[open]').forEach((d) => {
+    d.classList.add('is-closing');
     try { d.close(); } catch { /* ignore */ }
     d.remove();
   });
-  document.body.classList.remove('has-dialog');
+  syncDialogLock();
 }
 
 /* ── Confirm / alert ────────────────────────────────────────────────────── */

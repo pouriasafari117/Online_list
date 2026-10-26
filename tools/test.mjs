@@ -585,6 +585,21 @@ test('عبارت تأیید بازنشانی رمز دقیق است', () => {
     'عبارت بازنشانی رمز باید با عبارت حذف لیست فرق کند');
 });
 
+test('ورود، مسیر «راهنمای بازیابی» را نشان می‌دهد', () => {
+  const src = fs.readFileSync(path.join(ROOT, 'assets/js/admin.js'), 'utf8');
+  assert.ok(/data-forgot/.test(src), 'دکمهٔ راهنمای بازیابی در پنجرهٔ ورود نیست');
+  assert.ok(/function openForgotPassword\b/.test(src), 'تابع راهنمای بازیابی تعریف نشده');
+  assert.ok(/openForgotPassword\(\)/.test(src), 'راهنمای بازیابی به هیچ‌جا وصل نیست');
+});
+
+test('ریست کلی رمزها فایل امنیتی را حذف می‌کند', () => {
+  const src = fs.readFileSync(path.join(ROOT, 'assets/js/admin.js'), 'utf8');
+  assert.ok(/data-reset-credential/.test(src), 'دکمهٔ ریست کلی در برگهٔ رمز و توکن نیست');
+  assert.ok(/deleteFile\(\{\s*\n?\s*path: 'data\/vault\.json'/.test(src),
+    'ریست کلی باید vault.json را حذف کند');
+  assert.ok(/CREDENTIAL_RESET_PHRASE/.test(src), 'تأیید متنی برای ریست کلی لازم است');
+});
+
 /* ── Summary ──────────────────────────────────────────────────────────── */
 const line = '─'.repeat(58);
 console.log(`\n${line}`);

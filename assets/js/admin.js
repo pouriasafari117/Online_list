@@ -12,7 +12,7 @@ import {
   parseStoreJson, serializeStore
 } from './model.js';
 import {
-  clearDraft, currentNumerals, discardDraftAndReset, endAdminSession,
+  clearDraft, currentNumerals, discardDraftAndReset, endAdminSession, flushDraftNow,
   isAdmin, isDemo, markPublished, mutate, persistDraft, readDraft, refreshDirty,
   replaceData, startAdminSession, state
 } from './state.js';
@@ -29,7 +29,7 @@ import { computeStats } from './model.js';
 import { hydrateIcons } from './render.js';
 
 const REQUIRED_ACTIONS = new Set([
-  'login', 'logout', 'admin-menu', 'add-menu', 'publish', 'discard', 'settings', 'security',
+  'login', 'logout', 'admin-menu', 'add-menu', 'manage', 'publish', 'discard', 'settings', 'security',
   'add-device', 'edit-device', 'device-menu', 'add-category', 'edit-category',
   'export-backup', 'import-backup', 'lock', 'demo-exit'
 ]);
@@ -119,11 +119,13 @@ function repoConfig(raw) {
 
 /* ── Dock ───────────────────────────────────────────────────────────────── */
 
+let dockSignature = '';
+
 export function renderAdmin() {
   const host = document.getElementById('adminDockHost');
   if (!host) return;
   document.body.classList.toggle('has-adminbar', isAdmin());
-  if (!isAdmin()) { host.innerHTML = ''; return; }
+  if (!isAdmin()) { host.innerHTML = ''; dockSignature = ''; return; }
 
   const dirty = !!state.dirty;
   const demo = isDemo();
@@ -135,6 +137,13 @@ export function renderAdmin() {
   const warnBits = [];
   if (stats.out) warnBits.push({ label: `${formatNum(stats.out, currentNumerals())} ناموجود`, kind: 'out' });
   if (hiddenCount) warnBits.push({ label: `${formatNum(hiddenCount, currentNumerals())} پنهان`, kind: 'hidden' });
+
+  // The dock is re-rendered after every stock tap; skip the DOM work when
+  // nothing visible has changed (this used to rebuild the whole bar 30+ times
+  // per minute while editing).
+  const signature = [name, statusLabel, demo, stats.out, hiddenCount].join('|');
+  if (signature === dockSignature && host.childElementCount) return;
+  dockSignature = signature;
   host.innerHTML = `
     <div class="adminbar ${dirty ? 'is-dirty' : 'is-live'} ${demo ? 'is-demo' : ''}" role="region" aria-label="نوار مدیریت">
       <div class="adminbar__inner">
@@ -148,6 +157,10 @@ export function renderAdmin() {
           ${warnBits.map((w) => `<button class="adminbar__warn" type="button" data-admin-focus="${w.kind}">${w.label}</button>`).join('')}
         </div>` : ''}
         <div class="adminbar__actions">
+          <button class="btn btn--tonal btn--sm btn--manage" type="button" data-action="manage">
+            ${icon('inventory_2', { size: 17 })}
+            <span class="label">پنل</span>
+          </button>
           <button class="btn btn--filled btn--sm btn--publish" type="button" data-action="publish">
             ${icon('cloud_upload', { size: 17 })}
             <span class="label">${demo ? 'پیش‌نمایش' : 'انتشار'}</span>
@@ -304,7 +317,9 @@ function openPasswordSheet(vault) {
         ${lockedFor ? `<div class="form-note form-note--danger">${icon('warning', { size: 18 })}<span data-lock-msg>تلاش‌های ناموفق زیاد بوده؛ ${formatNum(lockedFor, currentNumerals())} ثانیه صبر کنید.</span></div>` : ''}
         <div class="form-note">
           ${icon('security', { size: 18 })}
-          <span>رمز را فراموش کرده‌اید؟ با <a href="setup/" style="text-decoration:underline">صفحه راه‌اندازی</a> می‌توانید توکن جدید بسازید و رمز را بازنشانی کنید.</span>
+          <span>رمز را فراموش کرده‌اید؟ رمز هیچ‌جا ذخیره نمی‌شود، اما با
+            <button class="linklike" type="button" data-forgot>راهنمای بازیابی</button>
+            می‌توانید از نو رمز بسازید.</span>
         </div>
         <div class="form-note">
           ${icon('help', { size: 18 })}
@@ -330,6 +345,7 @@ function openPasswordSheet(vault) {
         input.focus();
       });
       c.el.querySelector('[data-token-login]')?.addEventListener('click', () => { c.close(); openDirectTokenSheet(); });
+      c.el.querySelector('[data-forgot]')?.addEventListener('click', () => { c.close(); openForgotPassword(); });
       form.addEventListener('submit', async (event) => {
         event.preventDefault();
         hideError(c);
@@ -415,8 +431,20 @@ async function unlockAndEnter({ vault, password, repo, token: directToken = null
     try {
       const draftData = normalizeStore(draft.data);
       if (serializeStore(draftData) !== serializeStore(remote)) {
-        initialData = draftData;
-        restored = true;
+        // Never apply leftovers silently: the admin confirms first.
+        const restore = await confirmDialog({
+          title: 'تغییرات منتشرنشده پیدا شد',
+          message: 'از نشست قبلی تغییراتی مانده که روی سایت نرفته است. بازیابی شود؟',
+          confirmText: 'بازیابی کن',
+          cancelText: 'دور بریز',
+          details: `${icon('info', { size: 18 })}<span>تا وقتی «اعمال تغییرات» را نزنید، این تغییرات روی سایت دیده نمی‌شوند.</span>`
+        });
+        if (restore) {
+          initialData = draftData;
+          restored = true;
+        } else {
+          clearDraft(repo);
+        }
       }
     } catch { /* ignore a broken draft */ }
   }
@@ -452,6 +480,9 @@ async function unlockAndEnter({ vault, password, repo, token: directToken = null
     // The file may be brand new — remember to create it on publish.
     state.sha = null;
   }
+  // The owner asked for a management screen on login: the panel is the place
+  // to change stock and items, not the public list.
+  openManage().catch((err) => console.error('[manage]', err));
   return true;
 }
 
@@ -510,11 +541,60 @@ function openDirectTokenSheet() {
         try {
           await unlockAndEnter({ vault: null, repo, token: values.token, adminName: values.adminName });
           c.close();
+          toast('با توکن وارد شدید. برای ساخت رمز تازه: تنظیمات ← رمز و توکن ← ریست کلی رمزها', { type: 'info', duration: 7000 });
         } catch (err) {
           setButtonBusy(submit, false);
           showError(c, err?.message || 'اتصال ناموفق بود.');
         }
       });
+    }
+  });
+}
+
+/**
+ * Recovery guide opened from the login sheet. Because the password is never
+ * stored anywhere, "forgot my password" always means creating a new vault:
+ * either from a temporary-token session (then the full reset) or by rerunning
+ * the local /setup/ page with a fresh token.
+ */
+function openForgotPassword() {
+  openSheet({
+    title: 'رمز را فراموش کرده‌اید؟',
+    subtitle: 'رمز ذخیره نمی‌شود؛ پس بازیابی یعنی ساختن رمز تازه',
+    size: 'narrow',
+    body: `
+      <div class="stack" style="gap:16px">
+        <div class="form-note">
+          ${icon('info', { size: 18 })}
+          <span>مرورگر با PBKDF2 از رمز شما کلید می‌سازد و فقط نسخهٔ رمزگذاری‌شدهٔ توکن در مخزن می‌ماند.
+          بدون رمز آن فایل باز نمی‌شود؛ پس «بازیابی رمز» وجود ندارد و باید رمز تازه بسازید.</span>
+        </div>
+        <div class="sheet__section">
+          <div class="sheet__legend">${icon('key', { size: 18 })} راه اول — توکن گیت‌هاب را دارید</div>
+          <ol class="cred-steps">
+            <li><span class="cred-steps__num">۱</span><b>ورود موقت با توکن</b> را بزنید و توکن فعلی را وارد کنید.</li>
+            <li><span class="cred-steps__num">۲</span>تنظیمات ← رمز و توکن ← <b>ریست کلی رمزها</b>؛ فایل امنیتی از مخزن حذف می‌شود.</li>
+            <li><span class="cred-steps__num">۳</span>صفحهٔ راه‌اندازی را روی رایانه باز کنید و <b>توکن تازه + رمز تازه</b> بسازید.</li>
+          </ol>
+        </div>
+        <div class="sheet__section">
+          <div class="sheet__legend">${icon('warning', { size: 18 })} راه دوم — توکن را هم ندارید</div>
+          <p class="danger-zone__desc">
+            یک توکن تازه در
+            <a href="https://github.com/settings/tokens" target="_blank" rel="noopener" dir="ltr">github.com/settings/tokens</a>
+            بسازید، بعد <a href="setup/">صفحهٔ راه‌اندازی</a> را روی رایانه اجرا کنید؛ فایل امنیتی با رمز تازه
+            بازنویسی می‌شود. لیست کالاها، دسته‌ها و تنظیمات فروشگاه دست نمی‌خورد.
+          </p>
+        </div>
+      </div>
+    `,
+    footer: `
+      <button class="btn btn--text btn--sm" type="button" data-token>ورود موقت با توکن</button>
+      <span class="spacer"></span>
+      <button class="btn btn--filled btn--sm" type="button" data-close>فهمیدم</button>
+    `,
+    onMount: (c) => {
+      c.el.querySelector('[data-token]')?.addEventListener('click', () => { c.close(); openDirectTokenSheet(); });
     }
   });
 }
@@ -534,6 +614,7 @@ function enterDemo() {
     mode: 'demo'
   });
   toast('حالت پیش‌نمایش فعال شد؛ تغییرات ذخیره یا منتشر نمی‌شوند.', { type: 'info', duration: 6000 });
+  openManage().catch((err) => console.error('[manage]', err));
 }
 
 async function doLogout() {
@@ -1355,7 +1436,7 @@ function openSecurity() {
           <button class="btn btn--outlined btn--sm" type="button" data-download-vault>${icon('download', { size: 17 })} دریافت فایل پشتیبان امنیتی</button>
         </div>
         <div class="sheet__section danger-zone" style="margin-top:4px">
-          <div class="sheet__legend">${icon('refresh', { size: 18 })} بازنشانی کامل رمز</div>
+          <div class="sheet__legend">${icon('refresh', { size: 18 })} ریست کلی رمزها</div>
           <p class="danger-zone__desc">
             فایل امنیتی (رمز و توکنِ رمزگذاری‌شده) از مخزن حذف می‌شود. بعد از آن ورود با رمز ممکن نیست
             تا دوباره صفحهٔ راه‌اندازی را باز کنید و <b>توکن تازه + رمز تازه</b> بسازید.
@@ -1363,8 +1444,8 @@ function openSecurity() {
             <br>
             اگر فقط می‌خواهید رمز را عوض کنید و توکن بماند، از بخش <b>ریست رمز عبور</b> بالا استفاده کنید.
           </p>
-          <button class="btn btn--text btn--sm btn--danger" type="button" data-reset-credential>
-            ${icon('refresh', { size: 17 })} بازنشانی رمز و توکن
+          <button class="btn btn--sm btn--danger" type="button" data-reset-credential>
+            ${icon('refresh', { size: 17 })} ریست کلی رمز و توکن
           </button>
         </div>
       </form>
@@ -1543,8 +1624,8 @@ function openCredentialReset() {
   }
   const hasVault = !!state.vault;
   const sheet = openSheet({
-    title: 'بازنشانی کامل رمز و توکن',
-    subtitle: 'فایل امنیتی از مخزن حذف می‌شود',
+    title: 'ریست کلی رمز و توکن',
+    subtitle: 'بعد از این کار باید توکن تازه و رمز تازه بسازید',
     size: 'narrow',
     body: `
       <form id="credentialResetForm" class="stack" style="gap:16px" novalidate>
@@ -1688,6 +1769,68 @@ function openCredentialResetDone({ commitUrl = null, already = false } = {}) {
       <button class="btn btn--filled btn--sm" type="button" data-close>باشه</button>
     `
   });
+}
+
+/* ── Management panel ───────────────────────────────────────────────────── */
+
+let manageModule = null;
+let managePromise = null;
+
+/**
+ * Opens the full-screen admin panel. manage.js is loaded on demand so the
+ * editor bundle stays small until an admin actually needs it.
+ */
+async function openManage() {
+  if (!isAdmin()) { openLogin(); return null; }
+  if (!manageModule) {
+    managePromise = managePromise || import('./manage.js')
+      .then((mod) => { manageModule = mod; return mod; })
+      .catch((err) => { managePromise = null; throw err; });
+    await managePromise;
+  }
+  return manageModule.openManagePanel({
+    edit: (id) => openDeviceEditor({ id }),
+    add: (categoryId) => openDeviceEditor({ categoryId }),
+    addCategory: () => openCategoryEditor({}),
+    settings: () => openSettings(),
+    apply: (message) => publishPending(message),
+    onChange: () => renderAdmin()
+  });
+}
+
+/**
+ * Commits the staged document — the "confirm" step of the panel. Returns true
+ * when the commit succeeded so the panel can reset its confirmation state.
+ */
+async function publishPending(message = '') {
+  if (isDemo()) {
+    await alertDialog({
+      title: 'در پیش‌نمایش ممکن نیست',
+      message: 'حالت پیش‌نمایش توکن ندارد؛ برای ثبت تغییرات، با رمز مدیریت وارد شوید.',
+      iconName: 'info'
+    });
+    return false;
+  }
+  if (!state.api) { await openLogin(); return false; }
+  if (!state.dirty) { toast('تغییری برای اعمال نیست.', { type: 'info' }); return true; }
+  const finalMessage = message || defaultCommitMessage();
+  try {
+    const res = await commitStore(deepClone(state.data), finalMessage);
+    // The panel already carries its own confirmation; a toast is enough
+    // feedback and does not stack a third dialog on top of it.
+    const short = res?.commitSha ? res.commitSha.slice(0, 7) : '';
+    toast(short ? `تغییرات روی سایت اعمال شد (کامیت ${short}).` : 'تغییرات روی سایت اعمال شد.', { type: 'ok', duration: 6000 });
+    return true;
+  } catch (err) {
+    toast(err?.message || 'انتشار ناموفق بود.', { type: 'err' });
+    return false;
+  }
+}
+
+function defaultCommitMessage() {
+  const diff = computeDiff(state.baseline, state.data);
+  const summary = diff?.stockOnly ? 'به‌روزرسانی موجودی' : 'به‌روزرسانی لیست موجودی';
+  return `${summary} — ${formatJalaliStamp()}`;
 }
 
 /* ── Publish ────────────────────────────────────────────────────────────── */
@@ -2077,6 +2220,9 @@ export function initAdmin() {
         case 'add-menu':
           openAddMenu(el);
           break;
+        case 'manage':
+          await openManage();
+          break;
         case 'publish':
           await openPublish();
           break;
@@ -2129,10 +2275,12 @@ export function initAdmin() {
 
   window.addEventListener('beforeunload', (event) => {
     if (isAdmin() && state.dirty) {
+      flushDraftNow();
       event.preventDefault();
       event.returnValue = '';
     }
   });
+  window.addEventListener('pagehide', () => { if (isAdmin() && state.dirty) flushDraftNow(); });
 
   document.addEventListener('keydown', (event) => {
     if (!isAdmin()) return;
@@ -2162,4 +2310,7 @@ function openHelp() {
   window.open(url, '_blank', 'noopener');
 }
 
-export { openLogin, openPublish, openSettings, openDeviceEditor, openCategoryEditor, openSecurity, openResetSheet, openHelp };
+export {
+  openLogin, openManage, openPublish, openSettings, openDeviceEditor, openCategoryEditor,
+  openSecurity, openResetSheet, openHelp
+};

@@ -1,5 +1,5 @@
 /* Online List — offline shell + fresh data */
-const VERSION = 'v1.4.0';
+const VERSION = 'v1.6.0';
 const CACHE = `online-list-${VERSION}`;
 const ASSETS = [
   './',
@@ -22,6 +22,7 @@ const ASSETS = [
   './assets/js/crypto.js',
   './assets/js/render.js',
   './assets/js/admin.js',
+  './assets/js/manage.js',
   './assets/js/app.js',
   './assets/fonts/Vazirmatn-Variable.woff2',
   './assets/icons/favicon.svg',
