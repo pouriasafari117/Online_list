@@ -281,6 +281,43 @@ test('فایل واقعی store.json معتبر و کامل است', () => {
   assert.ok(data.categories.every((c) => c.fields.every((f) => f.label)));
 });
 
+test('clearInventory فقط لیست را پاک می‌کند', () => {
+  const data = model.normalizeStore({
+    store: { name: 'فروشگاه من', phone: '۰۹۱۲' },
+    settings: { currency: 'تومان', adminName: 'مدیر' },
+    categories: [{ id: 'c1', title: 'موبایل', fields: [{ key: 'ram', label: 'رم' }] }],
+    devices: [{ id: 'd1', name: 'الف', categoryId: 'c1', stock: 2, specs: { ram: '۸' } }],
+    meta: { updatedBy: 'قبلی', history: [{ id: 'h1', at: '2026-01-01T00:00:00.000Z', by: 'x', action: 'publish', summary: 'ق' }] }
+  });
+  const { data: next, removedDevices, removedCategories } = model.clearInventory(data, {
+    at: '2026-10-26T10:00:00.000Z', by: 'پوریا'
+  });
+  assert.equal(removedDevices, 1);
+  assert.equal(removedCategories, 1);
+  assert.equal(next.devices.length, 0);
+  assert.equal(next.categories.length, 0);
+  // identity, settings and history survive
+  assert.equal(next.store.name, 'فروشگاه من');
+  assert.equal(next.store.phone, '۰۹۱۲');
+  assert.equal(next.settings.currency, 'تومان');
+  assert.equal(next.meta.updatedAt, '2026-10-26T10:00:00.000Z');
+  assert.equal(next.meta.updatedBy, 'پوریا');
+  assert.equal(next.meta.history[0].action, 'reset');
+  assert.equal(next.meta.history.length, 2);
+});
+
+test('clearInventory روی داده خالی هم امن است', () => {
+  const { data, removedDevices } = model.clearInventory(null);
+  assert.equal(removedDevices, 0);
+  assert.equal(data.devices.length, 0);
+  assert.deepEqual(data.devices, []);
+  assert.equal(data.meta.history[0].action, 'reset');
+});
+
+test('عبارت تأیید بازنشانی ثابت است', () => {
+  assert.equal(model.RESET_PHRASE, 'حذف همه');
+});
+
 /* ── Crypto / vault ───────────────────────────────────────────────────── */
 console.log('\n  رمزنگاری (Vault)');
 
@@ -300,7 +337,7 @@ await testAsync('رمزگذاری و رمزگشایی رفت‌وبرگشت دا
   });
   assert.ok(crypto.isVault(vault));
   assert.ok(!JSON.stringify(vault).includes(token), 'توکن نباید در نتیجه باشد');
-  assert.equal(vault.kdf.iterations >= 300000, true);
+  assert.equal(vault.kdf.iterations, 600000, 'پیش‌فرض باید ۶۰۰٬۰۰۰ دور باشد');
   assert.equal(vault.repo.branch, 'main');
 
   const opened = await crypto.openVault(vault, password);
@@ -321,6 +358,42 @@ await testAsync('دستکاری ciphertext تشخیص داده می‌شود', a
   await assert.rejects(() => crypto.openVault(vault, 'درست-۱۲۳-۴۵۶-۷۸۹'), (err) => err.code === 'bad-password');
 });
 
+await testAsync('رمز رایج یا کوتاه در لایهٔ رمزنگاری رد می‌شود', async () => {
+  await assert.rejects(
+    () => crypto.sealVault({ password: 'password', token: fakeToken('ghp_', 30) }),
+    (err) => err.code === 'weak-password'
+  );
+  await assert.rejects(
+    () => crypto.sealVault({ password: '1234567890', token: fakeToken('ghp_', 30) }),
+    (err) => err.code === 'weak-password'
+  );
+});
+
+await testAsync('ریست رمز: رمز قبلی بی‌اعتبار و توکن حفظ می‌شود', async () => {
+  const oldPassword = 'نمونه-رمز-۱۲۳-آزمایشی';
+  const newPassword = 'کتاب-پرنده-آبی-ماه-۱۲۴';
+  const token = fakeToken('ghp_', 30);
+  const before = await crypto.sealVault({ password: oldPassword, token });
+  // What the admin dialog does: open with the current password, then re-seal.
+  const opened = await crypto.openVault(before, oldPassword);
+  assert.equal(opened.token, token);
+  const after = await crypto.sealVault({ password: newPassword, token: opened.token });
+  assert.equal(after.kdf.iterations, 600000);
+  assert.notEqual(after.kdf.salt, before.kdf.salt, 'salt باید تازه باشد');
+  assert.equal((await crypto.openVault(after, newPassword)).token, token);
+  await assert.rejects(() => crypto.openVault(after, oldPassword), (err) => err.code === 'bad-password');
+});
+
+await testAsync('vault قدیمی با ۳۰۰٬۰۰۰ دور همچنان باز می‌شود', async () => {
+  const password = 'درست-۱۲۳-۴۵۶-۷۸۹';
+  const legacy = await crypto.sealVault({
+    password, token: fakeToken('ghp_', 30), iterations: 300000
+  });
+  assert.equal(legacy.kdf.iterations, 300000);
+  const opened = await crypto.openVault(legacy, password);
+  assert.equal(opened.token, fakeToken('ghp_', 30));
+});
+
 await testAsync('رمز کوتاه پذیرفته نمی‌شود', async () => {
   await assert.rejects(
     () => crypto.sealVault({ password: '123', token: fakeToken('ghp_', 30) }),
@@ -336,6 +409,37 @@ test('ساختار vault ناقص رد می‌شود', () => {
   assert.equal(crypto.isVault(null), false);
   assert.equal(crypto.isVault({ v: 1 }), false);
   assert.equal(crypto.isVault({ v: 1, kdf: { name: 'PBKDF2', salt: 'x' }, cipher: { iv: 'y', data: 'z' } }), true);
+});
+
+test('تخمین شکستن رمز محافظه‌کارانه و یکنوا است', () => {
+  const weak = crypto.estimateCrackSeconds('shop1404');
+  const year = crypto.estimateCrackSeconds('mahdi1385');
+  const twoWords = crypto.estimateCrackSeconds('کافه-آفتاب');
+  const fourWords = crypto.estimateCrackSeconds('کتاب-پرنده-آبی-ماه-۱۲۴');
+  assert.ok(weak < 86400, `واژه + سال باید زیر یک روز شکسته شود، نه ${Math.round(weak)} ثانیه`);
+  assert.ok(year < 86400, 'رمز با سال تولد باید زیر یک روز شکسته شود');
+  assert.ok(fourWords > twoWords, 'عبارت چهارکلمه‌ای باید قوی‌تر از دوکلمه‌ای باشد');
+  assert.ok(fourWords > 365 * 86400, 'عبارت چهارکلمه‌ای باید بیش از یک سال دوام بیاورد');
+  assert.equal(crypto.estimateCrackSeconds(''), 0);
+  // The estimator must price years as years, not as 4 random digits.
+  assert.ok(crypto.passwordEntropyBits('سال۱۴۰۵') < crypto.passwordEntropyBits('سال۹۴۷۲'));
+});
+
+test('دور بیشتر KDF زمان شکستن را طولانی‌تر می‌کند', () => {
+  const pw = 'کتاب-پرنده-آبی-ماه-۱۲۴';
+  const at600 = crypto.estimateCrackSeconds(pw, { iterations: 600000 });
+  const at300 = crypto.estimateCrackSeconds(pw, { iterations: 300000 });
+  assert.ok(at600 > at300 * 1.9, 'افزایش دورها باید هزینهٔ حمله را دو برابر کند');
+});
+
+test('CLI ساخت vault از همان منطق رمزِ سایت استفاده می‌کند', async () => {
+  // Regression guard: the CLI used to carry a copy of the heuristics, which
+  // could silently drift away from the browser policy.
+  const src = fs.readFileSync(path.join(ROOT, 'tools/make-vault.mjs'), 'utf8');
+  assert.ok(src.includes("from '../assets/js/crypto.js'"), 'CLI باید از crypto.js وارد کند');
+  assert.ok(!/function passwordEntropyBits/.test(src), 'CLI نباید نسخهٔ جداگانه‌ای داشته باشد');
+  const cli = await import(path.join(ROOT, 'tools/make-vault.mjs'));
+  assert.equal(typeof cli.default, 'undefined');
 });
 
 test('امتیاز رمز منطقی است', () => {
@@ -376,6 +480,109 @@ test('آدرس raw با encode ساخته می‌شود', () => {
 test('آدرس Pages برای هر دو نوع مخزن درست است', () => {
   assert.equal(api.pagesUrl({ owner: 'me', repo: 'Online_list' }), 'https://me.github.io/Online_list/');
   assert.equal(api.pagesUrl({ owner: 'me', repo: 'me.github.io' }), 'https://me.github.io/');
+});
+
+/* ── Commit encoding (regression: base64 text was stored as the file) ──── */
+console.log('\n  ثبت فایل در مخزن');
+
+await testAsync('commitFiles محتوا را به‌صورت UTF-8 خام می‌فرستد', async () => {
+  const calls = [];
+  const fetchImpl = async (url, options = {}) => {
+    const body = options.body ? JSON.parse(options.body) : null;
+    calls.push({ url, method: options.method || 'GET', body });
+    const reply = (data, status = 200) => ({
+      ok: status < 400,
+      status,
+      headers: new Headers(),
+      text: async () => JSON.stringify(data),
+      json: async () => data
+    });
+    if (url.includes('/git/ref/heads/')) return reply({ object: { sha: 'head-sha' } });
+    if (url.includes('/git/commits/head-sha')) return reply({ tree: { sha: 'tree-sha' } });
+    if (url.endsWith('/git/blobs')) return reply({ sha: `blob-${calls.length}` });
+    if (url.endsWith('/git/trees')) return reply({ sha: 'new-tree' });
+    if (url.endsWith('/git/commits')) return reply({ sha: 'new-commit', html_url: 'https://x' });
+    if (url.includes('/git/refs/heads/')) return reply({});
+    return reply({});
+  };
+  const client = api.createGitHub({
+    token: fakeToken('ghp_', 30), owner: 'me', repo: 'Online_list', branch: 'main', fetchImpl
+  });
+  const payload = '{\n  "name": "مک‌بوک"\n}\n';
+  await client.commitFiles([{ path: 'data/x.json', content: payload }], 'پیام');
+
+  const blobCall = calls.find((c) => c.url.endsWith('/git/blobs'));
+  assert.ok(blobCall, 'درخواست blob ارسال نشد');
+  assert.equal(blobCall.body.encoding, 'utf-8');
+  assert.equal(blobCall.body.content, payload, 'محتوا نباید base64 شود');
+  assert.ok(!blobCall.body.content.startsWith('eyJ'), 'محتوا نباید base64 باشد');
+});
+
+test('parseJsonLoose فایل‌های base64 قدیمی را بازیابی می‌کند', () => {
+  const original = { v: 1, text: 'سلام' };
+  const b64 = Buffer.from(JSON.stringify(original, null, 2), 'utf8').toString('base64');
+  const parsed = api.parseJsonLoose(b64);
+  assert.equal(parsed.repaired, true);
+  assert.deepEqual(parsed.value, original);
+
+  const plain = api.parseJsonLoose('{"a":1}');
+  assert.equal(plain.repaired, false);
+  assert.deepEqual(plain.value, { a: 1 });
+
+  assert.throws(() => api.parseJsonLoose('not json at all'));
+});
+
+test('deleteFile فایل امنیتی را با sha حذف می‌کند', async () => {
+  const calls = [];
+  const reply = (data, status = 200) => ({
+    ok: status < 400,
+    status,
+    headers: new Headers(),
+    text: async () => JSON.stringify(data),
+    json: async () => data
+  });
+  const fetchImpl = async (url, options = {}) => {
+    calls.push({ url, method: options.method || 'GET', body: options.body ? JSON.parse(options.body) : null });
+    if (url.includes('/contents/data/vault.json') && (options.method || 'GET') === 'GET') {
+      return reply({ sha: 'vault-sha', content: Buffer.from('{}').toString('base64') });
+    }
+    if (url.includes('/contents/data/vault.json') && options.method === 'DELETE') {
+      return reply({ commit: { sha: 'c0ffee', html_url: 'https://github.com/me/Online_list/commit/c0ffee' } });
+    }
+    return reply({}, 404);
+  };
+  const client = api.createGitHub({
+    token: fakeToken('ghp_', 30), owner: 'me', repo: 'Online_list', branch: 'main', fetchImpl
+  });
+  const res = await client.deleteFile({ path: 'data/vault.json', message: 'حذف فایل امنیتی' });
+  const del = calls.find((c) => c.method === 'DELETE');
+  assert.ok(del, 'درخواست DELETE ارسال نشد');
+  assert.equal(del.body.sha, 'vault-sha', 'sha فایل باید فرستاده شود');
+  assert.equal(del.body.branch, 'main');
+  assert.equal(del.body.message, 'حذف فایل امنیتی');
+  assert.equal(res.commitSha, 'c0ffee');
+  assert.equal(res.missing, false);
+});
+
+test('deleteFile برای فایل ناموجود خطا نمی‌دهد', async () => {
+  const calls = [];
+  const fetchImpl = async (url, options = {}) => {
+    calls.push({ url, method: options.method || 'GET' });
+    return { ok: false, status: 404, headers: new Headers(), text: async () => '{}', json: async () => ({}) };
+  };
+  const client = api.createGitHub({
+    token: fakeToken('ghp_', 30), owner: 'me', repo: 'Online_list', branch: 'main', fetchImpl
+  });
+  const res = await client.deleteFile({ path: 'data/vault.json', message: 'حذف' });
+  assert.equal(res.missing, true);
+  assert.equal(calls.some((c) => c.method === 'DELETE'), false, 'وقتی فایل نیست، DELETE نباید بفرستد');
+});
+
+test('عبارت تأیید بازنشانی رمز دقیق است', () => {
+  assert.equal(model.CREDENTIAL_RESET_PHRASE.trim(), model.CREDENTIAL_RESET_PHRASE);
+  assert.ok(model.CREDENTIAL_RESET_PHRASE.length >= 8);
+  assert.notEqual(model.CREDENTIAL_RESET_PHRASE, model.RESET_PHRASE,
+    'عبارت بازنشانی رمز باید با عبارت حذف لیست فرق کند');
 });
 
 /* ── Summary ──────────────────────────────────────────────────────────── */

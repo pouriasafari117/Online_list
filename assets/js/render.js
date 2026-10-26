@@ -431,6 +431,12 @@ export function renderList() {
   root.innerHTML = html;
   root.setAttribute('aria-busy', 'false');
 
+  // With an empty catalogue the search/filter chrome is noise — hide it.
+  const nothingAtAll = totalVisible === 0;
+  document.getElementById('filterbar')?.classList.toggle('is-hidden', nothingAtAll);
+  const resultBar = document.querySelector('.resultbar');
+  if (resultBar) resultBar.classList.toggle('is-hidden', nothingAtAll);
+
   // count
   if (resultCount) {
     if (grouped) {
@@ -617,6 +623,21 @@ export function stockBadgeHtml(device) {
   </span>`;
 }
 
+function emptyContactActionsHtml() {
+  const store = state.data?.store || {};
+  const tel = String(store.phone || '').trim();
+  const wa = String(store.whatsapp || '').trim();
+  const actions = [];
+  if (tel) {
+    actions.push(`<a class="btn btn--filled btn--sm" href="${escapeHtml(telHref(tel))}">${icon('call', { size: 17 })} تماس با فروشگاه</a>`);
+  }
+  if (wa) {
+    actions.push(`<a class="btn btn--outlined btn--sm" href="${escapeHtml(whatsappHref(wa))}" target="_blank" rel="noopener">${icon('chat', { size: 17 })} واتساپ</a>`);
+  }
+  if (!actions.length) return '';
+  return `<div class="empty__actions">${actions.join('')}</div>`;
+}
+
 function emptyStateHtml(nothingAtAll) {
   if (nothingAtAll) {
     return `
@@ -631,7 +652,7 @@ function emptyStateHtml(nothingAtAll) {
         ${isAdmin() ? `<div class="empty__actions">
           <button class="btn btn--filled btn--sm" type="button" data-action="add-device">${icon('add', { size: 17 })} افزودن دستگاه</button>
           <button class="btn btn--outlined btn--sm" type="button" data-action="add-category">${icon('category', { size: 17 })} ساخت دسته</button>
-        </div>` : ''}
+        </div>` : emptyContactActionsHtml()}
       </div>`;
   }
   return `

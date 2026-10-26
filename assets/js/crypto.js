@@ -8,7 +8,13 @@
    the browser decrypts it locally and produces the token for the API calls.
    ========================================================================== */
 
-const KDF_ITERATIONS = 300_000;
+/**
+ * OWASP (2023) recommends ≥600,000 iterations of PBKDF2-HMAC-SHA256. The value
+ * is stored inside every vault, so older files (300k) keep opening and a
+ * password change silently upgrades them.
+ */
+export const KDF_ITERATIONS = 600_000;
+export const LEGACY_KDF_ITERATIONS = 300_000;
 const SALT_BYTES = 16;
 const IV_BYTES = 12;
 const VAULT_VERSION = 1;
@@ -68,8 +74,13 @@ async function deriveKey(password, saltBytes, iterations) {
  * The returned object is safe to publish — it only contains ciphertext.
  */
 export async function sealVault({ password, token, login = '', repo = {}, hint = '', iterations = KDF_ITERATIONS }) {
-  if (!password || String(password).length < 8) {
-    throw new CryptoError('رمز عبور باید حداقل ۸ کاراکتر باشد.', 'weak-password');
+  if (!password || String(password).length < 10) {
+    throw new CryptoError('رمز عبور باید حداقل ۱۰ کاراکتر باشد.', 'weak-password');
+  }
+  // Defence in depth: the UI validates too, but the CLI and future callers go
+  // through this function, so a dictionary password is refused here as well.
+  if (isCommonPassword(password)) {
+    throw new CryptoError('این رمز در فهرست رمزهای رایج است؛ عبارت دیگری انتخاب کنید.', 'weak-password');
   }
   if (!token) throw new CryptoError('توکن گیت‌هاب را وارد کنید.', 'missing-token');
   const salt = randomBytes(SALT_BYTES);
@@ -135,6 +146,72 @@ export function isVault(obj) {
     && typeof obj.kdf.salt === 'string'
     && typeof obj.cipher?.iv === 'string'
     && typeof obj.cipher?.data === 'string';
+}
+
+/**
+ * Attacker model behind the UI estimate: one modern GPU doing PBKDF2-HMAC-SHA256.
+ * Measured on the reference machine: 300k iterations ≈ 17 guesses/s/core, so a
+ * GPU is assumed ~600× a core at the same cost. Keep this honest and visible —
+ * the number shown to the owner is only as good as this assumption.
+ */
+const REFERENCE_ITERATIONS = LEGACY_KDF_ITERATIONS;
+const GPU_GUESSES_PER_SEC_AT_REFERENCE = 10_000;
+
+/**
+ * Conservative search-space estimate, in bits.
+ *
+ * Deliberately pessimistic for human-chosen passwords: letter runs are priced
+ * as if they came from a 100k-word dictionary (~17 bits) instead of as random
+ * characters, and 4-digit years are priced at 8 bits. That is the only honest
+ * way to estimate a password a shop owner can actually remember.
+ */
+export function passwordEntropyBits(pw) {
+  const s = String(pw ?? '');
+  if (!s) return 0;
+
+  const WORD_BITS = 17;      // log2(~100k dictionary words)
+  const SEPARATOR_BITS = 3;  // each "-", ".", space… multiplies the search
+
+  // Persian/Arabic-Indic digits are common in passwords here; treat them as
+  // digits so «سال۱۴۰۵» is priced as word + year, not as one long word.
+  const norm = s.replace(/[۰-۹٠-٩]/g, (ch) => {
+    const fa = '۰۱۲۳۴۵۶۷۸۹'.indexOf(ch);
+    return String(fa >= 0 ? fa : '٠١٢٣٤٥٦٧٨٩'.indexOf(ch));
+  });
+  const rawChunks = norm.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+  // Split «water7» into «water» + «7» so the digit run is priced separately.
+  const chunks = rawChunks.flatMap((c) => c.match(/[0-9]+|[^0-9]+/gu) || [c]);
+  const separators = Math.min(12, (norm.match(/[^\p{L}\p{N}]+/gu) || []).length);
+
+  let bits = 0;
+  for (const chunk of chunks) {
+    if (/^\d+$/.test(chunk)) {
+      // Years are the most common numeric suffix by far.
+      bits += /^(13|14|19|20)\d\d$/.test(chunk) ? 8 : Math.min(chunk.length * 3.32, 22);
+      continue;
+    }
+    let cost = WORD_BITS;
+    if (chunk.length > 8) cost += (chunk.length - 8) * 2;      // long words are rarer
+    if (/[a-z]/.test(chunk) && /[A-Z]/.test(chunk)) cost += 6;  // mixed case
+    bits += cost;
+  }
+  bits += separators * SEPARATOR_BITS;
+
+  // Anything the browser/attacker already has in a wordlist is worthless.
+  if (isCommonPassword(s)) bits = Math.min(bits, 18);
+  return Math.round(Math.min(bits, 120) * 10) / 10;
+}
+
+/**
+ * Expected seconds to brute-force the password offline, assuming the vault file
+ * is public (it is) and the attacker runs a GPU. Iterations raise the cost.
+ */
+export function estimateCrackSeconds(pw, { iterations = KDF_ITERATIONS } = {}) {
+  const bits = passwordEntropyBits(pw);
+  if (!bits) return 0;
+  const rounds = Math.max(10_000, Number(iterations) || KDF_ITERATIONS);
+  const rate = GPU_GUESSES_PER_SEC_AT_REFERENCE * (REFERENCE_ITERATIONS / rounds);
+  return Math.pow(2, bits - 1) / rate;   // expected guesses at 50% probability
 }
 
 /** Rough, local-only password strength (0..4). */

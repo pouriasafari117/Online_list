@@ -1,9 +1,13 @@
 /* Online List — offline shell + fresh data */
-const VERSION = 'v1.0.0';
+const VERSION = 'v1.4.0';
 const CACHE = `online-list-${VERSION}`;
 const ASSETS = [
   './',
   './index.html',
+  './help/',
+  './help/index.html',
+  './assets/css/help.css',
+  './assets/js/help.js',
   './manifest.webmanifest',
   './assets/css/tokens.css',
   './assets/css/base.css',
@@ -53,7 +57,10 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   if (request.mode === 'navigate') {
-    event.respondWith(networkFirst(request, './index.html'));
+    // Offline fallback depends on the section: the handbook should not dump the
+    // visitor on the shop page.
+    const fallback = url.pathname.includes('/help') ? './help/index.html' : './index.html';
+    event.respondWith(networkFirst(request, fallback));
     return;
   }
   event.respondWith(staleWhileRevalidate(request));

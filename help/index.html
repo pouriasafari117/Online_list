@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="fa" dir="rtl" data-theme="auto">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>راهنمای مدیر — Online List</title>
+  <meta name="description" content="راهنمای گام‌به‌گام پنل مدیریت لیست موجودی: ورود، به‌روزرسانی موجودی، انتشار، دسته‌بندی، پشتیبان‌گیری و بازنشانی.">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="color-scheme" content="light dark">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self'">
+  <meta name="theme-color" content="#f4f2ed">
+  <link rel="icon" href="../assets/icons/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="../assets/fonts/Vazirmatn-Variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../assets/css/tokens.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/help.css">
+  <script src="../assets/js/theme-boot.js"></script>
+  <script type="module" src="../assets/js/help.js"></script>
+</head>
+<body class="help-page">
+  <a class="skip-link" href="#content">رفتن به محتوای راهنما</a>
+
+  <header class="help-top">
+    <div class="container help-top__inner">
+      <a class="brand" href="../" aria-label="بازگشت به سایت">
+        <span class="brand__mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
+            <path d="M4 6.5h10M4 12h16M4 17.5h7"></path>
+            <circle cx="18.5" cy="6.5" r="1.6" fill="currentColor" stroke="none"></circle>
+            <circle cx="15" cy="17.5" r="1.6" fill="currentColor" stroke="none"></circle>
+          </svg>
+        </span>
+        <span class="brand__text">
+          <span class="brand__name">Online List</span>
+          <span class="brand__sub">راهنمای مدیر</span>
+        </span>
+      </a>
+      <span class="help-top__spacer"></span>
+      <button class="btn btn--text btn--sm" type="button" data-action="print">
+        <span data-icon="print"></span> <span id="printLabel">چاپ / PDF</span>
+      </button>
+      <button class="btn btn--icon btn--sm btn--outlined" type="button" data-action="theme" aria-label="تغییر پوسته" data-tip="پوسته">
+        <span data-icon="dark_mode"></span>
+      </button>
+      <a class="btn btn--filled btn--sm" href="../">
+        <span data-icon="arrow_back"></span> بازگشت به لیست
+      </a>
+    </div>
+  </header>
+
+  <div class="container help-layout">
+    <aside class="help-toc" aria-label="فهرست راهنما">
+      <div class="help-toc__title">فهرست</div>
+      <nav class="help-toc__nav" id="tocNav">
+        <a href="#quick">برگه تقلب</a>
+        <a href="#token">۱ · گرفتن توکن</a>
+        <a href="#setup">۲ · ساختن رمز</a>
+        <a href="#login">۳ · ورود مدیر</a>
+        <a href="#dock">۴ · نوار مدیریت</a>
+        <a href="#stock">۵ · کم و زیاد کردن موجودی</a>
+        <a href="#publish">۶ · انتشار</a>
+        <a href="#device">۷ · افزودن دستگاه</a>
+        <a href="#category">۸ · دسته و فیلدهای اختصاصی</a>
+        <a href="#settings">۹ · تنظیمات فروشگاه</a>
+        <a href="#security">۱۰ · رمز و توکن</a>
+        <a href="#backup">۱۱ · پشتیبان و بازیابی</a>
+        <a href="#reset">۱۲ · بازنشانی همه داده‌ها</a>
+        <a href="#theme">۱۳ · پوسته تاریک</a>
+        <a href="#privacy">۱۴ · امنیت</a>
+        <a href="#trouble">۱۵ · رفع اشکال</a>
+      </nav>
+    </aside>
+
+    <main class="help-main" id="content">
+      <section class="help-hero">
+        <span class="t-eyebrow">مخصوص صاحب فروشگاه</span>
+        <h1 class="t-display">هر کاری که در پنل هست،<br><span class="help-hero__accent">با یک تصویر.</span></h1>
+        <p class="t-lead">
+          این صفحه برای خودِ مدیر نوشته شده است. اگر تازه سایت را راه انداخته‌اید، از بخش ۱ شروع کنید؛
+          اگر فقط می‌خواهید موجودی را به‌روز کنید، بخش‌های ۳ تا ۶ کافی است.
+        </p>
+        <div class="help-hero__meta">
+          <span class="chip"><span data-icon="schedule"></span> ۱۰ دقیقه مطالعه</span>
+          <span class="chip"><span data-icon="image"></span> ۱۴ تصویر واقعی از پنل</span>
+          <span class="chip"><span data-icon="lock"></span> بدون سرور و بدون دیتابیس</span>
+        </div>
+      </section>
+
+      <figure class="help-figure">
+        <img src="../assets/help/01-home.webp" width="1200" height="760" loading="lazy" alt="صفحه اصلی سایت لیست موجودی با عنوان فروشگاه، دکمه‌های تماس و کارت آمار">
+        <figcaption>صفحهٔ عمومی سایت — همان چیزی که مشتری می‌بیند.</figcaption>
+      </figure>
+
+      <!-- ── Cheat sheet ─────────────────────────────────────────────────── -->
+      <section class="help-section" id="quick">
+        <h2>برگه تقلب: کارِ مورد نظر ← جای درست</h2>
+        <p>اگر وقت ندارید کل راهنما را بخوانید، همین جدول معمولاً کافی است.</p>
+        <div class="help-table-wrap">
+          <table class="help-table">
+            <thead>
+              <tr><th>می‌خواهم…</th><th>کجا؟</th><th>بخش</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>موجودی یک کالا را عوض کنم</td><td>پس از ورود مدیر، دکمه‌های <b>+</b> و <b>−</b> روی همان ردیف ← <b>انتشار</b></td><td><a href="#stock">۵</a> و <a href="#publish">۶</a></td></tr>
+              <tr><td>قیمت یا مشخصات را اصلاح کنم</td><td>منوی <b>⋮</b> ردیف ← ویرایش دستگاه</td><td><a href="#device">۷</a></td></tr>
+              <tr><td>کالای جدید اضافه کنم</td><td>نوار پایین ← <b>+</b> ← دستگاه جدید</td><td><a href="#device">۷</a></td></tr>
+              <tr><td>دسته یا فیلد جدید بسازم</td><td>نوار پایین ← <b>+</b> ← دسته‌بندی جدید</td><td><a href="#category">۸</a></td></tr>
+              <tr><td>اسم فروشگاه یا شماره تماس را عوض کنم</td><td>نوار پایین ← ⚙ تنظیمات</td><td><a href="#settings">۹</a></td></tr>
+              <tr><td>رمز ورود را عوض کنم</td><td>تنظیمات ← رمز و توکن</td><td><a href="#security">۱۰</a></td></tr>
+              <tr><td>رمز و توکن را کامل از نو بسازم</td><td>تنظیمات ← رمز و توکن ← <b>بازنشانی کامل رمز</b></td><td><a href="#security">۱۰</a></td></tr>
+              <tr><td>از لیست نسخه پشتیبان بگیرم</td><td>تنظیمات ← دریافت نسخه پشتیبان</td><td><a href="#backup">۱۱</a></td></tr>
+              <tr><td>همه کالاها را پاک کنم و از صفر شروع کنم</td><td>تنظیمات ← منطقه خطر ← بازنشانی</td><td><a href="#reset">۱۲</a></td></tr>
+              <tr><td>چیزی روی سایت به‌روز نمی‌شود</td><td>بخش رفع اشکال</td><td><a href="#trouble">۱۵</a></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ── 1. Token ────────────────────────────────────────────────────── -->
+      <section class="help-section" id="token">
+        <h2><span class="help-num">۱</span> گرفتن توکن از گیت‌هاب</h2>
+        <p class="help-lead">
+          سایت روی GitHub Pages زندگی می‌کند و برای نوشتن در مخزن به یک «کلید» نیاز دارد که همان توکن است.
+          این کار فقط <b>یک بار</b> انجام می‌شود.
+        </p>
+        <ol class="help-steps">
+          <li>به <b>github.com</b> وارد شوید ← عکس پروفایل ← <b>Settings</b>.</li>
+          <li>در پایین ستون چپ: <b>Developer settings</b> ← <b>Personal access tokens</b> ← <b>Fine-grained tokens</b>.</li>
+          <li><b>Generate new token</b> را بزنید.</li>
+          <li>
+            در <b>Repository access</b> گزینهٔ <b>Only select repositories</b> را انتخاب کنید و فقط
+            مخزن <code dir="ltr">Online_list</code> را بگذارید.
+          </li>
+          <li>
+            در <b>Permissions</b> ← <b>Repository permissions</b> ← <b>Contents</b> را روی
+            <b>Read and write</b> بگذارید. (Metadata خودکار Read-only است.)
+          </li>
+          <li><b>Expiration</b>: ۹۰ روز یا ۱ سال. تاریخش را یادداشت کنید تا دیر نشود.</li>
+          <li><b>Generate token</b> ← رشتهٔ <code dir="ltr">github_pat_…</code> را کپی کنید.</li>
+        </ol>
+        <div class="help-note help-note--warn">
+          <span data-icon="warning"></span>
+          <div>
+            <b>این رشته فقط یک بار نشان داده می‌شود.</b>
+            آن را در جای امن (مثلاً مدیر رمز مرورگر) نگه دارید. اگر گم شد، همان توکن را Revoke کنید و تازه بسازید.
+            هیچ‌وقت توکن را در چت، ایمیل یا فایل‌های مخزن نگذارید.
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 2. Setup ───────────────────────────────────────────────────── -->
+      <section class="help-section" id="setup">
+        <h2><span class="help-num">۲</span> ساختن رمز (صفحه راه‌اندازی)</h2>
+        <p class="help-lead">
+          توکن باید با یک رمز «قفل» شود تا هر بار لازم نباشد توکن را تایپ کنید. این کار در صفحهٔ
+          <code dir="ltr">/setup/</code> انجام می‌شود که عمداً فقط روی کامپیوتر خودتان اجرا می‌شود.
+        </p>
+        <figure class="help-figure">
+          <img src="../assets/help/13-setup.webp" width="1200" height="760" loading="lazy" alt="صفحه راه‌اندازی با فیلد توکن، نام مخزن و رمز عبور">
+          <figcaption>صفحه راه‌اندازی: توکن، مخزن و رمز در یک صفحه.</figcaption>
+        </figure>
+        <ol class="help-steps">
+          <li>در پوشهٔ مخزن، ترمینال را باز کنید و <code dir="ltr">npm start</code> را بزنید (یا <code dir="ltr">python3 -m http.server 8080</code>).</li>
+          <li>در مرورگر بروید به <code dir="ltr">http://localhost:8080/setup/</code>.</li>
+          <li>توکن را بگذارید، مالک/مخزن/شاخه را بررسی کنید، <b>بررسی اتصال و دسترسی</b> را بزنید.</li>
+          <li>یک <b>رمز قوی</b> و تکرارش را وارد کنید (حداقل ۱۰ کاراکتر؛ مثلاً چهار کلمهٔ بی‌ربط).
+            زیر کادر رمز، <b>تخمین زمان شکستن</b> را می‌بینید؛ رمزی که زیر ۷ روز شکسته شود پذیرفته نمی‌شود.</li>
+          <li><b>ساخت فایل امنیتی</b> ← بعد <b>نوشتن در مخزن گیت‌هاب</b>.</li>
+          <li>سه خط سبز دیدید؟ تمام. به سایت برگردید.</li>
+        </ol>
+        <div class="help-note">
+          <span data-icon="info"></span>
+          <div>
+            فقط نسخهٔ <b>رمزگذاری‌شده</b> در فایل <code dir="ltr">data/vault.json</code> می‌نشیند
+            (PBKDF2-SHA256 با ۶۰۰٬۰۰۰ دور + AES-256-GCM). توکن خام هیچ‌جا ذخیره نمی‌شود.
+            اگر رمز را عوض کنید، همین فایل بازنویسی می‌شود.
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 3. Login ───────────────────────────────────────────────────── -->
+      <section class="help-section" id="login">
+        <h2><span class="help-num">۳</span> ورود مدیر</h2>
+        <p class="help-lead">
+          دکمهٔ <b>ورود مدیر</b> بالای صفحه (و پایین صفحه در ستون «مدیریت فروشگاه») پنجرهٔ ورود را باز می‌کند.
+        </p>
+        <figure class="help-figure">
+          <img src="../assets/help/02-login.webp" width="1200" height="760" loading="lazy" alt="پنجره ورود مدیر با فیلد رمز عبور">
+          <figcaption>رمز را وارد کنید؛ رمز در همین مرورگر توکن را باز می‌کند و به هیچ سروری نمی‌رود.</figcaption>
+        </figure>
+        <ul class="help-list">
+          <li><b>رمز اشتباه</b> ← پیام قرمز زیر فیلد؛ بعد از چند تلاش، ۳۰ ثانیه صبر لازم می‌شود.</li>
+          <li><b>ورود موقت با توکن</b> ← اگر رمز را فراموش کرده‌اید یا فایل امنیتی هنوز ساخته نشده؛ مناسب تست، نه استفادهٔ روزمره (با بستن تب پاک می‌شود).</li>
+          <li><b>پیش‌نمایش</b> ← دیدن پنل بدون هیچ ورودی واقعی؛ انتشار در این حالت انجام نمی‌شود.</li>
+          <li>نشست فقط در همان تب است؛ با <b>قفل کردن</b> یا بستن تب خارج می‌شوید.</li>
+        </ul>
+        <div class="help-note help-note--warn">
+          <span data-icon="error"></span>
+          <div>
+            اگر پنجرهٔ ورود می‌گوید <b>«هنوز رمز مدیریت ساخته نشده»</b> یعنی فایل
+            <code dir="ltr">data/vault.json</code> در مخزن نیست یا خوانده نمی‌شود؛ بخش ۲ را دوباره انجام دهید
+            و مطمئن شوید آخرین گام («نوشتن در مخزن») سبز شده است.
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 4. Dock ────────────────────────────────────────────────────── -->
+      <section class="help-section" id="dock">
+        <h2><span class="help-num">۴</span> نوار مدیریت</h2>
+        <p class="help-lead">
+          بعد از ورود، یک نوار شیشه‌ای پایین صفحه ظاهر می‌شود و فرم‌های ویرایش داخل لیست باز می‌شوند.
+        </p>
+        <figure class="help-figure">
+          <img src="../assets/help/03-dock.webp" width="1200" height="760" loading="lazy" alt="نمای مدیر: نوار پایین با دکمه انتشار و استپر موجودی روی هر ردیف">
+          <figcaption>نمای مدیر: نوار پایین (انتشار، افزودن، تنظیمات) و استپر موجودی روی هر کالا.</figcaption>
+        </figure>
+        <div class="help-table-wrap">
+          <table class="help-table">
+            <thead><tr><th>در نوار</th><th>کار</th></tr></thead>
+            <tbody>
+              <tr><td>آواتار + «همگام با مخزن»</td><td>وضعیت: همه‌چیز منتشر شده است.</td></tr>
+              <tr><td>«۲ ناموجود» / «۱ پنهان»</td><td>هشدارهای کلیک‌پذیر؛ با زدنشان لیست فقط همان کالاها را نشان می‌دهد.</td></tr>
+              <tr><td>«منتشرنشده» (نقطه نارنجی)</td><td>تغییر ذخیره شده ولی هنوز روی سایت نرفته.</td></tr>
+              <tr><td><b>انتشار</b></td><td>نوشتن تغییرات در گیت‌هاب (Ctrl/⌘ + S هم کار می‌کند).</td></tr>
+              <tr><td><b>+</b></td><td>دستگاه جدید، دسته جدید، تنظیمات، رمز.</td></tr>
+              <tr><td>⚙</td><td>تنظیمات فروشگاه.</td></tr>
+              <tr><td>↩</td><td>بازگردانی به نسخهٔ منتشرشده (تغییرات تستی را دور می‌ریزد).</td></tr>
+              <tr><td>🔒</td><td>قفل کردن / خروج.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ── 5. Stock ───────────────────────────────────────────────────── -->
+      <section class="help-section" id="stock">
+        <h2><span class="help-num">۵</span> کم و زیاد کردن موجودی</h2>
+        <p class="help-lead">روتین روزانهٔ شما همین است: عدد موجودی را درست کنید و منتشر بزنید.</p>
+        <figure class="help-figure help-figure--tight">
+          <img src="../assets/help/04-stepper.webp" width="1200" height="420" loading="lazy" alt="استپر موجودی روی یک ردیف کالا با دکمه‌های کاهش، عدد و افزایش">
+          <figcaption>با دکمه‌های − و + تغییر می‌کند؛ می‌توانید عدد را مستقیم تایپ کنید.</figcaption>
+        </figure>
+        <ol class="help-steps">
+          <li>روی ردیف کالا، <b>−</b> یا <b>+</b> را بزنید (یا عدد را تایپ کنید و Enter).</li>
+          <li>نوار پایین نارنجی می‌شود: «منتشرنشده».</li>
+          <li><b>انتشار</b> را بزنید. تمام.</li>
+        </ol>
+        <ul class="help-list">
+          <li>عدد <b>۰</b> یعنی ناموجود؛ سایت خودش برچسب «ناموجود» می‌زند و کالا در فیلتر موجودی نمی‌آید.</li>
+          <li>آستانهٔ «کمیاب» در تنظیمات است (پیش‌فرض: ۲).</li>
+          <li>اگر تب را ببندید بدون انتشار، تغییر از بین می‌رود؛ ولی اگر بستن تصادفی بود، با همان مرورگر و همان تب نمی‌شود برگرداند — پس همیشه یک‌بار انتشار بزنید.</li>
+        </ul>
+      </section>
+
+      <!-- ── 6. Publish ─────────────────────────────────────────────────── -->
+      <section class="help-section" id="publish">
+        <h2><span class="help-num">۶</span> انتشار: تفاوت «ذخیره» و «دیده شدن»</h2>
+        <p class="help-lead">
+          تا وقتی <b>انتشار</b> را نزنید، بازدیدکننده همان نسخهٔ قبلی را می‌بیند. انتشار یعنی نوشتن فایل
+          <code dir="ltr">data/store.json</code> در مخزن گیت‌هاب.
+        </p>
+        <figure class="help-figure">
+          <img src="../assets/help/05-publish.webp" width="1200" height="760" loading="lazy" alt="برگه انتشار با خلاصه تعداد دستگاه‌های جدید، ویرایش‌شده و حذف‌شده و فیلد پیام کامیت">
+          <figcaption>برگهٔ انتشار: قبل از تأیید، دقیقاً می‌بینید چه چیزی تغییر کرده است.</figcaption>
+        </figure>
+        <ol class="help-steps">
+          <li><b>انتشار</b> را بزنید.</li>
+          <li>خلاصه را ببینید: چند دستگاه جدید، چند ویرایش، چند حذف.</li>
+          <li>پیام پیش‌فرض («به‌روزرسانی لیست موجودی — تاریخ») خوب است؛ می‌توانید عوضش کنید.</li>
+          <li><b>انتشار روی گیت‌هاب</b> ← چند ثانیه صبر.</li>
+          <li>پیام «تغییرات منتشر شد» با شناسهٔ کامیت.</li>
+        </ol>
+        <div class="help-note">
+          <span data-icon="info"></span>
+          <div>
+            سایت عمومی معمولاً تا <b>یک دقیقه</b> نسخهٔ تازه را نشان می‌دهد. اگر دیر شد، یک بار
+            <b>Ctrl+Shift+R</b> بزنید. هر انتشار در «تاریخچه» با تاریخ شمسی ثبت می‌شود.
+          </div>
+        </div>
+        <div class="help-note help-note--warn">
+          <span data-icon="sync_problem"></span>
+          <div>
+            اگر پیام <b>«تغییرات هم‌زمان ثبت شده است»</b> دیدید، یعنی از دستگاه دیگری هم منتشر شده؛
+            صفحه تازه می‌شود، تغییرات شما به‌عنوان پیش‌نویس می‌مانند و دوباره انتشار بزنید.
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 7. Device ──────────────────────────────────────────────────── -->
+      <section class="help-section" id="device">
+        <h2><span class="help-num">۷</span> افزودن و ویرایش دستگاه</h2>
+        <p class="help-lead">هر دستگاه یک نام، یک دسته، موجودی و قیمت دارد؛ بقیه اختیاری است.</p>
+        <figure class="help-figure">
+          <img src="../assets/help/06-device.webp" width="1200" height="760" loading="lazy" alt="فرم ویرایش دستگاه با فیلدهای نام، برند، وضعیت، قیمت، موجودی و مشخصات">
+          <figcaption>فرم دستگاه؛ فیلدهای مشخصات از روی دستهٔ انتخاب‌شده ساخته می‌شوند.</figcaption>
+        </figure>
+        <div class="help-table-wrap">
+          <table class="help-table">
+            <thead><tr><th>فیلد</th><th>توضیح</th></tr></thead>
+            <tbody>
+              <tr><td>نام</td><td>همان چیزی که مشتری می‌خواند؛ کامل بنویسید (مثلاً «آیفون ۱۶ پرو مکس ۲۵۶ گیگ»).</td></tr>
+              <tr><td>دسته</td><td>موبایل، لپ‌تاپ، کنسول… انتخاب دسته، فیلدهای مشخصات را عوض می‌کند.</td></tr>
+              <tr><td>قیمت</td><td>به تومان، فقط عدد. برای «استعلام» خالی بگذارید.</td></tr>
+              <tr><td>موجودی</td><td>عدد صحیح؛ صفر یعنی ناموجود.</td></tr>
+              <tr><td>پیشنهادی</td><td>کارت بزرگ بالای سایت (حداکثر ۶ تا خوب است).</td></tr>
+              <tr><td>مخفی</td><td>از دید عمومی پنهان می‌شود، ولی حذف نمی‌شود؛ برای کالای موقت.</td></tr>
+              <tr><td>تصویر</td><td>آدرس اینترنتی تصویر (https).</td></tr>
+              <tr><td>مشخصات</td><td>جفت «عنوان / مقدار» مخصوص همان دسته.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="help-inline">برای ویرایش: منوی <b>⋮</b> روی ردیف ← <b>ویرایش دستگاه</b>. برای حذف کامل: همان منو ← <b>حذف دستگاه</b>.</p>
+        <figure class="help-figure">
+          <img src="../assets/help/12-mobile.webp" width="390" height="780" loading="lazy" alt="نمای مدیر روی گوشی موبایل با نوار مدیریت و استپر موجودی">
+          <figcaption>روی موبایل هم همان امکانات هست: نوار مدیریت پایین، استپر روی هر کارت و منوی ⋮ برای ویرایش.</figcaption>
+        </figure>
+      </section>
+
+      <!-- ── 8. Category ────────────────────────────────────────────────── -->
+      <section class="help-section" id="category">
+        <h2><span class="help-num">۸</span> دسته‌بندی و فیلدهای اختصاصی</h2>
+        <p class="help-lead">
+          هر دسته می‌تواند فیلدهای خودش را داشته باشد: موبایل «رم و حافظه»، لپ‌تاپ «پردازنده و گرافیک»،
+          کنسول «نسخه». بعد از تعریف، این فیلدها خودکار در فرم دستگاه‌های همان دسته ظاهر می‌شوند.
+        </p>
+        <figure class="help-figure">
+          <img src="../assets/help/07-category.webp" width="1200" height="760" loading="lazy" alt="فرم دسته‌بندی با لیست فیلدها شامل عنوان، کلید و واحد">
+          <figcaption>فرم دسته؛ هر ردیف یک مشخصه با عنوان و واحد (مثلاً «رم» / «گیگابایت»).</figcaption>
+        </figure>
+        <ol class="help-steps">
+          <li>نوار پایین ← <b>+</b> ← <b>دسته‌بندی جدید</b>.</li>
+          <li>عنوان و یک آیکون انتخاب کنید.</li>
+          <li>با <b>افزودن مشخصه</b> ردیف بسازید: عنوان (اجباری)، کلید (لاتین، خودکار)، واحد.</li>
+          <li>ذخیره، بعد <b>انتشار</b>.</li>
+        </ol>
+        <div class="help-note help-note--warn">
+          <span data-icon="warning"></span>
+          <div>
+            دسته‌ای که دستگاه دارد قابل حذف نیست؛ اول دستگاه‌ها را جابه‌جا یا حذف کنید.
+            نام کلید فیلد را بعد از ساخت تغییر ندهید، وگرنه مقدارهای قبلی از دید فرم خارج می‌شوند.
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 9. Settings ────────────────────────────────────────────────── -->
+      <section class="help-section" id="settings">
+        <h2><span class="help-num">۹</span> تنظیمات فروشگاه</h2>
+        <p class="help-lead">
+          نام، شعار، توضیح، تلفن، واتساپ، اینستاگرام، آدرس و ساعات کاری از اینجا عوض می‌شوند و
+          در صفحهٔ اول و فوتر دیده می‌شوند.
+        </p>
+        <figure class="help-figure">
+          <img src="../assets/help/08-settings.webp" width="1200" height="760" loading="lazy" alt="برگه تنظیمات با بخش هویت فروشگاه و نمایش لیست">
+          <figcaption>تنظیمات: هویت فروشگاه، نمایش لیست، امنیت و پشتیبان.</figcaption>
+        </figure>
+        <div class="help-table-wrap">
+          <table class="help-table">
+            <thead><tr><th>تنظیم</th><th>اثر</th></tr></thead>
+            <tbody>
+              <tr><td>پوسته پیش‌فرض</td><td>خودکار (سیستم) / روشن / تاریک — انتخاب هر بازدیدکننده روی دستگاه خودش اولویت دارد.</td></tr>
+              <tr><td>واحد پول</td><td>مثلاً «تومان» یا «تومان (هزار)».</td></tr>
+              <tr><td>اعداد</td><td>فارسی ۱۲۳ یا لاتین 123.</td></tr>
+              <tr><td>آستانه کمیاب</td><td>اگر موجودی ≤ این عدد باشد، «کمیاب» نمایش داده می‌شود.</td></tr>
+              <tr><td>نمایش قیمت‌ها</td><td>خاموش: «استعلام قیمت».</td></tr>
+              <tr><td>نمایش تعداد دقیق</td><td>خاموش: فقط «موجود / ناموجود»، بدون عدد.</td></tr>
+              <tr><td>نام نمایشی مدیر</td><td>در «آخرین به‌روزرسانی» و تاریخچه دیده می‌شود.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ── 10. Security ───────────────────────────────────────────────── -->
+      <section class="help-section" id="security">
+        <h2><span class="help-num">۱۰</span> رمز و توکن</h2>
+        <p class="help-lead">رمز را همین‌جا عوض کنید؛ لازم نیست دوباره سراغ صفحهٔ راه‌اندازی بروید و توکن هم دست نمی‌خورد.</p>
+        <figure class="help-figure">
+          <img src="../assets/help/09-security.webp" width="1200" height="760" loading="lazy" alt="برگه رمز و توکن با فیلدهای رمز فعلی، رمز جدید و تکرار آن">
+          <figcaption>تغییر رمز: رمز فعلی + رمز جدید + تکرار. توکن دست‌نخورده می‌ماند.</figcaption>
+        </figure>
+        <ul class="help-list">
+          <li>برای تغییر رمز باید <b>وارد شده</b> باشید و در همان برگه <b>رمز فعلی</b> را هم بنویسید؛ یعنی فقط کسی که رمز را می‌داند می‌تواند عوضش کند.</li>
+          <li>رمز جدید حداقل ۱۰ کاراکتر و با تکرار مطابق. زیر کادر رمز، <b>تخمین زمان شکستن</b> را ببینید؛ رمزی که با یک کارت گرافیک زیر ۷ روز شکسته شود پذیرفته نمی‌شود.</li>
+          <li>بعد از تغییر، فایل <code dir="ltr">data/vault.json</code> دوباره رمز می‌شود؛ روی دستگاه‌های دیگر باید رمز جدید را بزنید.</li>
+          <li>اگر <b>ورود موقت با توکن</b> کرده‌اید، تغییر رمز ممکن نیست چون فایل امنیتی باز نشده است؛ در عوض «بازنشانی کامل رمز» را بزنید.</li>
+          <li>فیلد <b>توکن جدید</b> اختیاری است: اگر پر شود، همان لحظه توکن تازه رمزگذاری و جایگزین می‌شود. می‌توانید فقط توکن را عوض کنید و رمز را خالی بگذارید؛ در این حالت رمز فعلی حفظ می‌شود.</li>
+        </ul>
+
+        <h3>بازنشانی کامل رمز و توکن (شروع از صفر)</h3>
+        <p>
+          پایین همان برگه، بخش <b>بازنشانی کامل رمز</b> است. این دکمه فایل امنیتی را از مخزن حذف می‌کند؛
+          یعنی هیچ رمز و هیچ توکنی روی سایت نمی‌ماند و باید توکن تازه بگیرید و رمز تازه بگذارید.
+          <b>لیست کالاها، دسته‌ها و تنظیمات فروشگاه دست نمی‌خورد.</b>
+        </p>
+        <ol class="help-steps">
+          <li data-step="۱">وارد شوید ← تنظیمات ← <b>رمز و توکن</b> ← پایین برگه ← <b>بازنشانی رمز و توکن</b>.</li>
+          <li data-step="۲">عبارت تأیید <b>بازنشانی رمز</b> را بنویسید. اگر خواستید، نسخهٔ پشتیبان فایل امنیتی را دانلود کنید.</li>
+          <li data-step="۳">با تأیید، <code dir="ltr">data/vault.json</code> از مخزن حذف می‌شود و از حالت مدیریت خارج می‌شوید.</li>
+          <li data-step="۴">در <code dir="ltr">github.com/settings/tokens</code> توکن قدیمی را Revoke کنید و یک توکن تازه بسازید.</li>
+          <li data-step="۵">روی رایانه: <code dir="ltr">npm start</code> ← <code dir="ltr">http://localhost:8080/setup/</code> ← توکن تازه + رمز تازه ← <b>نوشتن در مخزن گیت‌هاب</b>.</li>
+          <li data-step="۶">به سایت برگردید و با رمز تازه وارد شوید.</li>
+        </ol>
+        <div class="help-note">
+          <span data-icon="info"></span>
+          <div>
+            رمز را فراموش کرده‌اید؟ وارد شدن با رمز ممکن نیست، اما «<b>ورود موقت با توکن</b>» در پنجرهٔ ورود
+            کار می‌کند: با توکن وارد شوید، تنظیمات ← رمز و توکن ← «حذف فایل امنیتی»، بعد از همان مرحلهٔ ۴ شروع کنید.
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 11. Backup ─────────────────────────────────────────────────── -->
+      <section class="help-section" id="backup">
+        <h2><span class="help-num">۱۱</span> پشتیبان و بازیابی</h2>
+        <div class="help-cards">
+          <div class="help-card">
+            <span class="help-card__icon" data-icon="download"></span>
+            <h3>دریافت نسخه پشتیبان</h3>
+            <p>یک فایل JSON کامل از همه‌چیز (فروشگاه، دسته‌ها، دستگاه‌ها، تنظیمات). ماهی یک‌بار کافی است.</p>
+          </div>
+          <div class="help-card">
+            <span class="help-card__icon" data-icon="table_rows"></span>
+            <h3>خروجی CSV</h3>
+            <p>برای اکسل؛ حاوی یک سطر برای هر دستگاه و ستون‌های اختصاصی هر دسته. با BOM تولید می‌شود تا فارسی درست باز شود.</p>
+          </div>
+          <div class="help-card">
+            <span class="help-card__icon" data-icon="cloud_upload"></span>
+            <h3>بازیابی از فایل</h3>
+            <p>فایل پشتیبان را انتخاب می‌کنید، پیش‌نمایش می‌بینید و بعد انتشار می‌زنید. اگر خراب باشد، جایگزین نمی‌شود.</p>
+          </div>
+        </div>
+        <p class="help-inline">
+          پشتیبان در «تنظیمات ← نسخه پشتیبان» است. بازیابی، کل ليست فعلی را با محتوای فایل عوض می‌کند —
+          پس قبلش یک پشتیبان تازه بگیرید.
+        </p>
+      </section>
+
+      <!-- ── 12. Reset ──────────────────────────────────────────────────── -->
+      <section class="help-section" id="reset">
+        <h2><span class="help-num">۱۲</span> بازنشانی همه داده‌های لیست</h2>
+        <p class="help-lead">
+          وقتی می‌خواهید لیست را کامل خالی کنید و از صفر شروع کنید: <b>تنظیمات ← منطقه خطر ← بازنشانی همه داده‌های لیست</b>.
+        </p>
+        <figure class="help-figure">
+          <img src="../assets/help/10-reset.webp" width="1200" height="760" loading="lazy" alt="برگه بازنشانی با هشدار قرمز، خلاصه آنچه حذف و آنچه می‌ماند و فیلد تأیید">
+          <figcaption>بازنشانی: تعداد دقیق کالاها را نشان می‌دهد و عبارت تأیید می‌خواهد.</figcaption>
+        </figure>
+        <div class="help-table-wrap">
+          <table class="help-table">
+            <thead><tr><th>حذف می‌شود</th><th>می‌ماند</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>همه دستگاه‌ها و همه دسته‌بندی‌ها (و فیلدهایشان)</td>
+                <td>نام و اطلاعات تماس فروشگاه، تنظیمات نمایش، رمز و توکن، تاریخچه</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <ol class="help-steps">
+          <li><b>قبل از حذف، نسخه پشتیبان دانلود کن</b> را تیک‌دار بگذارید (پیش‌فرض روشن است).</li>
+          <li>عبارت <b>حذف همه</b> را تایپ کنید.</li>
+          <li><b>حذف همه و انتشار</b>.</li>
+        </ol>
+        <div class="help-note help-note--warn">
+          <span data-icon="warning"></span>
+          <div>
+            این کار <b>بلافاصله منتشر می‌شود</b> و با «بازگردانی» برنمی‌گردد. اگر اشتباه شد:
+            تنظیمات ← بازیابی از فایل (با همان پشتیبان خودکار) یا در گیت‌هاب همان کامیت را Revert کنید.
+          </div>
+        </div>
+        <p class="help-inline">
+          بعد از بازنشانی، سایت عمومی صفحهٔ «لیست خالی» نشان می‌دهد و دعوت به تماس می‌کند؛ برای شروع دوباره
+          کافی است یک دسته و یک دستگاه بسازید.
+        </p>
+        <figure class="help-figure">
+          <img src="../assets/help/11-empty.webp" width="1200" height="760" loading="lazy" alt="نمای سایت عمومی بعد از بازنشانی: پیام «لیست موجودی هنوز خالی است» با دکمه‌های تماس و واتساپ">
+          <figcaption>بعد از بازنشانی، بازدیدکننده به‌جای صفحهٔ خالی، پیام روشن و راه تماس می‌بیند.</figcaption>
+        </figure>
+      </section>
+
+      <!-- ── 13. Security model ─────────────────────────────────────────── -->
+      <section class="help-section" id="theme">
+        <h2><span class="help-num">۱۳</span> پوستهٔ روشن و تاریک</h2>
+        <p class="help-lead">
+          سایت هر دو حالت را دارد. انتخاب هر بازدیدکننده در مرورگر خودش ذخیره می‌شود؛ تنظیمات فروشگاه فقط
+          حالت <b>پیش‌فرض</b> را برای کسانی تعیین می‌کند که هنوز انتخابی نکرده‌اند.
+        </p>
+        <figure class="help-figure">
+          <img src="../assets/help/14-dark.webp" width="1200" height="760" loading="lazy" alt="پنل مدیریت در پوستهٔ تاریک با برگهٔ تنظیمات باز">
+          <figcaption>همان صفحه در پوستهٔ تاریک. آیکون نیمه‌ماه/خورشید در نوار بالا، پوسته را عوض می‌کند.</figcaption>
+        </figure>
+      </section>
+
+      <section class="help-section" id="privacy">
+        <h2><span class="help-num">۱۴</span> امنیت به زبان ساده</h2>
+        <div class="help-table-wrap">
+          <table class="help-table">
+            <thead><tr><th>موضوع</th><th>واقعیت</th></tr></thead>
+            <tbody>
+              <tr><td>توکن</td><td>رمزگذاری‌شده در <code dir="ltr">data/vault.json</code>؛ متن ساده‌اش هیچ‌جا نیست. هنگام ورود فقط در حافظهٔ همان تب باز می‌شود.</td></tr>
+              <tr><td>رمز</td><td>هیچ‌جا ذخیره نمی‌شود. اگر رمز را فراموش کردید، راه بازیابی نیست؛ باید صفحهٔ راه‌اندازی را دوباره اجرا کنید.</td></tr>
+              <tr><td>فایل رمزشده</td><td>برای همه قابل دانلود است؛ پس <b>قدرت رمز</b> تعیین‌کننده است. چهار کلمهٔ بی‌ربط انتخاب کنید.</td></tr>
+              <tr><td>لیست موجودی</td><td>عمومی است. IMEI، سریال، قیمت خرید و اطلاعات مشتری را در آن نگذارید.</td></tr>
+              <tr><td>تاریخچه گیت</td><td>همه‌چیز برای همیشه می‌ماند؛ چیزی که نباید عمومی شود را حتی یک بار هم ثبت نکنید.</td></tr>
+              <tr><td>دسترسی توکن</td><td>فقط همین مخزن، فقط Contents Read/Write، با تاریخ انقضا. اگر لو رفت: Revoke و رمز را عوض کنید.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ── 14. Troubleshooting ────────────────────────────────────────── -->
+      <section class="help-section" id="trouble">
+        <h2><span class="help-num">۱۵</span> رفع اشکال</h2>
+        <div class="help-table-wrap">
+          <table class="help-table">
+            <thead><tr><th>نشانه</th><th>علت</th><th>راه‌حل</th></tr></thead>
+            <tbody>
+              <tr><td>«هنوز رمز مدیریت ساخته نشده»</td><td>فایل امنیتی در مخزن نیست یا خوانده نمی‌شود</td><td>بخش ۲؛ مطمئن شوید <code dir="ltr">data/vault.json</code> در شاخهٔ main هست</td></tr>
+              <tr><td>«رمز عبور نادرست است»</td><td>رمز اشتباه یا در دستگاه دیگر عوض شده</td><td>رمز فعلی را وارد کنید؛ اگر یادتان نیست، صفحهٔ راه‌اندازی + توکن</td></tr>
+              <tr><td>«دسترسی توکن کافی نیست»</td><td>توکن Read-only است</td><td>همان توکن را روی <b>Contents: Read and write</b> ببرید و دوباره وارد شوید</td></tr>
+              <tr><td>تغییرات روی سایت نیست</td><td>منتشر نشده، یا Pages هنوز نسخه تازه را نگرفته</td><td>«انتشار» را بزنید، یک دقیقه صبر و Ctrl+Shift+R</td></tr>
+              <tr><td>«تغییرات هم‌زمان ثبت شده است»</td><td>از دستگاه دیگری هم ذخیره شده</td><td>صفحه تازه می‌شود؛ تغییرات شما می‌مانند، دوباره انتشار بزنید</td></tr>
+              <tr><td>«رمزنگاری در دسترس نیست»</td><td>صفحه روی http (غیر از localhost) باز شده</td><td>از آدرس HTTPS استفاده کنید</td></tr>
+              <tr><td>سایت قدیمی مانده</td><td>کش مرورگر یا سرویس‌ورکر</td><td>Ctrl+Shift+R، یا بستن و باز کردن دوباره تب</td></tr>
+              <tr><td>صفحهٔ راه‌اندازی فرم را نشان نمی‌دهد</td><td>روی دامنهٔ عمومی باز شده (عمدی)</td><td><code dir="ltr">npm start</code> ← <code dir="ltr">localhost:8080/setup/</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <footer class="help-foot">
+        <p>
+          سؤالی هست که جوابش اینجا نبود؟ در گیت‌هاب مخزن
+          <a href="https://github.com/pouriasafari117/Online_list/issues" target="_blank" rel="noopener">یک Issue</a> باز کنید
+          یا مستندات فنی را ببینید:
+          <a href="https://github.com/pouriasafari117/Online_list/blob/main/docs/SETUP.md" target="_blank" rel="noopener">راه‌اندازی</a> ·
+          <a href="https://github.com/pouriasafari117/Online_list/blob/main/docs/SECURITY.md" target="_blank" rel="noopener">امنیت</a>
+        </p>
+        <a class="btn btn--filled btn--sm" href="../">رفتن به لیست موجودی</a>
+      </footer>
+    </main>
+  </div>
+
+  <button class="toc-fab" type="button" data-action="toc" aria-label="فهرست راهنما">
+    <span data-icon="list"></span>
+  </button>
+</body>
+</html>

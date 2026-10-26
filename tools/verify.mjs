@@ -189,6 +189,48 @@ if (exists('.github/workflows/pages.yml')) {
   else note('صفحه راه‌اندازی (setup/) در خروجی Pages نیست');
 }
 
+/* ── 8b. Help page sanity ──────────────────────────────────────────────── */
+if (exists('help/index.html')) {
+  const helpHtml = read('help/index.html');
+  const shots = [...helpHtml.matchAll(/src="\.\.\/(assets\/help\/[^"]+)"/g)].map((m) => m[1]);
+  if (shots.length < 8) warn(`صفحه راهنما فقط ${shots.length} تصویر دارد.`);
+  for (const shot of shots) if (!exists(shot)) fail(`تصویر راهنما پیدا نشد: ${shot}`);
+  const anchors = new Set([...helpHtml.matchAll(/id="([^"]+)"/g)].map((m) => m[1]));
+  for (const [, target] of helpHtml.matchAll(/href="#([^"]+)"/g)) {
+    if (!anchors.has(target)) fail(`لینک شکسته در راهنما: #${target}`);
+  }
+  const toc = [...helpHtml.matchAll(/<a href="#([^"]+)"/g)].length;
+  note(`راهنمای مدیر: ${shots.length} تصویر، ${toc} لینک فهرست`);
+}
+
+/* ── 9. Publishing fences around setup/ ────────────────────────────────── */
+if (!exists('_config.yml')) {
+  fail('_config.yml پیدا نشد؛ بدون آن، انتشار از روی شاخه، setup/ و package.json را عمومی می‌کند.');
+} else {
+  const config = read('_config.yml');
+  for (const entry of ['setup', 'tools', 'docs', 'package.json']) {
+    const listed = new RegExp(`^\\s*-\\s*${entry.replace('.', '\\.')}\\s*$`, 'm').test(config);
+    if (!listed) fail(`_config.yml باید «${entry}» را از انتشار حذف کند.`);
+  }
+  if (/(^|\n)\s*include:/.test(config) && /nojekyll/.test(config)) warn('_config.yml ورودی مشکوک «.nojekyll» دارد.');
+  note('_config.yml فایل‌های خصوصی را از انتشار حذف می‌کند');
+}
+if (exists('.nojekyll')) {
+  fail('فایل .nojekyll وجود دارد؛ آن را حذف کنید تا excludeهای _config.yml اعمال شوند (وگرنه setup/ منتشر می‌شود).');
+}
+if (exists('setup/index.html')) {
+  const setupHtml = read('setup/index.html');
+  if (!setupHtml.includes('id="blockedPanel"')) fail('setup/index.html نگهبان میزبان (blockedPanel) را ندارد.');
+  for (const marker of ['name="robots" content="noindex', 'Content-Security-Policy']) {
+    if (!setupHtml.includes(marker)) warn(`setup/index.html بدون «${marker}» است.`);
+  }
+  const setupJs = read('assets/js/setup.js');
+  if (!/export function isLocalHost/.test(setupJs)) fail('assets/js/setup.js تابع isLocalHost را ندارد.');
+  if (!/if \(!enforceLocalOnly\(\)\) return;/.test(setupJs)) fail('setup.js قبل از هر کاری نگهبان میزبان را اجرا نمی‌کند.');
+  if (!/LOCAL_HOSTS/.test(read('assets/js/setup.js'))) fail('setup.js فهرست میزبان‌های محلی را ندارد.');
+  note('صفحه راه‌اندازی فقط روی localhost اجرا می‌شود');
+}
+
 /* ── Report ─────────────────────────────────────────────────────────────── */
 const line = (char = '─') => char.repeat(58);
 console.log(`\n${line()}\n  Online List — verify\n${line()}`);

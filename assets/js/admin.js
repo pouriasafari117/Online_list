@@ -2,11 +2,14 @@
    Admin — unlock the vault, edit the shop, publish to GitHub
    ========================================================================== */
 
-import { ApiError, createGitHub, fetchVault, isValidRepoPart, looksLikeToken } from './api.js';
-import { CryptoError, cryptoAvailable, isVault, openVault, passwordScore, sealVault } from './crypto.js';
+import { ApiError, createGitHub, fetchVault, isValidRepoPart, looksLikeToken, parseJsonLoose } from './api.js';
 import {
-  CATEGORY_ICONS, CONDITION_OPTIONS, computeDiff, defaultCategory, defaultField,
-  diffSummary, getCategory, makeDefaultData, normalizeStore, parseStoreJson, serializeStore
+  CryptoError, cryptoAvailable, estimateCrackSeconds, isVault, openVault, passwordScore, sealVault
+} from './crypto.js';
+import {
+  CATEGORY_ICONS, CONDITION_OPTIONS, CREDENTIAL_RESET_PHRASE, RESET_PHRASE, clearInventory, computeDiff,
+  defaultCategory, defaultField, diffSummary, getCategory, makeDefaultData, normalizeStore,
+  parseStoreJson, serializeStore
 } from './model.js';
 import {
   clearDraft, currentNumerals, discardDraftAndReset, endAdminSession,
@@ -18,7 +21,7 @@ import {
   setButtonBusy, toast
 } from './ui.js';
 import {
-  deepClone, download, escapeHtml, formatJalaliDateTime, formatJalaliStamp,
+  deepClone, download, escapeHtml, formatCrackTime, formatJalaliDateTime, formatJalaliStamp,
   formatNum, parseNumber, slugify, storageGet, storageSet, toCsv, uid
 } from './util.js';
 import { icon } from './icons.js';
@@ -32,6 +35,11 @@ const REQUIRED_ACTIONS = new Set([
 ]);
 
 const GATE_KEY = 'ol.loginGate.v1';
+
+/* The vault file is public, so a password is always attacked offline.
+   Under a week on a single GPU is refused; under a year only warns. */
+const WEAK_SECONDS = 7 * 86_400;
+const YEAR_SECONDS = 365 * 86_400;
 
 /* ── Small form helpers ─────────────────────────────────────────────────── */
 
@@ -298,6 +306,10 @@ function openPasswordSheet(vault) {
           ${icon('security', { size: 18 })}
           <span>رمز را فراموش کرده‌اید؟ با <a href="setup/" style="text-decoration:underline">صفحه راه‌اندازی</a> می‌توانید توکن جدید بسازید و رمز را بازنشانی کنید.</span>
         </div>
+        <div class="form-note">
+          ${icon('help', { size: 18 })}
+          <span>اولین بار است؟ <a href="help/" target="_blank" rel="noopener" style="text-decoration:underline">راهنمای تصویری مدیر</a> قدم‌به‌قدم توضیح داده است.</span>
+        </div>
       </form>
     `,
     footer: `
@@ -383,9 +395,13 @@ async function unlockAndEnter({ vault, password, repo, token: directToken = null
 
   let remote = makeDefaultData();
   let sha = null;
+  let legacyStore = false;
   if (file) {
     try {
-      remote = parseStoreJson(file.text);
+      // Tolerate files written by the early setup build (base64-wrapped JSON).
+      const { value, repaired } = parseJsonLoose(file.text);
+      remote = parseStoreJson(repaired ? JSON.stringify(value) : file.text);
+      if (repaired) legacyStore = true;
     } catch (err) {
       throw new ApiError('فایل data/store.json در مخزن معتبر نیست. لطفاً نسخه پشتیبان را بررسی کنید.', { code: 'bad-data' });
     }
@@ -424,6 +440,13 @@ async function unlockAndEnter({ vault, password, repo, token: directToken = null
     toast('تغییرات ذخیره‌نشده‌ی قبلی بازیابی شد. برای انتشار، دکمه «انتشار» را بزنید.', { type: 'warn', duration: 6000 });
   } else {
     toast(`خوش آمدید${displayName ? `، ${displayName}` : ''}`, { type: 'ok' });
+  }
+  if (legacyStore) {
+    // The file in the repo was double-encoded by an early build. Publishing
+    // rewrites it as plain JSON, so nudge the owner once.
+    toast('فایل لیست روی مخزن قالب قدیمی دارد؛ با اولین «انتشار» به‌صورت خودکار اصلاح می‌شود.', {
+      type: 'info', duration: 9000
+    });
   }
   if (!state.sha) {
     // The file may be brand new — remember to create it on publish.
@@ -539,8 +562,10 @@ function openAdminMenu(anchor) {
     { label: 'تنظیمات فروشگاه', icon: 'settings', onSelect: openSettings },
     { label: 'رمز و توکن', icon: 'key', onSelect: openSecurity },
     { label: 'نسخه پشتیبان', icon: 'download', onSelect: exportBackup },
+    { label: 'راهنمای مدیر', icon: 'help', onSelect: openHelp },
     { label: 'تاریخچه', icon: 'history', onSelect: () => document.dispatchEvent(new CustomEvent('ol:history')) },
     { separator: true },
+    { label: 'بازنشانی لیست', icon: 'delete_forever', danger: true, onSelect: openResetSheet },
     { label: isDemo() ? 'خروج از پیش‌نمایش' : 'قفل کردن', icon: 'lock', danger: true, onSelect: doLogout }
   ], { align: 'end' });
 }
@@ -1178,6 +1203,19 @@ function openSettings(tab = 'store') {
             ${state.dirty ? `<button class="btn btn--text btn--sm" type="button" data-inline-action="discard">${icon('replay', { size: 17 })} بازگشت به نسخه منتشرشده</button>` : ''}
           </div>
         </div>
+
+        <div class="sheet__section danger-zone">
+          <div class="sheet__legend">${icon('warning', { size: 18 })} منطقه خطر</div>
+          <p class="t-xs" style="color:var(--text-3);line-height:1.9">
+            همه دستگاه‌ها و دسته‌بندی‌ها یک‌جا پاک می‌شوند. اطلاعات فروشگاه، تنظیمات و رمز دست‌نخورده می‌مانند.
+            قبل از اجرا می‌توانید نسخه پشتیبان بگیرید.
+          </p>
+          <div class="row" style="gap:8px;flex-wrap:wrap">
+            <button class="btn btn--danger btn--sm" type="button" data-inline-action="reset">
+              ${icon('delete_forever', { size: 17 })} بازنشانی همه داده‌های لیست
+            </button>
+          </div>
+        </div>
       </form>
     `,
     footer: `
@@ -1198,6 +1236,7 @@ function openSettings(tab = 'store') {
           else if (kind === 'export-backup') exportBackup();
           else if (kind === 'export-csv') exportCsv();
           else if (kind === 'import-backup') importBackup();
+          else if (kind === 'reset') openResetSheet();
         });
       });
       form.addEventListener('submit', (event) => {
@@ -1261,21 +1300,39 @@ function openSecurity() {
         </div>
         <p class="t-xs" style="margin-top:12px;color:var(--text-3);line-height:1.9">با صفحه راه‌اندازی می‌توانید همین توکن را با یک رمز عبور سینک کنید؛ از آن به بعد ورود فقط با رمز انجام می‌شود.</p>
       `,
-      footer: `<span class="spacer"></span><a class="btn btn--filled btn--sm" href="setup/">${icon('rocket_launch', { size: 17 })} صفحه راه‌اندازی</a>`
+      footer: `<span class="spacer"></span>
+        <button class="btn btn--text btn--sm btn--danger" type="button" data-reset-credential>${icon('refresh', { size: 17 })} حذف فایل امنیتی</button>
+        <a class="btn btn--filled btn--sm" href="setup/">${icon('rocket_launch', { size: 17 })} صفحه راه‌اندازی</a>`
+    });
+    document.querySelector('dialog.sheet[open] [data-reset-credential]')?.addEventListener('click', () => {
+      document.querySelectorAll('dialog.sheet[open]').forEach((d) => { try { d.close(); } catch { /* ignore */ } });
+      openCredentialReset();
     });
     return;
   }
   const sheet = openSheet({
     title: 'رمز و توکن',
-    subtitle: 'تغییر رمز مدیریت یا جایگزینی توکن گیت‌هاب',
+    subtitle: 'ریست رمز با رمز فعلی، یا جایگزینی توکن گیت‌هاب',
     size: 'narrow',
     body: `
       <form id="securityForm" class="stack" style="gap:14px" novalidate>
         ${errorNote('')}
         <div class="form-note">
           ${icon('security', { size: 18 })}
-          <span>رمز جدید فقط برای باز کردن توکن استفاده می‌شود؛ خود توکن رمزگذاری‌شده در <span dir="ltr">data/vault.json</span> می‌ماند و هیچ‌گاه به‌صورت متن ساده منتشر نمی‌شود.</span>
+          <span>برای عوض کردن رمز، <b>رمز فعلی</b> را هم می‌پرسیم تا فقط خودتان بتوانید این کار را بکنید.
+          توکن دست‌نخورده می‌ماند و فایل رمزگذاری‌شده در <span dir="ltr">data/vault.json</span> بازنویسی می‌شود.</span>
         </div>
+        <div class="field">
+          <span class="field__label">رمز فعلی<span class="req">*</span></span>
+          <div class="password-wrap">
+            <input class="input" type="password" name="currentPassword" id="currentPassword" autocomplete="current-password" placeholder="همان رمزی که با آن وارد شدید">
+            <button class="icon-btn" type="button" data-toggle-current aria-label="نمایش رمز فعلی">${icon('visibility', { size: 19 })}</button>
+          </div>
+          <span class="field__hint">فقط برای تأیید هویت؛ نه ذخیره می‌شود و نه جایی فرستاده می‌شود.</span>
+          <span class="field__error"></span>
+        </div>
+        <div class="sheet__section">
+          <div class="sheet__legend">${icon('lock', { size: 18 })} ریست رمز عبور</div>
         <div class="field">
           <span class="field__label">رمز عبور جدید<span class="req">*</span></span>
           <div class="password-wrap">
@@ -1283,10 +1340,12 @@ function openSecurity() {
             <button class="icon-btn" type="button" data-toggle-password aria-label="نمایش رمز">${icon('visibility', { size: 19 })}</button>
           </div>
           <div class="pw-meter" data-pw-meter data-score="0" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
-          <span class="field__hint">پیشنهاد: یک عبارت طولانی و یکتا که جای دیگری استفاده نکرده‌اید.</span>
+          <div class="pw-estimate" data-pw-estimate data-level="weak" role="status" hidden></div>
+          <span class="field__hint">پیشنهاد: چهار کلمهٔ بی‌ربط با خط تیره؛ مثل «کتاب-پرنده-آبی-ماه».</span>
           <span class="field__error"></span>
         </div>
         ${fieldHtml({ label: 'تکرار رمز جدید', name: 'password2', type: 'password', autocomplete: 'new-password', required: true })}
+        </div>
         ${fieldHtml({ label: 'یادآور رمز (اختیاری)', name: 'hint', value: state.vault.hint || '', maxlength: 80, hint: 'مثلاً «شماره پلاک + اسم فروشگاه» — خود رمز را ننویسید.' })}
         <div class="sheet__section">
           <div class="sheet__legend">${icon('key', { size: 18 })} توکن گیت‌هاب</div>
@@ -1294,6 +1353,19 @@ function openSecurity() {
         </div>
         <div class="row" style="gap:8px;flex-wrap:wrap">
           <button class="btn btn--outlined btn--sm" type="button" data-download-vault>${icon('download', { size: 17 })} دریافت فایل پشتیبان امنیتی</button>
+        </div>
+        <div class="sheet__section danger-zone" style="margin-top:4px">
+          <div class="sheet__legend">${icon('refresh', { size: 18 })} بازنشانی کامل رمز</div>
+          <p class="danger-zone__desc">
+            فایل امنیتی (رمز و توکنِ رمزگذاری‌شده) از مخزن حذف می‌شود. بعد از آن ورود با رمز ممکن نیست
+            تا دوباره صفحهٔ راه‌اندازی را باز کنید و <b>توکن تازه + رمز تازه</b> بسازید.
+            لیست کالاها، دسته‌ها و تنظیمات فروشگاه پاک نمی‌شود.
+            <br>
+            اگر فقط می‌خواهید رمز را عوض کنید و توکن بماند، از بخش <b>ریست رمز عبور</b> بالا استفاده کنید.
+          </p>
+          <button class="btn btn--text btn--sm btn--danger" type="button" data-reset-credential>
+            ${icon('refresh', { size: 17 })} بازنشانی رمز و توکن
+          </button>
         </div>
       </form>
     `,
@@ -1305,14 +1377,38 @@ function openSecurity() {
     onMount: (c) => {
       const form = c.el.querySelector('#securityForm');
       const pw = form.elements.namedItem('password');
+      const currentPw = form.elements.namedItem('currentPassword');
       const meter = c.el.querySelector('[data-pw-meter]');
       const saveBtn = c.el.querySelector('[data-save]');
-      pw.addEventListener('input', () => { meter.dataset.score = String(passwordScore(pw.value)); });
+      const estimate = c.el.querySelector('[data-pw-estimate]');
+      c.el.querySelector('[data-toggle-current]')?.addEventListener('click', (event) => {
+        const show = currentPw.type === 'password';
+        currentPw.type = show ? 'text' : 'password';
+        event.currentTarget.innerHTML = icon(show ? 'visibility_off' : 'visibility', { size: 19 });
+        currentPw.focus();
+      });
+      const renderEstimate = () => {
+        const value = pw.value;
+        meter.dataset.score = String(passwordScore(value));
+        if (!estimate) return;
+        if (!value) { estimate.hidden = true; estimate.textContent = ''; return; }
+        const seconds = estimateCrackSeconds(value);
+        estimate.hidden = false;
+        estimate.dataset.level = seconds < WEAK_SECONDS ? 'weak' : seconds < YEAR_SECONDS ? 'ok' : 'strong';
+        estimate.textContent = seconds < WEAK_SECONDS
+          ? `در برابر حملهٔ آفلاین ${formatCrackTime(seconds)} دوام می‌آورد — کافی نیست.`
+          : `تخمین در برابر حملهٔ آفلاین (${formatCrackTime(seconds)}) با فرض واژه‌نامه و یک کارت گرافیک.`;
+      };
+      pw.addEventListener('input', renderEstimate);
       c.el.querySelector('[data-toggle-password]')?.addEventListener('click', (event) => {
         const show = pw.type === 'password';
         pw.type = show ? 'text' : 'password';
         event.currentTarget.innerHTML = icon(show ? 'visibility_off' : 'visibility', { size: 19 });
         pw.focus();
+      });
+      c.el.querySelector('[data-reset-credential]')?.addEventListener('click', () => {
+        c.close();
+        openCredentialReset();
       });
       c.el.querySelector('[data-download-vault]')?.addEventListener('click', () => {
         if (!state.vault) return;
@@ -1322,22 +1418,40 @@ function openSecurity() {
       form.addEventListener('submit', async (event) => {
         event.preventDefault();
         hideError(c);
+        const current = fieldValue(form, 'currentPassword');
         const password = pw.value;
         const password2 = fieldValue(form, 'password2');
         const hint = fieldValue(form, 'hint');
         const newToken = fieldValue(form, 'token');
-        if (password.length < 10) {
-          fieldError(pw, 'رمز جدید باید حداقل ۱۰ کاراکتر باشد.');
+        if (!current) {
+          fieldError(currentPw, 'برای تأیید، رمز فعلی را وارد کنید.');
+          currentPw.focus();
+          return;
+        }
+        if (!password && !newToken) {
+          fieldError(pw, 'رمز جدید را وارد کنید (یا برای تغییر فقط توکن، توکن تازه را بگذارید).');
           pw.focus();
           return;
         }
-        if (password !== password2) {
-          fieldError(form.elements.namedItem('password2'), 'تکرار رمز مطابقت ندارد.');
-          return;
-        }
-        if (passwordScore(password) < 2) {
-          showError(c, 'رمز ضعیف است؛ از حروف و عدد یا یک عبارت بلندتر استفاده کنید.');
-          return;
+        if (password) {
+          if (password.length < 10) {
+            fieldError(pw, 'رمز جدید باید حداقل ۱۰ کاراکتر باشد.');
+            pw.focus();
+            return;
+          }
+          if (password !== password2) {
+            fieldError(form.elements.namedItem('password2'), 'تکرار رمز مطابقت ندارد.');
+            return;
+          }
+          if (passwordScore(password) < 2) {
+            showError(c, 'رمز ضعیف است؛ از حروف و عدد یا یک عبارت بلندتر استفاده کنید.');
+            return;
+          }
+          if (estimateCrackSeconds(password) < WEAK_SECONDS) {
+            fieldError(pw, `این رمز در برابر حملهٔ آفلاین فقط ${formatCrackTime(estimateCrackSeconds(password))} دوام می‌آورد؛ چهار کلمهٔ بی‌ربط بگذارید.`);
+            pw.focus();
+            return;
+          }
         }
         if (newToken && !looksLikeToken(newToken)) {
           showError(c, 'مقدار توکن جدید معتبر به نظر نمی‌رسد.');
@@ -1345,15 +1459,31 @@ function openSecurity() {
         }
         setButtonBusy(saveBtn, true, 'ذخیره امن…');
         try {
-          let token = state.api.token;
+          // The vault is already open in this tab, but re-deriving the key from
+          // the typed password proves that the person at the keyboard owns it.
+          let opened;
+          try {
+            opened = await openVault(state.vault, current);
+          } catch (err) {
+            setButtonBusy(saveBtn, false);
+            if (err?.code === 'bad-password' || err?.code === 'crypto') {
+              fieldError(currentPw, 'رمز فعلی نادرست است.');
+              currentPw.select();
+              return;
+            }
+            throw err;
+          }
+          let token = opened.token || state.api.token;
           if (newToken) {
             const probe = createGitHub({ token: newToken, ...state.repo });
             const info = await probe.getRepo();
             if (info.canPush === false) throw new ApiError('توکن جدید دسترسی نوشتن ندارد.');
             token = newToken;
           }
+          // Empty password + new token = keep the current password, rotate only
+          // the token. Otherwise the typed password becomes the new one.
           const sealed = await sealVault({
-            password,
+            password: password || current,
             token,
             login: state.user?.login || '',
             repo: state.repo,
@@ -1371,8 +1501,14 @@ function openSecurity() {
           if (newToken) {
             state.api = createGitHub({ token, ...state.repo });
           }
+          resetGate();
           c.close();
-          toast('رمز و توکن با موفقیت به‌روزرسانی شد.', { type: 'ok' });
+          const what = password && newToken
+            ? 'رمز و توکن با موفقیت به‌روزرسانی شد.'
+            : password
+              ? 'رمز با موفقیت تغییر کرد؛ از این به بعد با رمز جدید وارد شوید.'
+              : 'توکن با موفقیت جایگزین شد؛ رمز فعلی دست‌نخورده ماند.';
+          toast(what, { type: 'ok' });
           if (res?.commitUrl) {
             console.info('[vault] updated:', res.commitUrl);
           }
@@ -1386,7 +1522,322 @@ function openSecurity() {
   return sheet;
 }
 
+/* ── Credential reset: delete the vault, start over with a fresh token ───── */
+
+/**
+ * Removes data/vault.json from the repository. Afterwards the site has no
+ * password and no token at all, so the owner must fetch a new GitHub token and
+ * set a new password in /setup/ — exactly the first-run flow. The inventory
+ * file is untouched. Works from a temporary-token session too, which is the
+ * way out when the password is forgotten.
+ */
+function openCredentialReset() {
+  if (!isAdmin()) { openLogin(); return; }
+  if (isDemo() || !state.api) {
+    alertDialog({
+      title: 'در پیش‌نمایش ممکن نیست',
+      message: 'حالت پیش‌نمایش توکنی ندارد، پس نمی‌تواند فایل امنیتی را از مخزن حذف کند.',
+      iconName: 'info'
+    });
+    return;
+  }
+  const hasVault = !!state.vault;
+  const sheet = openSheet({
+    title: 'بازنشانی کامل رمز و توکن',
+    subtitle: 'فایل امنیتی از مخزن حذف می‌شود',
+    size: 'narrow',
+    body: `
+      <form id="credentialResetForm" class="stack" style="gap:16px" novalidate>
+        ${errorNote('')}
+        <div class="danger-card">
+          ${icon('warning', { size: 22 })}
+          <div>
+            <b>بعد از این کار، ورود با رمز ممکن نیست</b>
+            <p>فایل <span dir="ltr">data/vault.json</span> حذف می‌شود؛ یعنی هیچ رمز و هیچ توکنی روی سایت نمی‌ماند.
+            برای برگشتن باید یک <b>توکن تازه</b> در گیت‌هاب بسازید و در صفحهٔ راه‌اندازی یک <b>رمز تازه</b> بگذارید.</p>
+          </div>
+        </div>
+        <div class="reset-summary">
+          <div class="reset-summary__row is-removed">
+            ${icon('delete', { size: 18 })}
+            <span>حذف می‌شود: فایل امنیتی، یعنی توکنِ رمزگذاری‌شده و رمزِ مربوط به آن</span>
+          </div>
+          <div class="reset-summary__row">
+            ${icon('check', { size: 18 })}
+            <span>می‌ماند: لیست کالاها، دسته‌بندی‌ها، تنظیمات فروشگاه و تاریخچه</span>
+          </div>
+        </div>
+        <div class="form-note">
+          ${icon('info', { size: 18 })}
+          <span>این دکمه توکن را در گیت‌هاب باطل نمی‌کند. بعد از بازنشانی، توکن قدیمی را در
+          <a href="https://github.com/settings/tokens" target="_blank" rel="noopener" dir="ltr">github.com/settings/tokens</a>
+          حذف (Revoke) کنید و یک توکن تازه بگیرید.</span>
+        </div>
+        ${state.dirty ? `<div class="form-note form-note--danger">
+          ${icon('warning', { size: 18 })}
+          <span>تغییرات منتشرنشدهٔ لیست دارید؛ با بازنشانی از بین می‌رود. اول «انتشار» بزنید یا نسخه پشتیبان بگیرید.</span>
+        </div>` : ''}
+        ${hasVault ? `<label class="check">
+          <input type="checkbox" name="backup" checked>
+          <span>قبل از حذف، نسخهٔ پشتیبان فایل امنیتی را دانلود کن</span>
+        </label>` : ''}
+        <label class="field">
+          <span class="field__label">برای تأیید، عبارت <b>${escapeHtml(CREDENTIAL_RESET_PHRASE)}</b> را بنویسید<span class="req">*</span></span>
+          <input class="input" name="phrase" autocomplete="off" placeholder="${escapeHtml(CREDENTIAL_RESET_PHRASE)}" required>
+          <span class="field__hint">این عبارت جلوی بازنشانی اتفاقی را می‌گیرد.</span>
+          <span class="field__error"></span>
+        </label>
+      </form>
+    `,
+    footer: `
+      <span class="spacer"></span>
+      <button class="btn btn--text btn--sm" type="button" data-close>انصراف</button>
+      <button class="btn btn--filled btn--sm btn--danger" type="submit" form="credentialResetForm" data-submit>
+        ${icon('refresh', { size: 17 })} حذف رمز و توکن
+      </button>
+    `,
+    onMount: (c) => {
+      const form = c.el.querySelector('#credentialResetForm');
+      const submit = c.el.querySelector('[data-submit]');
+      const phrase = form.elements.namedItem('phrase');
+      phrase.focus();
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        hideError(c);
+        const typed = String(phrase.value || '').replace(/\s+/g, ' ').trim();
+        if (typed !== CREDENTIAL_RESET_PHRASE) {
+          fieldError(phrase, `برای تأیید، دقیقاً «${CREDENTIAL_RESET_PHRASE}» را بنویسید.`);
+          phrase.select();
+          return;
+        }
+        const wantsBackup = hasVault && form.elements.namedItem('backup')?.checked;
+        if (wantsBackup && state.vault) {
+          download('vault-backup.json', `${JSON.stringify(state.vault, null, 2)}\n`);
+        }
+        setButtonBusy(submit, true, 'در حال حذف…');
+        c.setBusy(true);
+        try {
+          const file = await state.api.getFile('data/vault.json');
+          const res = file?.sha
+            ? await state.api.deleteFile({
+              path: 'data/vault.json',
+              sha: file.sha,
+              message: `بازنشانی رمز و توکن (حذف فایل امنیتی) — ${formatJalaliStamp()}`
+            })
+            : { missing: true, commitUrl: null };
+          resetGate();
+          endAdminSession();
+          document.querySelectorAll('dialog.sheet[open]').forEach((d) => { try { d.close(); } catch { /* ignore */ } });
+          openCredentialResetDone({ commitUrl: res?.commitUrl || null, already: !!res?.missing });
+        } catch (err) {
+          setButtonBusy(submit, false);
+          c.setBusy(false);
+          showError(c, err?.message || 'حذف فایل امنیتی ناموفق بود.');
+        }
+      });
+    }
+  });
+  return sheet;
+}
+
+function openCredentialResetDone({ commitUrl = null, already = false } = {}) {
+  openSheet({
+    title: 'رمز و توکن پاک شد',
+    size: 'narrow',
+    body: `
+      <div class="stack" style="gap:16px">
+        <div class="login-hero">
+          <span class="login-hero__icon">${icon('lock_open', { size: 24 })}</span>
+          <div>
+            <div class="login-hero__title">${already ? 'فایل امنیتی از قبل وجود نداشت' : 'از این لحظه هیچ رمزی روی سایت نیست'}</div>
+            <div class="login-hero__sub">
+              لیست کالاها، دسته‌ها و تنظیمات دست‌نخورده ماند. برای ورود مدیر باید یک توکن تازه و یک رمز تازه بسازید.
+            </div>
+          </div>
+        </div>
+        <ol class="cred-steps">
+          <li>
+            <span class="cred-steps__num">۱</span>
+            <b>توکن قدیمی را باطل کنید.</b>
+            در <a href="https://github.com/settings/tokens" target="_blank" rel="noopener" dir="ltr">github.com/settings/tokens</a>
+            توکن قبلی را Revoke کنید و یک توکن تازه بسازید (Contents: Read and write).
+          </li>
+          <li>
+            <span class="cred-steps__num">۲</span>
+            <b>صفحهٔ راه‌اندازی را روی رایانه باز کنید:</b>
+            <code dir="ltr">npm start</code> ← <code dir="ltr">http://localhost:8080/setup/</code>
+          </li>
+          <li>
+            <span class="cred-steps__num">۳</span>
+            توکن تازه و رمز تازه را وارد کنید؛ زیر کادر رمز، تخمین زمان شکستن را ببینید.
+            بعد <b>ساخت فایل امنیتی</b> ← <b>نوشتن در مخزن گیت‌هاب</b>.
+          </li>
+          <li><span class="cred-steps__num">۴</span>به سایت برگردید و با رمز تازه وارد شوید.</li>
+        </ol>
+        <div class="form-note">
+          ${icon('info', { size: 18 })}
+          <span>اگر رمز را فراموش کرده بودید، همین مسیر جواب می‌دهد: با «ورود موقت با توکن» وارد شوید،
+          فایل امنیتی را پاک کنید و از نو رمز بسازید.</span>
+        </div>
+      </div>
+    `,
+    footer: `
+      <span class="spacer"></span>
+      ${commitUrl ? `<a class="btn btn--text btn--sm" href="${escapeHtml(commitUrl)}" target="_blank" rel="noopener">${icon('open_in_new', { size: 17 })} کامیت حذف</a>` : ''}
+      <a class="btn btn--text btn--sm" href="help/#security">${icon('help', { size: 17 })} راهنما</a>
+      <button class="btn btn--filled btn--sm" type="button" data-close>باشه</button>
+    `
+  });
+}
+
 /* ── Publish ────────────────────────────────────────────────────────────── */
+
+/**
+ * Writes the current draft to data/store.json and marks the session as clean.
+ * Used by the publish sheet and by destructive actions (reset) that commit
+ * immediately.
+ */
+async function commitStore(next, message) {
+  let sha = state.sha;
+  if (!sha) {
+    const existing = await state.api.getFile('data/store.json');
+    sha = existing?.sha || null;
+  }
+  const res = await state.api.putFile({
+    path: 'data/store.json',
+    content: serializeStore(next),
+    message,
+    sha
+  });
+  markPublished({ data: next, sha: res.sha, commit: res });
+  return res;
+}
+
+/* ── Danger zone: reset the whole inventory ─────────────────────────────── */
+
+function openResetSheet() {
+  if (!isAdmin()) { openLogin(); return; }
+  const data = state.data;
+  const devices = data?.devices?.length || 0;
+  const categories = data?.categories?.length || 0;
+  const numbers = (n) => formatNum(n, currentNumerals());
+  const sheet = openSheet({
+    title: 'بازنشانی لیست موجودی',
+    subtitle: 'همه دستگاه‌ها و دسته‌بندی‌ها حذف می‌شوند',
+    size: 'narrow',
+    body: `
+      <form id="resetForm" class="stack" style="gap:16px" novalidate>
+        ${errorNote('')}
+        <div class="danger-card">
+          ${icon('warning', { size: 22 })}
+          <div>
+            <b>این کار قابل بازگشت نیست</b>
+            <p>با تأیید، ${numbers(devices)} دستگاه و ${numbers(categories)} دسته‌بندی پاک می‌شوند و تغییر
+            <b>بلافاصله</b> روی سایت منتشر می‌شود. بازدیدکننده‌ها از آن لحظه لیست خالی می‌بینند.</p>
+          </div>
+        </div>
+        <div class="reset-summary">
+          <div class="reset-summary__row is-removed">
+            ${icon('delete', { size: 18 })}
+            <span>حذف می‌شود: دستگاه‌ها، دسته‌بندی‌ها و مشخصات آن‌ها</span>
+          </div>
+          <div class="reset-summary__row">
+            ${icon('check', { size: 18 })}
+            <span>می‌ماند: نام فروشگاه، تماس و آدرس، تنظیمات نمایش، رمز و توکن، تاریخچه</span>
+          </div>
+        </div>
+        <label class="check">
+          <input type="checkbox" name="backup" checked>
+          <span>قبل از حذف، یک نسخه پشتیبان (فایل JSON) دانلود کن</span>
+        </label>
+        <label class="field">
+          <span class="field__label">برای تأیید، عبارت <b dir="rtl">${escapeHtml(RESET_PHRASE)}</b> را بنویسید<span class="req">*</span></span>
+          <input class="input" name="phrase" autocomplete="off" placeholder="${escapeHtml(RESET_PHRASE)}" required>
+          <span class="field__hint">این عبارت جلوی حذف اتفاقی را می‌گیرد.</span>
+          <span class="field__error"></span>
+        </label>
+      </form>
+    `,
+    footer: `
+      <span class="spacer"></span>
+      <button class="btn btn--text btn--sm" type="button" data-close>انصراف</button>
+      <button class="btn btn--filled btn--sm btn--danger" type="submit" form="resetForm" data-submit>
+        ${icon('delete_forever', { size: 17 })} حذف همه و انتشار
+      </button>
+    `,
+    onMount: (c) => {
+      const form = c.el.querySelector('#resetForm');
+      const submit = c.el.querySelector('[data-submit]');
+      const phrase = form.elements.namedItem('phrase');
+      phrase.focus();
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        hideError(c);
+        const typed = String(phrase.value || '').replace(/\s+/g, ' ').trim();
+        if (typed !== RESET_PHRASE) {
+          fieldError(phrase, `برای تأیید، دقیقاً «${RESET_PHRASE}» را بنویسید.`);
+          phrase.select();
+          return;
+        }
+        if (form.elements.namedItem('backup').checked && state.data) exportBackup();
+        setButtonBusy(submit, true, 'در حال حذف…');
+        c.setBusy(true);
+        try {
+          const by = state.user?.name || state.data?.settings?.adminName || 'مدیر فروشگاه';
+          const { data: next, removedDevices, removedCategories } = clearInventory(state.data, { by });
+          let res = null;
+          if (isDemo()) {
+            replaceData(next, { baseline: next });
+          } else {
+            res = await commitStore(next, `بازنشانی لیست موجودی — ${formatJalaliStamp()}`);
+          }
+          c.close();
+          document.querySelectorAll('dialog.sheet[open]').forEach((d) => { try { d.close(); } catch { /* ignore */ } });
+          openResetSuccess({ removedDevices, removedCategories, res, demo: isDemo() });
+        } catch (err) {
+          setButtonBusy(submit, false);
+          c.setBusy(false);
+          showError(c, err?.message || 'بازنشانی ناموفق بود.');
+        }
+      });
+    }
+  });
+  return sheet;
+}
+
+function openResetSuccess({ removedDevices, removedCategories, res, demo }) {
+  const numbers = (n) => formatNum(n, currentNumerals());
+  const url = res?.commitUrl || (state.repo ? `https://github.com/${state.repo.owner}/${state.repo.repo}/commits/${state.repo.branch}` : '');
+  openSheet({
+    title: 'لیست بازنشانی شد',
+    size: 'narrow',
+    body: `
+      <div class="stack" style="gap:16px">
+        <div class="login-hero">
+          <span class="login-hero__icon">${icon('delete_sweep', { size: 24 })}</span>
+          <div>
+            <div class="login-hero__title">${numbers(removedDevices)} دستگاه و ${numbers(removedCategories)} دسته حذف شد</div>
+            <div class="login-hero__sub">
+              ${demo
+                ? 'این تغییر فقط در پیش‌نمایش اعمال شد؛ چون توکنی وجود ندارد، چیزی روی مخزن نوشته نشد.'
+                : 'فایل data/store.json بازنویسی شد. لیست عمومی تا یک دقیقه خالی می‌شود.'}
+            </div>
+          </div>
+        </div>
+        ${demo ? '' : `<div class="form-note">
+          ${icon('info', { size: 18 })}
+          <span>نسخه پشتیبان در پوشه دانلودهای شماست. برای بازگردانی کامل: تنظیمات → بازیابی از فایل.
+          همچنین می‌توانید همان کامیت را در گیت‌هاب Revert کنید.</span>
+        </div>`}
+      </div>
+    `,
+    footer: `
+      <span class="spacer"></span>
+      ${url ? `<a class="btn btn--text btn--sm" href="${escapeHtml(url)}" target="_blank" rel="noopener">${icon('open_in_new', { size: 17 })} تاریخچه گیت‌هاب</a>` : ''}
+      <button class="btn btn--filled btn--sm" type="button" data-close>باشه</button>
+    `
+  });
+}
 
 async function openPublish() {
   if (isDemo()) {
@@ -1476,19 +1927,7 @@ async function openPublish() {
             summary: diff.stockOnly ? 'به‌روزرسانی موجودی' : diffSummary(diff) || message,
             stats: { added: diff.added.length, updated: diff.updated.length, removed: diff.removed.length }
           }, ...(next.meta.history || [])].slice(0, 60);
-          const content = serializeStore(next);
-          let sha = state.sha;
-          if (!sha) {
-            const existing = await state.api.getFile('data/store.json');
-            sha = existing?.sha || null;
-          }
-          const res = await state.api.putFile({
-            path: 'data/store.json',
-            content,
-            message,
-            sha
-          });
-          markPublished({ data: next, sha: res.sha, commit: res });
+          const res = await commitStore(next, message);
           c.close();
           openPublishSuccess(res);
         } catch (err) {
@@ -1718,4 +2157,9 @@ async function discardChanges() {
   toast('تغییرات بازگردانی شد.', { type: 'ok' });
 }
 
-export { openLogin, openPublish, openSettings, openDeviceEditor, openCategoryEditor, openSecurity };
+function openHelp() {
+  const url = new URL('help/', document.baseURI).href;
+  window.open(url, '_blank', 'noopener');
+}
+
+export { openLogin, openPublish, openSettings, openDeviceEditor, openCategoryEditor, openSecurity, openResetSheet, openHelp };
