@@ -277,7 +277,9 @@ test('فایل واقعی store.json معتبر و کامل است', () => {
   const text = fs.readFileSync(path.join(ROOT, 'data/store.json'), 'utf8');
   const data = model.parseStoreJson(text);
   assert.equal(model.serializeStore(data), text, 'store.json باید با خروجی سریالایزر یکسان باشد');
-  assert.ok(data.devices.length > 0);
+  // An empty inventory is valid (the admin can reset everything on purpose).
+  assert.ok(Array.isArray(data.devices));
+  assert.ok(Array.isArray(data.categories));
   assert.ok(data.categories.every((c) => c.fields.every((f) => f.label)));
 });
 
@@ -598,6 +600,145 @@ test('ریست کلی رمزها فایل امنیتی را حذف می‌کند
   assert.ok(/deleteFile\(\{\s*\n?\s*path: 'data\/vault\.json'/.test(src),
     'ریست کلی باید vault.json را حذف کند');
   assert.ok(/CREDENTIAL_RESET_PHRASE/.test(src), 'تأیید متنی برای ریست کلی لازم است');
+});
+
+test('قالب‌های آمادهٔ مشخصات، فیلدهای تازه و مستقل می‌سازند', () => {
+  const phone = model.presetFields('phone');
+  assert.ok(phone.length >= 3, 'قالب موبایل باید چند مشخصه داشته باشد');
+  assert.ok(phone.every((f) => f.label && f.key));
+  assert.ok(phone.some((f) => f.showInRow), 'حداقل یک مشخصه باید در ردیف نمایش داده شود');
+  const again = model.presetFields('phone');
+  assert.notEqual(phone[0], again[0], 'هر بار باید شیء تازه ساخته شود');
+  assert.equal(phone[0].key, again[0].key, 'کلید مشخصه باید پایدار باشد');
+  assert.deepEqual(model.presetFields('nope'), []);
+});
+
+test('مشخصات اضافهٔ هر کالا ذخیره، پاک‌سازی و گرد می‌شوند', () => {
+  const data = model.normalizeStore({
+    store: { name: 'فروشگاه' },
+    categories: [{ id: 'c1', title: 'موبایل', fields: [{ key: 'ram', label: 'رم' }] }],
+    devices: [{
+      id: 'd1', name: 'گوشی', categoryId: 'c1', stock: 1,
+      specs: { ram: '۸' },
+      extraSpecs: [
+        { label: 'ایراد فنی', value: 'خش کوچک' },
+        { label: 'ایراد فنی', value: 'تکراری' },
+        { label: '', value: 'بدون عنوان' },
+        { label: ' جعبه ', value: ' دارد ' }
+      ]
+    }]
+  });
+  const extra = model.deviceExtraSpecs(data.devices[0]);
+  assert.deepEqual(extra, [
+    { label: 'ایراد فنی', value: 'خش کوچک' },
+    { label: 'جعبه', value: 'دارد' }
+  ]);
+  const json = JSON.parse(model.serializeStore(data));
+  assert.deepEqual(json.devices[0].extraSpecs, extra, 'خروجی JSON باید مشخصات اضافه را نگه دارد');
+  assert.deepEqual(model.deviceExtraSpecs({}), [], 'کالای بدون مشخصات اضافه نباید خطا بدهد');
+});
+
+test('پنل مدیریت یک صفحه است، نه پنجرهٔ شناور', () => {
+  const src = fs.readFileSync(path.join(ROOT, 'assets/js/manage.js'), 'utf8');
+  assert.ok(!/openSheet/.test(src), 'پنل نباید از دیالوگ شناور استفاده کند');
+  assert.ok(/is-manage-page/.test(src), 'کلاس صفحهٔ مدیریت تنظیم نمی‌شود');
+  assert.ok(/data-mp-back/.test(src), 'دکمهٔ بازگشت به لیست در پنل نیست');
+  assert.ok(/closeManagePanel/.test(src), 'تابع بستن صفحه تعریف نشده');
+  const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+  assert.ok(/managePageHost/.test(html), 'میزبان صفحهٔ مدیریت در index.html نیست');
+  assert.ok(!/adminDockHost/.test(html), 'میزبان نوار مدیریت قدیمی هنوز در HTML است');
+  const css = fs.readFileSync(path.join(ROOT, 'assets/css/app.css'), 'utf8');
+  assert.ok(/\.mpage__foot/.test(css), 'نوار پایین صفحهٔ مدیریت استایل ندارد');
+  assert.ok(!/\.adminbar/.test(css), 'استایل نوار مدیریت قدیمی باقی مانده');
+});
+
+test('رنگ‌های تأکیدی فقط روی همین چند عنصر پنل اعمال می‌شوند', () => {
+  const css = fs.readFileSync(path.join(ROOT, 'assets/css/app.css'), 'utf8');
+  assert.ok(/\.mp-badge--ok/.test(css) && /\.mp-badge--low/.test(css) && /\.mp-badge--out/.test(css),
+    'برچسب وضعیت باید سه رنگ داشته باشد');
+  assert.ok(/\.mp-stepper__btn--inc[^{]*\{[^}]*var\(--ok\)/.test(css), 'دکمهٔ افزایش باید سبز باشد');
+  assert.ok(/\.mp-stepper__btn--dec[^{]*\{[^}]*var\(--low\)/.test(css), 'دکمهٔ کاهش باید زرد باشد');
+  assert.ok(/\.mp-row__danger[^{]*\{[^}]*var\(--danger\)/.test(css), 'حذف باید قرمز باشد');
+  const base = fs.readFileSync(path.join(ROOT, 'assets/css/base.css'), 'utf8');
+  assert.ok(/\.btn--ok\s*\{/.test(base), 'دکمهٔ سبز تأیید تعریف نشده');
+});
+
+test('رنگ‌ها روی آیکون‌ها دیده می‌شوند، نه فقط روی متن', () => {
+  const render = fs.readFileSync(path.join(ROOT, 'assets/js/render.js'), 'utf8');
+  // The stock pill must carry a coloured glyph: ✓ green, ! amber, ✕ red.
+  assert.ok(/stock-badge__ic/.test(render), 'نشان موجودی آیکون رنگی ندارد');
+  assert.ok(/'cancel'/.test(render) && /'warning'/.test(render) && /'check_circle'/.test(render),
+    'آیکون هر سه وضعیت موجودی تعریف نشده');
+  // pickTone() already stamped data-tone; the stylesheet must consume it now.
+  assert.ok(/data-tone="\$\{pickTone\(title\)\}"/.test(render), 'آیکون دسته رنگ نمی‌گیرد');
+  const css = fs.readFileSync(path.join(ROOT, 'assets/css/app.css'), 'utf8');
+  assert.ok(/\.stock-badge__ic \.ic\s*\{[^}]*width/.test(css), 'اندازهٔ آیکون نشان موجودی تعیین نشده');
+  assert.ok(/\.stock-badge\[data-state="out"\]\s*\{[^}]*var\(--danger\)/.test(css), 'ناموجود قرمز نیست');
+  for (const n of [1, 2, 3, 4, 5]) {
+    assert.ok(new RegExp(`\\.device__thumb\\[data-tone="${n}"\\]`).test(css),
+      `رنگ آیکون شمارهٔ ${n} در CSS استفاده نشده`);
+  }
+  const tokens = fs.readFileSync(path.join(ROOT, 'assets/css/tokens.css'), 'utf8');
+  assert.equal((tokens.match(/--tone-1:/g) || []).length, 3, 'رنگ‌های آیکون باید در روشن و هر دو بلوک تاریک باشند');
+});
+
+test('دسته‌ها قالب مشخصات دارند و کالاها می‌توانند مشخصهٔ اضافه بگیرند', () => {
+  const admin = fs.readFileSync(path.join(ROOT, 'assets/js/admin.js'), 'utf8');
+  assert.ok(/FIELD_PRESETS/.test(admin), 'قالب‌های آماده در ویرایش دسته استفاده نشده‌اند');
+  assert.ok(/data-preset/.test(admin), 'دکمهٔ قالب مشخصات در ویرایش دسته نیست');
+  assert.ok(/extraSpecsHost/.test(admin), 'بخش مشخصات اضافه در فرم کالا نیست');
+  assert.ok(/specs,\s*\n\s*extraSpecs/.test(admin), 'مشخصات اضافه هنگام ذخیره ثبت نمی‌شود');
+  const modelSrc = fs.readFileSync(path.join(ROOT, 'assets/js/model.js'), 'utf8');
+  assert.ok(/export const FIELD_PRESETS/.test(modelSrc));
+  assert.ok(/extraSpecs: normalizeExtraSpecs/.test(modelSrc));
+  const render = fs.readFileSync(path.join(ROOT, 'assets/js/render.js'), 'utf8');
+  assert.ok(/deviceExtraSpecs\(device\)/.test(render), 'مشخصات اضافه در جزئیات کالا دیده نمی‌شود');
+});
+
+test('انتشار، «آخرین به‌روزرسانی» و تاریخچه را به‌روز می‌کند', () => {
+  const base = model.normalizeStore({ store: { name: 'فروشگاه' }, settings: { adminName: 'پوریا' }, categories: [], devices: [] });
+  const at = '2026-10-26T12:00:00.000Z';
+  const next = model.stampMeta(base, { at, action: 'publish', summary: '۲ دستگاه', stats: { added: 2 } });
+  assert.equal(next.meta.updatedAt, at, 'زمان به‌روزرسانی باید عوض شود');
+  assert.equal(next.meta.updatedBy, 'پوریا', 'نام مدیر از تنظیمات خوانده شود');
+  assert.equal(next.meta.history[0].action, 'publish');
+  assert.equal(next.meta.history[0].summary, '۲ دستگاه');
+  assert.deepEqual(next.meta.history[0].stats, { added: 2 });
+
+  // the history never grows past the cap the site documents
+  const many = model.normalizeStore({
+    ...JSON.parse(model.serializeStore(base)),
+    meta: { updatedAt: at, history: Array.from({ length: 60 }, (_, i) => ({ id: 'h' + i, at, by: 'x', action: 'publish', summary: 's' })) }
+  });
+  const capped = model.stampMeta(many, { at, summary: 'تازه' });
+  assert.equal(capped.meta.history.length, 60, 'تاریخچه باید روی ۶۰ مورد بماند');
+  assert.equal(capped.meta.history[0].summary, 'تازه');
+
+  assert.equal(model.diffHeadline(model.computeDiff(base, next), 'پیام'), 'بدون تغییر');
+  assert.equal(model.diffHeadline(null, 'پیام'), 'پیام');
+});
+
+test('انتشار از پنل (نه فقط برگهٔ انتشار) هم متادیتا را ثبت می‌کند', () => {
+  const admin = fs.readFileSync(path.join(ROOT, 'assets/js/admin.js'), 'utf8');
+  const start = admin.indexOf('async function publishPending');
+  assert.ok(start > -1, 'publishPending پیدا نشد');
+  const fn = admin.slice(start, admin.indexOf('function defaultCommitMessage'));
+  assert.ok(/stampMeta\(/.test(fn), 'انتشار پنل باید stampMeta را صدا بزند');
+  assert.ok(/commitStore\(next, finalMessage\)/.test(fn), 'انتشار پنل باید همان سند مهرشده را بنویسد');
+  assert.ok(/historySummary\(/.test(fn), 'خط تاریخچه باید با ارقام فارسی نوشته شود');
+});
+
+test('پنل با کلیدهای میان‌بر، فوکوس و دکمهٔ بازگشت مرورگر سازگار است', () => {
+  const src = fs.readFileSync(path.join(ROOT, 'assets/js/manage.js'), 'utf8');
+  assert.ok(/pushState\(\{ \.\.\.\(history\.state \|\| \{\}\), olManage: true \}/.test(src), 'پنل باید یک ورودی تاریخچه بگذارد');
+  assert.ok(/addEventListener\('popstate'/.test(src), 'دکمهٔ بازگشت مرورگر باید پنل را ببندد');
+  assert.ok(/el\.tabIndex = -1/.test(src), 'صفحه باید فوکوس‌پذیر باشد');
+  assert.ok(!/\[data-mp-search\]'\)\?\.focus\(\{ preventScroll: true \}\)/.test(src),
+    'باز شدن خودکار صفحه نباید کیبورد گوشی را بالا بیاورد');
+  assert.ok(/if \(!state\.dirty\) page\.confirmApply = false/.test(src), 'کادر تأیید با پیش‌نویس خالی نباید باز بماند');
+  assert.ok(/page\.confirmApply = !ok/.test(src), 'انتشار ناموفق باید کادر تأیید را باز نگه دارد');
+  const css = fs.readFileSync(path.join(ROOT, 'assets/css/app.css'), 'utf8');
+  assert.ok(/body\.is-manage-page #main \{ display: block !important; \}/.test(css), 'چاپ از داخل پنل نباید صفحهٔ سفید بدهد');
 });
 
 /* ── Summary ──────────────────────────────────────────────────────────── */

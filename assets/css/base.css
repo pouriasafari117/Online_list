@@ -210,6 +210,12 @@ hr { border: 0; border-top: 1px solid var(--hairline); margin: 0; }
 .linklike:hover { color: var(--primary); }
 .btn--danger { --btn-bg: var(--danger-container); --btn-fg: var(--danger); --btn-border: transparent; }
 .btn--danger:hover { box-shadow: var(--shadow-1); }
+/* Confirmation / success. The only saturated fill in the product, used for the
+   one action that changes the live shop. */
+.btn--ok { --btn-bg: var(--ok); --btn-fg: var(--on-ok); --btn-border: var(--ok); }
+.btn--ok:hover { box-shadow: var(--shadow-2); }
+.btn--ok-soft { --btn-bg: var(--ok-container); --btn-fg: var(--ok); --btn-border: transparent; }
+.btn--ok-soft:hover { box-shadow: var(--shadow-1); }
 .btn--sm { --btn-h: 36px; padding-inline: 14px; font-size: var(--fs-xs); }
 .btn--sm .ic { width: 17px; height: 17px; }
 .btn--lg { --btn-h: 52px; padding-inline: 26px; font-size: var(--fs-body); }

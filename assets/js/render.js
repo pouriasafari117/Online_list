@@ -5,10 +5,10 @@
 
 import { hydrateIcons, icon } from './icons.js';
 import {
-  categoryTitle, computeStats, countByCategory, getCategory, specText,
+  categoryTitle, computeStats, countByCategory, deviceExtraSpecs, getCategory, specText,
   stockState, visibleDevices
 } from './model.js';
-import { currentNumerals, isAdmin, isDemo, state } from './state.js';
+import { currentNumerals, isAdmin, state } from './state.js';
 import {
   escapeHtml, formatJalaliDate, formatJalaliDateTime, formatNum,
   instagramHref, matchesQuery, pickTone, prefersReducedMotion, safeUrl,
@@ -121,7 +121,7 @@ export function renderFooter() {
       : '<span class="t-muted">هنوز دسته‌بندی‌ای ثبت نشده است.</span>';
   }
   const footerLogin = document.getElementById('footerLogin');
-  if (footerLogin) footerLogin.textContent = isAdmin() ? 'تنظیمات مدیریت' : 'ورود مدیر';
+  if (footerLogin) footerLogin.textContent = isAdmin() ? 'پنل مدیریت' : 'ورود مدیر';
 }
 
 export function renderHeader() {
@@ -139,22 +139,8 @@ export function renderHeader() {
     loginBtn.setAttribute('data-action', 'login');
     loginBtn.removeAttribute('aria-haspopup');
   }
-  const quickAdd = document.getElementById('quickAdd');
-  if (quickAdd) quickAdd.hidden = !isAdmin();
-  const headerPublish = document.getElementById('headerPublish');
-  if (headerPublish) {
-    const compact = window.matchMedia('(max-width: 719px)').matches;
-    const showPublish = isAdmin() && !isDemo() && state.dirty && !compact;
-    headerPublish.hidden = !showPublish;
-    headerPublish.classList.toggle('is-visible', showPublish);
-    headerPublish.classList.toggle('has-changes', !!state.dirty);
-    const label = headerPublish.querySelector('.header-publish__label');
-    if (label) label.textContent = state.dirty ? 'انتشار تغییرات' : 'منتشرشده';
-    headerPublish.setAttribute('aria-disabled', String(!state.dirty));
-    headerPublish.title = state.dirty ? 'تغییرات منتظر انتشار است' : 'همه تغییرات منتشر شده است';
-  }
   const loginLink = document.getElementById('footerLogin');
-  if (loginLink) loginLink.textContent = isAdmin() ? 'تنظیمات مدیریت' : 'ورود مدیر';
+  if (loginLink) loginLink.textContent = isAdmin() ? 'پنل مدیریت' : 'ورود مدیر';
 }
 
 /* ── Stats & last update ────────────────────────────────────────────────── */
@@ -254,7 +240,7 @@ function featureCardHtml(device) {
   return `
     <button class="feature-card reveal is-in" type="button" role="listitem" data-action="detail" data-device-id="${escapeHtml(device.id)}"
             aria-label="جزئیات ${escapeHtml(device.name)}">
-      <div class="feature-card__media">
+      <div class="feature-card__media" data-tone="${pickTone(device.name + device.brand)}">
         ${device.image ? `<img class="thumb-img" src="${escapeHtml(safeUrl(device.image))}" alt="" loading="lazy" decoding="async">` : icon(cat?.icon || 'devices_other', { size: 54 })}
         <span class="feature-card__tag badge badge--inverse">${icon('star', { size: 12 })} ویژه</span>
       </div>
@@ -489,7 +475,7 @@ function groupHtml(cat, items) {
   return `
     <section class="group group--${state.ui.view === 'grid' ? 'grid' : 'list'}" data-group="${escapeHtml(catId)}" aria-label="${escapeHtml(title)}">
       <div class="group__head">
-        <span class="group__icon">${icon(iconName, { size: 19 })}</span>
+        <span class="group__icon" data-tone="${pickTone(title)}">${icon(iconName, { size: 19 })}</span>
         <div class="group__titles">
           <h3 class="group__title">${escapeHtml(title)}</h3>
           <span class="group__meta" data-group-meta="${escapeHtml(catId)}">${metaBits.join(' · ')}</span>
@@ -617,8 +603,10 @@ export function stockBadgeHtml(device) {
       ? `${num(device.stock)} عدد`
       : (stateKey === 'low' ? 'کمیاب' : 'موجود');
   const title = stateKey === 'out' ? 'موجود نیست' : `موجودی: ${num(device.stock)} عدد`;
+  /* A coloured icon, not just a tinted word: ✓ green / ! amber / ✕ red. */
+  const stateIcon = stateKey === 'out' ? 'cancel' : stateKey === 'low' ? 'warning' : 'check_circle';
   return `<span class="stock-badge" data-stock-badge="${escapeHtml(device.id)}" data-state="${stateKey}" title="${escapeHtml(title)}">
-    <span class="stock-badge__dot" aria-hidden="true"></span>${label}
+    <span class="stock-badge__ic" aria-hidden="true">${icon(stateIcon, { size: 13 })}</span>${label}
   </span>`;
 }
 
@@ -740,7 +728,8 @@ export function openDeviceDetail(deviceId) {
     ['برند', device.brand],
     ['وضعیت', device.condition],
     ['گارانتی', device.warranty],
-    ...fields.map((f) => [f.label, specText(f, device)])
+    ...fields.map((f) => [f.label, specText(f, device)]),
+    ...deviceExtraSpecs(device).map((row) => [row.label, row.value])
   ].filter(([, v]) => v);
 
   const sheet = openSheet({
