@@ -418,6 +418,44 @@ export function diffSummary(diff) {
 }
 
 /** Public JSON parse guard used by both the site and the setup page. */
+/**
+ * Wipes the inventory (devices + categories) while keeping store identity,
+ * settings, the vault and the history log. Returns the new data plus what was
+ * removed so the UI can report exact numbers.
+ *
+ * Pure and side-effect free — safe to unit-test.
+ */
+export function clearInventory(data, {
+  at = new Date().toISOString(),
+  by = '',
+  keepCategories = false,
+  reason = 'بازنشانی کامل لیست موجودی'
+} = {}) {
+  const next = normalizeStore(data);
+  const removedDevices = next.devices.length;
+  const removedCategories = keepCategories ? 0 : next.categories.length;
+
+  next.devices = [];
+  if (!keepCategories) next.categories = [];
+
+  const author = String(by || next.meta.updatedBy || next.settings.adminName || 'مدیر فروشگاه').trim();
+  next.meta.updatedAt = at;
+  next.meta.updatedBy = author;
+  next.meta.history = [{
+    id: uid('h'),
+    at,
+    by: author,
+    action: 'reset',
+    summary: reason,
+    stats: { added: 0, updated: 0, removed: removedDevices }
+  }, ...(next.meta.history || [])].slice(0, 60);
+
+  return { data: normalizeStore(next), removedDevices, removedCategories };
+}
+
+/** The exact phrase an admin has to type before a destructive reset. */
+export const RESET_PHRASE = 'حذف همه';
+
 export function parseStoreJson(text) {
   const raw = JSON.parse(text);
   if (!isPlainObject(raw)) throw new Error('ساختار فایل معتبر نیست.');

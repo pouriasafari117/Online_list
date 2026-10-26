@@ -1,0 +1,343 @@
+/* ==========================================================================
+   Help — a printable admin handbook that matches the site's design language
+   ========================================================================== */
+
+.help-page {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.skip-link {
+  position: fixed;
+  inset-inline-start: 12px;
+  inset-block-start: -60px;
+  z-index: 100;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: var(--on-primary);
+  font-size: var(--fs-xs);
+  transition: inset-block-start 160ms ease;
+}
+.skip-link:focus-visible { inset-block-start: 12px; }
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+.help-top {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 40;
+  padding-block: 10px;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: saturate(1.4) blur(18px);
+  border-block-end: 1px solid var(--hairline);
+}
+.help-top__inner { display: flex; align-items: center; gap: 10px; min-height: 48px; }
+.help-top__spacer { flex: 1; }
+.help-top .brand { gap: 10px; min-width: 0; }
+.help-top .brand__text { min-width: 0; overflow: hidden; }
+.help-top .brand__name,
+.help-top .brand__sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.help-top #printLabel { display: inline; }
+
+/* ── Layout ─────────────────────────────────────────────────────────────── */
+.help-layout {
+  display: grid;
+  grid-template-columns: 248px minmax(0, 1fr);
+  gap: clamp(24px, 4vw, 56px);
+  padding-block: clamp(28px, 5vw, 56px) 96px;
+  align-items: start;
+}
+
+.help-toc {
+  position: sticky;
+  inset-block-start: 84px;
+  padding: 18px 16px;
+  border-radius: var(--r-lg, 20px);
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  box-shadow: var(--shadow-1);
+  max-height: calc(100dvh - 110px);
+  overflow: auto;
+}
+.help-toc__title {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 10px;
+  padding-inline-start: 8px;
+}
+.help-toc__nav { display: flex; flex-direction: column; gap: 2px; }
+.help-toc__nav a {
+  display: block;
+  padding: 7px 10px;
+  border-radius: 10px;
+  font-size: var(--fs-xs);
+  color: var(--text-2);
+  text-decoration: none;
+  transition: background 140ms ease, color 140ms ease;
+}
+.help-toc__nav a:hover { background: var(--surface-2); color: var(--text); }
+.help-toc__nav a.is-active {
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.help-main { min-width: 0; max-width: 820px; }
+
+/* ── Hero ───────────────────────────────────────────────────────────────── */
+.help-hero { padding-block-end: clamp(20px, 3vw, 32px); }
+.help-hero h1 { margin: 12px 0 16px; }
+.help-hero__accent {
+  background: linear-gradient(180deg, transparent 62%, color-mix(in srgb, var(--primary) 12%, transparent) 62%);
+  padding-inline: 4px;
+}
+.help-hero .t-lead { max-width: 64ch; }
+.help-hero__meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.help-hero__meta .chip { display: inline-flex; align-items: center; gap: 6px; }
+.help-hero__meta .chip .ic { width: 15px; height: 15px; }
+
+/* ── Sections ───────────────────────────────────────────────────────────── */
+.help-section {
+  padding-block: clamp(24px, 3.4vw, 40px);
+  border-block-start: 1px solid var(--hairline);
+  scroll-margin-block-start: 88px;
+}
+.help-section:first-of-type { border-block-start: 0; }
+.help-section h2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: clamp(1.15rem, 2.4vw, 1.45rem);
+  margin-bottom: 12px;
+  letter-spacing: -0.01em;
+}
+.help-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 12px;
+  background: var(--primary);
+  color: var(--on-primary);
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.help-section h3 { font-size: var(--fs-sm); margin-bottom: 6px; }
+.help-lead { font-size: var(--fs-sm); color: var(--text-2); line-height: 2.05; margin-bottom: 20px; max-width: 68ch; }
+.help-section > p { font-size: var(--fs-sm); color: var(--text-2); line-height: 2.05; }
+.help-inline { font-size: var(--fs-xs); color: var(--text-3); line-height: 2; margin-top: 14px; }
+
+/* ── Steps ──────────────────────────────────────────────────────────────── */
+.help-steps {
+  list-style: none;
+  display: grid;
+  gap: 10px;
+  margin: 18px 0;
+  padding: 0;
+}
+.help-steps li {
+  position: relative;
+  padding: 12px 14px;
+  padding-inline-start: 48px;
+  border-radius: var(--r-md, 14px);
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  font-size: var(--fs-sm);
+  line-height: 1.95;
+  color: var(--text-2);
+}
+.help-steps li::before {
+  /* Numbers are baked into data-step by help.js — CSS counter styles cannot
+     emit Persian digits consistently across browsers. */
+  content: attr(data-step);
+  position: absolute;
+  inset-inline-start: 12px;
+  inset-block-start: 11px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  background: var(--primary-soft, rgba(29, 28, 24, 0.06));
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+.help-steps li b { color: var(--text); }
+
+.help-list { margin: 16px 0; padding-inline-start: 20px; display: grid; gap: 8px; }
+.help-list li { font-size: var(--fs-sm); line-height: 2; color: var(--text-2); }
+.help-list li b { color: var(--text); }
+
+/* ── Figures ────────────────────────────────────────────────────────────── */
+.help-figure {
+  margin: 22px 0;
+  border-radius: var(--r-lg, 20px);
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+  box-shadow: var(--shadow-2);
+}
+.help-figure img { display: block; width: 100%; height: auto; }
+.help-figure figcaption {
+  padding: 10px 16px;
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  border-block-start: 1px solid var(--hairline);
+  background: var(--surface-2);
+  line-height: 1.9;
+}
+.help-figure--tight { max-width: 640px; }
+.help-figure img { background: var(--surface-2); }
+
+/* ── Notes ──────────────────────────────────────────────────────────────── */
+.help-note {
+  display: flex;
+  gap: 12px;
+  margin: 18px 0;
+  padding: 14px 16px;
+  border-radius: var(--r-md, 14px);
+  background: var(--surface-2);
+  border: 1px solid var(--hairline);
+  font-size: var(--fs-xs);
+  line-height: 2;
+  color: var(--text-2);
+}
+.help-note .ic { flex: none; margin-top: 3px; color: var(--text-3); }
+.help-note b { color: var(--text); }
+.help-note--warn {
+  background: var(--low-container);
+  border-color: color-mix(in srgb, var(--low) 26%, transparent);
+  color: color-mix(in srgb, var(--low) 80%, var(--text));
+}
+.help-note--warn .ic { color: var(--low); }
+
+/* ── Tables ─────────────────────────────────────────────────────────────── */
+.help-table-wrap {
+  margin: 18px 0;
+  border-radius: var(--r-md, 14px);
+  border: 1px solid var(--hairline);
+  overflow: auto;
+  background: var(--surface);
+}
+.help-table { width: 100%; border-collapse: collapse; font-size: var(--fs-xs); min-width: 420px; }
+.help-table th,
+.help-table td {
+  padding: 11px 14px;
+  text-align: start;
+  line-height: 1.9;
+  border-block-end: 1px solid var(--hairline);
+  vertical-align: top;
+}
+.help-table thead th {
+  background: var(--surface-2);
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+}
+.help-table tbody tr:last-child td { border-block-end: 0; }
+.help-table td { color: var(--text-2); }
+.help-table b { color: var(--text); }
+.help-table a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+
+/* ── Cards ──────────────────────────────────────────────────────────────── */
+.help-cards { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin: 18px 0; }
+.help-card {
+  padding: 16px;
+  border-radius: var(--r-md, 14px);
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+}
+.help-card__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+  color: var(--primary);
+  margin-bottom: 10px;
+}
+.help-card h3 { font-size: var(--fs-sm); margin-bottom: 6px; }
+.help-card p { font-size: var(--fs-xs); color: var(--text-3); line-height: 1.95; margin: 0; }
+
+/* ── Footer ─────────────────────────────────────────────────────────────── */
+.help-foot {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-block-start: 1px solid var(--hairline);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  justify-content: space-between;
+}
+.help-foot p { font-size: var(--fs-xs); color: var(--text-3); line-height: 2; margin: 0; max-width: 60ch; }
+.help-foot a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+
+/* ── Mobile TOC ─────────────────────────────────────────────────────────── */
+.toc-fab {
+  position: fixed;
+  inset-block-end: 18px;
+  inset-inline-start: 18px;
+  z-index: 45;
+  width: 50px;
+  height: 50px;
+  display: none;
+  place-items: center;
+  border-radius: 18px;
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-2);
+  cursor: pointer;
+}
+.toc-fab.is-open { background: var(--primary); color: var(--on-primary); }
+
+@media (max-width: 900px) {
+  .help-layout { grid-template-columns: minmax(0, 1fr); padding-block-start: 20px; }
+  .help-toc {
+    position: fixed;
+    inset-inline: 12px;
+    inset-block-end: 80px;
+    inset-block-start: auto;
+    z-index: 44;
+    max-height: 60dvh;
+    display: none;
+    box-shadow: var(--shadow-3);
+  }
+  .help-toc.is-open { display: block; }
+  .toc-fab { display: grid; }
+  .help-top { padding-block: 8px; }
+  .help-top__inner { gap: 8px; }
+  .help-top .brand__sub { display: none; }
+  .help-top .brand__name { font-size: 0.8rem; }
+  .help-top [data-action="print"] { padding-inline: 10px; }
+  .help-top #printLabel { display: none; }
+  .help-top__spacer { display: none; }
+  .help-top .btn--filled { margin-inline-start: auto; }
+  .help-top .btn--filled .ic { display: none; }
+  /* The sticky header covers two actions on 360–390px; keep "print" and the back
+     link, drop the theme toggle (the page follows the system theme anyway). */
+  .help-top .btn--icon[data-action="theme"] { display: none; }
+  .help-section { scroll-margin-block-start: 76px; }
+}
+
+/* ── Print ──────────────────────────────────────────────────────────────── */
+@media print {
+  .help-top, .help-toc, .toc-fab { display: none !important; }
+  .help-layout { display: block; padding: 0; }
+  .help-main { max-width: none; }
+  .help-figure { break-inside: avoid; box-shadow: none; }
+  .help-section { break-inside: auto; page-break-inside: auto; }
+  .help-section h2 { break-after: avoid; }
+  .help-table-wrap { overflow: visible; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 9px; color: #666; }
+}

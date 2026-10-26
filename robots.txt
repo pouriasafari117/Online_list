@@ -1,5 +1,9 @@
 User-agent: *
 Allow: /
 Disallow: /setup/
+Disallow: /tools/
+Disallow: /docs/
 
-# The setup page is for the shop owner only and is noindex.
+# /setup/ seals the GitHub token with the admin password. It is not published
+# (see _config.yml + .github/workflows/pages.yml) and refuses to run anywhere
+# except localhost — this entry stays as a second fence.

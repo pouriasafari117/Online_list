@@ -281,6 +281,43 @@ test('فایل واقعی store.json معتبر و کامل است', () => {
   assert.ok(data.categories.every((c) => c.fields.every((f) => f.label)));
 });
 
+test('clearInventory فقط لیست را پاک می‌کند', () => {
+  const data = model.normalizeStore({
+    store: { name: 'فروشگاه من', phone: '۰۹۱۲' },
+    settings: { currency: 'تومان', adminName: 'مدیر' },
+    categories: [{ id: 'c1', title: 'موبایل', fields: [{ key: 'ram', label: 'رم' }] }],
+    devices: [{ id: 'd1', name: 'الف', categoryId: 'c1', stock: 2, specs: { ram: '۸' } }],
+    meta: { updatedBy: 'قبلی', history: [{ id: 'h1', at: '2026-01-01T00:00:00.000Z', by: 'x', action: 'publish', summary: 'ق' }] }
+  });
+  const { data: next, removedDevices, removedCategories } = model.clearInventory(data, {
+    at: '2026-10-26T10:00:00.000Z', by: 'پوریا'
+  });
+  assert.equal(removedDevices, 1);
+  assert.equal(removedCategories, 1);
+  assert.equal(next.devices.length, 0);
+  assert.equal(next.categories.length, 0);
+  // identity, settings and history survive
+  assert.equal(next.store.name, 'فروشگاه من');
+  assert.equal(next.store.phone, '۰۹۱۲');
+  assert.equal(next.settings.currency, 'تومان');
+  assert.equal(next.meta.updatedAt, '2026-10-26T10:00:00.000Z');
+  assert.equal(next.meta.updatedBy, 'پوریا');
+  assert.equal(next.meta.history[0].action, 'reset');
+  assert.equal(next.meta.history.length, 2);
+});
+
+test('clearInventory روی داده خالی هم امن است', () => {
+  const { data, removedDevices } = model.clearInventory(null);
+  assert.equal(removedDevices, 0);
+  assert.equal(data.devices.length, 0);
+  assert.deepEqual(data.devices, []);
+  assert.equal(data.meta.history[0].action, 'reset');
+});
+
+test('عبارت تأیید بازنشانی ثابت است', () => {
+  assert.equal(model.RESET_PHRASE, 'حذف همه');
+});
+
 /* ── Crypto / vault ───────────────────────────────────────────────────── */
 console.log('\n  رمزنگاری (Vault)');
 
@@ -376,6 +413,56 @@ test('آدرس raw با encode ساخته می‌شود', () => {
 test('آدرس Pages برای هر دو نوع مخزن درست است', () => {
   assert.equal(api.pagesUrl({ owner: 'me', repo: 'Online_list' }), 'https://me.github.io/Online_list/');
   assert.equal(api.pagesUrl({ owner: 'me', repo: 'me.github.io' }), 'https://me.github.io/');
+});
+
+/* ── Commit encoding (regression: base64 text was stored as the file) ──── */
+console.log('\n  ثبت فایل در مخزن');
+
+await testAsync('commitFiles محتوا را به‌صورت UTF-8 خام می‌فرستد', async () => {
+  const calls = [];
+  const fetchImpl = async (url, options = {}) => {
+    const body = options.body ? JSON.parse(options.body) : null;
+    calls.push({ url, method: options.method || 'GET', body });
+    const reply = (data, status = 200) => ({
+      ok: status < 400,
+      status,
+      headers: new Headers(),
+      text: async () => JSON.stringify(data),
+      json: async () => data
+    });
+    if (url.includes('/git/ref/heads/')) return reply({ object: { sha: 'head-sha' } });
+    if (url.includes('/git/commits/head-sha')) return reply({ tree: { sha: 'tree-sha' } });
+    if (url.endsWith('/git/blobs')) return reply({ sha: `blob-${calls.length}` });
+    if (url.endsWith('/git/trees')) return reply({ sha: 'new-tree' });
+    if (url.endsWith('/git/commits')) return reply({ sha: 'new-commit', html_url: 'https://x' });
+    if (url.includes('/git/refs/heads/')) return reply({});
+    return reply({});
+  };
+  const client = api.createGitHub({
+    token: fakeToken('ghp_', 30), owner: 'me', repo: 'Online_list', branch: 'main', fetchImpl
+  });
+  const payload = '{\n  "name": "مک‌بوک"\n}\n';
+  await client.commitFiles([{ path: 'data/x.json', content: payload }], 'پیام');
+
+  const blobCall = calls.find((c) => c.url.endsWith('/git/blobs'));
+  assert.ok(blobCall, 'درخواست blob ارسال نشد');
+  assert.equal(blobCall.body.encoding, 'utf-8');
+  assert.equal(blobCall.body.content, payload, 'محتوا نباید base64 شود');
+  assert.ok(!blobCall.body.content.startsWith('eyJ'), 'محتوا نباید base64 باشد');
+});
+
+test('parseJsonLoose فایل‌های base64 قدیمی را بازیابی می‌کند', () => {
+  const original = { v: 1, text: 'سلام' };
+  const b64 = Buffer.from(JSON.stringify(original, null, 2), 'utf8').toString('base64');
+  const parsed = api.parseJsonLoose(b64);
+  assert.equal(parsed.repaired, true);
+  assert.deepEqual(parsed.value, original);
+
+  const plain = api.parseJsonLoose('{"a":1}');
+  assert.equal(plain.repaired, false);
+  assert.deepEqual(plain.value, { a: 1 });
+
+  assert.throws(() => api.parseJsonLoose('not json at all'));
 });
 
 /* ── Summary ──────────────────────────────────────────────────────────── */

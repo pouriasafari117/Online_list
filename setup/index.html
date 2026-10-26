@@ -44,7 +44,7 @@
     </div>
   </header>
 
-  <main class="container setup-main">
+  <main class="container setup-main" id="setupMain">
     <section class="setup-intro">
       <span class="t-eyebrow">گام صفر · یک‌بار برای همیشه</span>
       <h1 class="t-display">توکن را با یک رمز<br><span class="setup-intro__accent">سینک کنید.</span></h1>
@@ -278,7 +278,31 @@
         </div>
       </div>
     </section>
+
   </main>
+
+  <!-- Guard: this page can write data/vault.json, so it must never work on a
+         public host. It is also excluded from every deploy (see _config.yml and
+         .github/workflows/pages.yml); this block is the last line of defence. -->
+  <section class="setup-locked container" id="blockedPanel" hidden>
+    <div class="setup-locked__inner">
+      <span class="setup-locked__icon" data-icon="lock"></span>
+        <h1 class="t-display">این صفحه فقط روی دستگاه خودتان کار می‌کند</h1>
+        <p class="t-lead">
+          صفحه راه‌اندازی می‌تواند فایل امنیتی مخزن را بنویسد، پس عمداً از دسترس عموم خارج شده است.
+          برای ساختن رمز، مخزن را روی کامپیوتر خود اجرا کنید:
+        </p>
+        <pre class="code-block" dir="ltr">npm start
+http://localhost:8080/setup/</pre>
+        <p class="t-xs">
+          اگر Node ندارید: <code dir="ltr">python3 -m http.server 8080</code> در پوشه مخزن.
+          توکن و رمز هرگز نباید از یک صفحه عمومی رد شوند.
+        </p>
+      <a class="btn btn--filled" href="../" style="margin-top:18px">
+        <span data-icon="chevron_right"></span> بازگشت به سایت
+      </a>
+    </div>
+  </section>
 
   <footer class="setup-footer">
     <div class="container">

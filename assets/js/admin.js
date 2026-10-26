@@ -2,11 +2,12 @@
    Admin — unlock the vault, edit the shop, publish to GitHub
    ========================================================================== */
 
-import { ApiError, createGitHub, fetchVault, isValidRepoPart, looksLikeToken } from './api.js';
+import { ApiError, createGitHub, fetchVault, isValidRepoPart, looksLikeToken, parseJsonLoose } from './api.js';
 import { CryptoError, cryptoAvailable, isVault, openVault, passwordScore, sealVault } from './crypto.js';
 import {
-  CATEGORY_ICONS, CONDITION_OPTIONS, computeDiff, defaultCategory, defaultField,
-  diffSummary, getCategory, makeDefaultData, normalizeStore, parseStoreJson, serializeStore
+  CATEGORY_ICONS, CONDITION_OPTIONS, RESET_PHRASE, clearInventory, computeDiff,
+  defaultCategory, defaultField, diffSummary, getCategory, makeDefaultData, normalizeStore,
+  parseStoreJson, serializeStore
 } from './model.js';
 import {
   clearDraft, currentNumerals, discardDraftAndReset, endAdminSession,
@@ -298,6 +299,10 @@ function openPasswordSheet(vault) {
           ${icon('security', { size: 18 })}
           <span>رمز را فراموش کرده‌اید؟ با <a href="setup/" style="text-decoration:underline">صفحه راه‌اندازی</a> می‌توانید توکن جدید بسازید و رمز را بازنشانی کنید.</span>
         </div>
+        <div class="form-note">
+          ${icon('help', { size: 18 })}
+          <span>اولین بار است؟ <a href="help/" target="_blank" rel="noopener" style="text-decoration:underline">راهنمای تصویری مدیر</a> قدم‌به‌قدم توضیح داده است.</span>
+        </div>
       </form>
     `,
     footer: `
@@ -383,9 +388,13 @@ async function unlockAndEnter({ vault, password, repo, token: directToken = null
 
   let remote = makeDefaultData();
   let sha = null;
+  let legacyStore = false;
   if (file) {
     try {
-      remote = parseStoreJson(file.text);
+      // Tolerate files written by the early setup build (base64-wrapped JSON).
+      const { value, repaired } = parseJsonLoose(file.text);
+      remote = parseStoreJson(repaired ? JSON.stringify(value) : file.text);
+      if (repaired) legacyStore = true;
     } catch (err) {
       throw new ApiError('فایل data/store.json در مخزن معتبر نیست. لطفاً نسخه پشتیبان را بررسی کنید.', { code: 'bad-data' });
     }
@@ -424,6 +433,13 @@ async function unlockAndEnter({ vault, password, repo, token: directToken = null
     toast('تغییرات ذخیره‌نشده‌ی قبلی بازیابی شد. برای انتشار، دکمه «انتشار» را بزنید.', { type: 'warn', duration: 6000 });
   } else {
     toast(`خوش آمدید${displayName ? `، ${displayName}` : ''}`, { type: 'ok' });
+  }
+  if (legacyStore) {
+    // The file in the repo was double-encoded by an early build. Publishing
+    // rewrites it as plain JSON, so nudge the owner once.
+    toast('فایل لیست روی مخزن قالب قدیمی دارد؛ با اولین «انتشار» به‌صورت خودکار اصلاح می‌شود.', {
+      type: 'info', duration: 9000
+    });
   }
   if (!state.sha) {
     // The file may be brand new — remember to create it on publish.
@@ -539,8 +555,10 @@ function openAdminMenu(anchor) {
     { label: 'تنظیمات فروشگاه', icon: 'settings', onSelect: openSettings },
     { label: 'رمز و توکن', icon: 'key', onSelect: openSecurity },
     { label: 'نسخه پشتیبان', icon: 'download', onSelect: exportBackup },
+    { label: 'راهنمای مدیر', icon: 'help', onSelect: openHelp },
     { label: 'تاریخچه', icon: 'history', onSelect: () => document.dispatchEvent(new CustomEvent('ol:history')) },
     { separator: true },
+    { label: 'بازنشانی لیست', icon: 'delete_forever', danger: true, onSelect: openResetSheet },
     { label: isDemo() ? 'خروج از پیش‌نمایش' : 'قفل کردن', icon: 'lock', danger: true, onSelect: doLogout }
   ], { align: 'end' });
 }
@@ -1178,6 +1196,19 @@ function openSettings(tab = 'store') {
             ${state.dirty ? `<button class="btn btn--text btn--sm" type="button" data-inline-action="discard">${icon('replay', { size: 17 })} بازگشت به نسخه منتشرشده</button>` : ''}
           </div>
         </div>
+
+        <div class="sheet__section danger-zone">
+          <div class="sheet__legend">${icon('warning', { size: 18 })} منطقه خطر</div>
+          <p class="t-xs" style="color:var(--text-3);line-height:1.9">
+            همه دستگاه‌ها و دسته‌بندی‌ها یک‌جا پاک می‌شوند. اطلاعات فروشگاه، تنظیمات و رمز دست‌نخورده می‌مانند.
+            قبل از اجرا می‌توانید نسخه پشتیبان بگیرید.
+          </p>
+          <div class="row" style="gap:8px;flex-wrap:wrap">
+            <button class="btn btn--danger btn--sm" type="button" data-inline-action="reset">
+              ${icon('delete_forever', { size: 17 })} بازنشانی همه داده‌های لیست
+            </button>
+          </div>
+        </div>
       </form>
     `,
     footer: `
@@ -1198,6 +1229,7 @@ function openSettings(tab = 'store') {
           else if (kind === 'export-backup') exportBackup();
           else if (kind === 'export-csv') exportCsv();
           else if (kind === 'import-backup') importBackup();
+          else if (kind === 'reset') openResetSheet();
         });
       });
       form.addEventListener('submit', (event) => {
@@ -1388,6 +1420,153 @@ function openSecurity() {
 
 /* ── Publish ────────────────────────────────────────────────────────────── */
 
+/**
+ * Writes the current draft to data/store.json and marks the session as clean.
+ * Used by the publish sheet and by destructive actions (reset) that commit
+ * immediately.
+ */
+async function commitStore(next, message) {
+  let sha = state.sha;
+  if (!sha) {
+    const existing = await state.api.getFile('data/store.json');
+    sha = existing?.sha || null;
+  }
+  const res = await state.api.putFile({
+    path: 'data/store.json',
+    content: serializeStore(next),
+    message,
+    sha
+  });
+  markPublished({ data: next, sha: res.sha, commit: res });
+  return res;
+}
+
+/* ── Danger zone: reset the whole inventory ─────────────────────────────── */
+
+function openResetSheet() {
+  if (!isAdmin()) { openLogin(); return; }
+  const data = state.data;
+  const devices = data?.devices?.length || 0;
+  const categories = data?.categories?.length || 0;
+  const numbers = (n) => formatNum(n, currentNumerals());
+  const sheet = openSheet({
+    title: 'بازنشانی لیست موجودی',
+    subtitle: 'همه دستگاه‌ها و دسته‌بندی‌ها حذف می‌شوند',
+    size: 'narrow',
+    body: `
+      <form id="resetForm" class="stack" style="gap:16px" novalidate>
+        ${errorNote('')}
+        <div class="danger-card">
+          ${icon('warning', { size: 22 })}
+          <div>
+            <b>این کار قابل بازگشت نیست</b>
+            <p>با تأیید، ${numbers(devices)} دستگاه و ${numbers(categories)} دسته‌بندی پاک می‌شوند و تغییر
+            <b>بلافاصله</b> روی سایت منتشر می‌شود. بازدیدکننده‌ها از آن لحظه لیست خالی می‌بینند.</p>
+          </div>
+        </div>
+        <div class="reset-summary">
+          <div class="reset-summary__row is-removed">
+            ${icon('delete', { size: 18 })}
+            <span>حذف می‌شود: دستگاه‌ها، دسته‌بندی‌ها و مشخصات آن‌ها</span>
+          </div>
+          <div class="reset-summary__row">
+            ${icon('check', { size: 18 })}
+            <span>می‌ماند: نام فروشگاه، تماس و آدرس، تنظیمات نمایش، رمز و توکن، تاریخچه</span>
+          </div>
+        </div>
+        <label class="check">
+          <input type="checkbox" name="backup" checked>
+          <span>قبل از حذف، یک نسخه پشتیبان (فایل JSON) دانلود کن</span>
+        </label>
+        <label class="field">
+          <span class="field__label">برای تأیید، عبارت <b dir="rtl">${escapeHtml(RESET_PHRASE)}</b> را بنویسید<span class="req">*</span></span>
+          <input class="input" name="phrase" autocomplete="off" placeholder="${escapeHtml(RESET_PHRASE)}" required>
+          <span class="field__hint">این عبارت جلوی حذف اتفاقی را می‌گیرد.</span>
+          <span class="field__error"></span>
+        </label>
+      </form>
+    `,
+    footer: `
+      <span class="spacer"></span>
+      <button class="btn btn--text btn--sm" type="button" data-close>انصراف</button>
+      <button class="btn btn--filled btn--sm btn--danger" type="submit" form="resetForm" data-submit>
+        ${icon('delete_forever', { size: 17 })} حذف همه و انتشار
+      </button>
+    `,
+    onMount: (c) => {
+      const form = c.el.querySelector('#resetForm');
+      const submit = c.el.querySelector('[data-submit]');
+      const phrase = form.elements.namedItem('phrase');
+      phrase.focus();
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        hideError(c);
+        const typed = String(phrase.value || '').replace(/\s+/g, ' ').trim();
+        if (typed !== RESET_PHRASE) {
+          fieldError(phrase, `برای تأیید، دقیقاً «${RESET_PHRASE}» را بنویسید.`);
+          phrase.select();
+          return;
+        }
+        if (form.elements.namedItem('backup').checked && state.data) exportBackup();
+        setButtonBusy(submit, true, 'در حال حذف…');
+        c.setBusy(true);
+        try {
+          const by = state.user?.name || state.data?.settings?.adminName || 'مدیر فروشگاه';
+          const { data: next, removedDevices, removedCategories } = clearInventory(state.data, { by });
+          let res = null;
+          if (isDemo()) {
+            replaceData(next, { baseline: next });
+          } else {
+            res = await commitStore(next, `بازنشانی لیست موجودی — ${formatJalaliStamp()}`);
+          }
+          c.close();
+          document.querySelectorAll('dialog.sheet[open]').forEach((d) => { try { d.close(); } catch { /* ignore */ } });
+          openResetSuccess({ removedDevices, removedCategories, res, demo: isDemo() });
+        } catch (err) {
+          setButtonBusy(submit, false);
+          c.setBusy(false);
+          showError(c, err?.message || 'بازنشانی ناموفق بود.');
+        }
+      });
+    }
+  });
+  return sheet;
+}
+
+function openResetSuccess({ removedDevices, removedCategories, res, demo }) {
+  const numbers = (n) => formatNum(n, currentNumerals());
+  const url = res?.commitUrl || (state.repo ? `https://github.com/${state.repo.owner}/${state.repo.repo}/commits/${state.repo.branch}` : '');
+  openSheet({
+    title: 'لیست بازنشانی شد',
+    size: 'narrow',
+    body: `
+      <div class="stack" style="gap:16px">
+        <div class="login-hero">
+          <span class="login-hero__icon">${icon('delete_sweep', { size: 24 })}</span>
+          <div>
+            <div class="login-hero__title">${numbers(removedDevices)} دستگاه و ${numbers(removedCategories)} دسته حذف شد</div>
+            <div class="login-hero__sub">
+              ${demo
+                ? 'این تغییر فقط در پیش‌نمایش اعمال شد؛ چون توکنی وجود ندارد، چیزی روی مخزن نوشته نشد.'
+                : 'فایل data/store.json بازنویسی شد. لیست عمومی تا یک دقیقه خالی می‌شود.'}
+            </div>
+          </div>
+        </div>
+        ${demo ? '' : `<div class="form-note">
+          ${icon('info', { size: 18 })}
+          <span>نسخه پشتیبان در پوشه دانلودهای شماست. برای بازگردانی کامل: تنظیمات → بازیابی از فایل.
+          همچنین می‌توانید همان کامیت را در گیت‌هاب Revert کنید.</span>
+        </div>`}
+      </div>
+    `,
+    footer: `
+      <span class="spacer"></span>
+      ${url ? `<a class="btn btn--text btn--sm" href="${escapeHtml(url)}" target="_blank" rel="noopener">${icon('open_in_new', { size: 17 })} تاریخچه گیت‌هاب</a>` : ''}
+      <button class="btn btn--filled btn--sm" type="button" data-close>باشه</button>
+    `
+  });
+}
+
 async function openPublish() {
   if (isDemo()) {
     await alertDialog({
@@ -1476,19 +1655,7 @@ async function openPublish() {
             summary: diff.stockOnly ? 'به‌روزرسانی موجودی' : diffSummary(diff) || message,
             stats: { added: diff.added.length, updated: diff.updated.length, removed: diff.removed.length }
           }, ...(next.meta.history || [])].slice(0, 60);
-          const content = serializeStore(next);
-          let sha = state.sha;
-          if (!sha) {
-            const existing = await state.api.getFile('data/store.json');
-            sha = existing?.sha || null;
-          }
-          const res = await state.api.putFile({
-            path: 'data/store.json',
-            content,
-            message,
-            sha
-          });
-          markPublished({ data: next, sha: res.sha, commit: res });
+          const res = await commitStore(next, message);
           c.close();
           openPublishSuccess(res);
         } catch (err) {
@@ -1718,4 +1885,9 @@ async function discardChanges() {
   toast('تغییرات بازگردانی شد.', { type: 'ok' });
 }
 
-export { openLogin, openPublish, openSettings, openDeviceEditor, openCategoryEditor, openSecurity };
+function openHelp() {
+  const url = new URL('help/', document.baseURI).href;
+  window.open(url, '_blank', 'noopener');
+}
+
+export { openLogin, openPublish, openSettings, openDeviceEditor, openCategoryEditor, openSecurity, openResetSheet, openHelp };

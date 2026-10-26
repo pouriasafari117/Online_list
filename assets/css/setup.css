@@ -244,3 +244,34 @@
   .setup-side { position: static; }
   .setup-header__inner .brand__name { font-size: 0.875rem; }
 }
+
+/* ── Public-host guard ─────────────────────────────────────────────────────
+   /setup/ can write data/vault.json, so it refuses to run anywhere except the
+   owner's machine. Keep this panel loud and short. */
+body.is-blocked .setup-header .setup-badge { display: none; }
+.setup-locked { display: flex; justify-content: center; padding-block: clamp(32px, 8vw, 96px); }
+.setup-locked__inner {
+  max-width: 640px;
+  width: 100%;
+  padding: clamp(24px, 4vw, 40px);
+  border-radius: var(--r-xl, 28px);
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, rgba(0, 0, 0, 0.08));
+  box-shadow: var(--shadow-3);
+  text-align: center;
+}
+.setup-locked__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--ink, #1b1a17) 8%, transparent);
+  color: var(--ink, #1b1a17);
+  margin-bottom: 18px;
+}
+.setup-locked h1 { font-size: clamp(1.25rem, 3vw, 1.6rem); margin-bottom: 12px; }
+.setup-locked .t-lead { font-size: var(--fs-sm, 0.95rem); line-height: 2; color: var(--text-2, #5c5a54); }
+.setup-locked .code-block { margin: 18px 0 12px; text-align: left; }
+.setup-locked .t-xs { font-size: var(--fs-xs, 0.78rem); color: var(--text-3, #8a877f); line-height: 2; }

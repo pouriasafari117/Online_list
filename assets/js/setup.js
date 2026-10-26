@@ -18,6 +18,35 @@ const statusHost = $('#testStatus');
 const writeStatusHost = $('#writeStatus');
 const resultPanel = $('#resultPanel');
 
+
+/* ── Host guard ────────────────────────────────────────────────────────────
+   This page seals a GitHub token, so it must only run on the owner's machine.
+   Anywhere else it renders a short explanation and disables everything.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]', '::1', '0.0.0.0']);
+
+export function isLocalHost(hostname = globalThis.location?.hostname || '') {
+  const host = String(hostname).toLowerCase();
+  return LOCAL_HOSTS.has(host) || host.endsWith('.localhost');
+}
+
+function enforceLocalOnly() {
+  const blocked = $('#blockedPanel');
+  const main = $('#setupMain');
+  if (isLocalHost()) return true;
+  document.body.classList.add('is-blocked');
+  if (main) main.hidden = true;
+  if (blocked) blocked.hidden = false;
+  hydrateIcons(document);
+  const form = $('#setupForm');
+  if (form) {
+    form.querySelectorAll('input, button, select').forEach((el) => { el.disabled = true; });
+    form.reset();
+  }
+  return false;
+}
+
 let context = null; // { client, info, user, values }
 let vaultText = '';
 
@@ -406,6 +435,7 @@ async function prefill() {
 
 function init() {
   hydrateIcons();
+  if (!enforceLocalOnly()) return;
   const stored = (() => {
     try { return localStorage.getItem('ol.theme'); } catch { return null; }
   })();

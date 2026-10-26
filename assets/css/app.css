@@ -1420,3 +1420,43 @@ body.has-adminbar .toast-root {
 /* ── Share sheet row ────────────────────────────────────────────────────── */
 .share-row { display: flex; gap: 8px; flex-wrap: wrap; }
 .share-row .btn { flex: 1 1 auto; min-width: 120px; }
+
+/* ── Danger zone (reset inventory) ──────────────────────────────────────── */
+.btn--filled.btn--danger { --btn-bg: var(--danger); --btn-fg: var(--on-danger, #fff); --btn-border: transparent; }
+.btn--filled.btn--danger:hover { filter: brightness(1.06); }
+
+.danger-zone { border: 1px solid color-mix(in srgb, var(--danger) 24%, transparent); }
+.danger-zone .sheet__legend { color: var(--danger); }
+
+.danger-card {
+  display: flex;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: var(--r-md, 14px);
+  background: var(--danger-container);
+  color: var(--danger);
+  border: 1px solid color-mix(in srgb, var(--danger) 22%, transparent);
+}
+.danger-card .ic { flex: none; margin-top: 2px; }
+.danger-card b { display: block; font-size: var(--fs-sm); margin-bottom: 4px; }
+.danger-card p { margin: 0; font-size: var(--fs-xs); line-height: 1.95; color: color-mix(in srgb, var(--danger) 82%, var(--text-2)); }
+
+.reset-summary { display: grid; gap: 8px; }
+.reset-summary__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--fs-xs);
+  line-height: 1.9;
+  color: var(--text-2);
+  padding: 10px 12px;
+  border-radius: var(--r-sm, 10px);
+  background: var(--surface-2, rgba(0, 0, 0, 0.03));
+}
+.reset-summary__row .ic { flex: none; color: var(--ok, #2f7d4f); }
+.reset-summary__row.is-removed { color: var(--danger); }
+.reset-summary__row.is-removed .ic { color: var(--danger); }
+
+/* Empty catalogue: the filter chrome adds nothing, so it steps aside. */
+#filterbar.is-hidden, .resultbar.is-hidden { display: none !important; }
+.empty__actions .btn { text-decoration: none; }

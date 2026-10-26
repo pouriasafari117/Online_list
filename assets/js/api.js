@@ -107,6 +107,32 @@ function mapHttpError(response, data, url) {
   return new ApiError(apiMessage ? `خطای گیت‌هاب: ${apiMessage}` : `خطای گیت‌هاب (${status}).`, base);
 }
 
+/* ── Robust JSON parsing ─────────────────────────────────────────────────── */
+
+function looksLikeBase64(text) {
+  const compact = String(text || '').replace(/\s+/g, '');
+  return compact.length > 16
+    && compact.length % 4 === 0
+    && /^[A-Za-z0-9+/]+={0,2}$/.test(compact);
+}
+
+/**
+ * Parses JSON that may have been stored as a base64 string (an early version of
+ * the setup page did this by mistake). Returns `{ value, repaired }` so callers
+ * can warn the owner, or throws when the text is not JSON at all.
+ */
+export function parseJsonLoose(text) {
+  const raw = String(text ?? '').trim();
+  try {
+    return { value: JSON.parse(raw), repaired: false };
+  } catch (err) {
+    if (!looksLikeBase64(raw)) throw err;
+    return { value: JSON.parse(base64ToUtf8(raw)), repaired: true };
+  }
+}
+
+
+
 /* ── Public reads (no token) ─────────────────────────────────────────────── */
 
 /**
@@ -134,7 +160,10 @@ export async function fetchStoreData(siteConfig, { timeout = 8000 } = {}) {
       const res = await fetch(attempt.url, { signal: controller.signal, cache: 'no-store', credentials: 'omit' });
       clearTimeout(timer);
       if (!res.ok) throw new ApiError(`دریافت لیست ناموفق بود (${res.status}).`, { status: res.status });
-      const text = await res.text();
+      let text = await res.text();
+      let repaired = false;
+      try { repaired = parseJsonLoose(text).repaired; } catch { repaired = false; }
+      if (repaired) text = JSON.stringify(parseJsonLoose(text).value, null, 2);
       return { text, source: attempt.source, url: attempt.url };
     } catch (err) {
       lastError = err;
@@ -160,7 +189,8 @@ export async function fetchVault(siteConfig, { timeout = 8000 } = {}) {
       if (!res.ok) continue;
       const text = await res.text();
       if (!text.trim()) continue;
-      return { vault: JSON.parse(text), url };
+      const parsed = parseJsonLoose(text);
+      return { vault: parsed.value, url, repaired: parsed.repaired };
     } catch { /* try next */ }
   }
   return { vault: null, url: null };
@@ -176,8 +206,8 @@ export async function fetchSiteConfig({ timeout = 6000 } = {}) {
     });
     clearTimeout(timer);
     if (!res.ok) return null;
-    const data = await res.json();
-    if (!data || typeof data !== 'object') return null;
+    const { value: data } = parseJsonLoose(await res.text());
+    if (!data || typeof data !== 'object' || Array.isArray(data)) return null;
     return data;
   } catch {
     return null;
@@ -305,7 +335,9 @@ export function createGitHub({ token, owner, repo, branch = 'main', fetchImpl } 
       for (const file of files) {
         const blob = await request('/git/blobs', {
           method: 'POST',
-          body: { content: utf8ToBase64(file.content), encoding: 'utf-8' }
+          // The Git Data API accepts raw UTF-8 here; base64-encoding the
+          // payload while declaring `utf-8` stores the base64 text itself.
+          body: { content: String(file.content ?? ''), encoding: 'utf-8' }
         });
         blobs.push({ path: file.path, mode: '100644', type: 'blob', sha: blob.data.sha });
       }

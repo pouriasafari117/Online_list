@@ -54,7 +54,7 @@ jobs:
           # setup/ is deliberately NOT published: it is a one-time, local-only page
           # (it can write data/vault.json, so it must never be public). Run
           # `npm start` and open http://localhost:8080/setup/ instead.
-          cp -r index.html 404.html sw.js manifest.webmanifest robots.txt assets data _site/
+          cp -r index.html 404.html sw.js manifest.webmanifest robots.txt assets data help _site/
           echo "Built $(find _site -type f | wc -l) files"
 
       - name: Upload artifact
