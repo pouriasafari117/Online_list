@@ -220,7 +220,7 @@ function focusSearch() {
 function resetFilters() {
   const input = document.getElementById('searchInput');
   if (input) input.value = '';
-  setUI({ q: '', category: 'all', avail: 'all', sort: 'recommended', limit: 24 });
+  setUI({ q: '', category: 'all', avail: 'all', hiddenOnly: false, sort: 'recommended', limit: 24 });
   document.getElementById('sortSelect') && (document.getElementById('sortSelect').value = 'recommended');
 }
 
@@ -328,6 +328,12 @@ function initDelegation() {
   });
 
   document.addEventListener('ol:history', () => openHistory());
+  document.addEventListener('ol:admin-focus', (event) => {
+    const { avail, hidden } = event.detail || {};
+    if (hidden) setUI({ hiddenOnly: true, category: 'all', avail: 'all', q: '', limit: 24 });
+    if (avail) setUI({ avail, hiddenOnly: false, category: 'all', q: '', limit: 24 });
+    scrollToList();
+  });
 
   const search = $('#searchInput');
   if (search) {

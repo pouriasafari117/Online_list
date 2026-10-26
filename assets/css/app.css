@@ -1396,3 +1396,27 @@ body.has-adminbar .toast-root {
   outline: 2px solid var(--text);
   outline-offset: 2px;
 }
+
+/* ── Admin dock warnings ────────────────────────────────────────────────── */
+.adminbar__warns { display: flex; align-items: center; gap: 4px; }
+.adminbar__warn {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding-inline: 9px;
+  border-radius: var(--r-full);
+  background: var(--low-container);
+  color: var(--low);
+  font-size: 10px;
+  font-weight: 650;
+  white-space: nowrap;
+  transition: transform var(--dur-2) var(--ease-spring), filter var(--dur-2);
+}
+.adminbar__warn:hover { transform: translateY(-1px); filter: brightness(0.98); }
+@media (max-width: 719px) {
+  .adminbar__warns { display: none; }
+}
+
+/* ── Share sheet row ────────────────────────────────────────────────────── */
+.share-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.share-row .btn { flex: 1 1 auto; min-width: 120px; }

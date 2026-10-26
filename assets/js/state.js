@@ -32,6 +32,7 @@ export const state = {
     q: '',
     category: 'all',
     avail: 'all',
+    hiddenOnly: false,
     sort: 'recommended',
     view: 'list',
     limit: 24,

@@ -277,6 +277,7 @@ export function visibleFilteredDevices() {
   if (!data) return [];
   const { ui } = state;
   let list = visibleDevices(data, { includeHidden: isAdmin() });
+  if (ui.hiddenOnly) list = list.filter((d) => d.hidden);
   if (ui.category !== 'all') {
     list = list.filter((d) => (d.categoryId || '__none__') === ui.category);
   }
@@ -346,11 +347,19 @@ export function renderFilters() {
   renderCategoryChips();
 
   const resetBtn = document.getElementById('resetFilters');
-  const hasFilters = !!ui.q || ui.category !== 'all' || ui.avail !== 'all' || ui.sort !== 'recommended';
+  const hasFilters = !!ui.q || ui.category !== 'all' || ui.avail !== 'all' || ui.sort !== 'recommended' || !!ui.hiddenOnly;
   if (resetBtn) resetBtn.hidden = !hasFilters;
 
   const listRoot = document.getElementById('listRoot');
   if (listRoot) listRoot.classList.toggle('list--static', !!ui.q);
+  const chips = document.getElementById('categories');
+  if (chips && ui.hiddenOnly) {
+    chips.insertAdjacentHTML('afterbegin', `
+      <button class="chip is-active" type="button" data-action="clear-filters" aria-pressed="true" title="نمایش همه دستگاه‌ها">
+        ${icon('visibility_off', { size: 17 })} فقط پنهان‌ها
+        <span class="chip__count">✕</span>
+      </button>`);
+  }
 
   const searchClear = document.getElementById('searchClear');
   if (searchClear) searchClear.hidden = !ui.q;
@@ -705,6 +714,10 @@ export function openDeviceDetail(deviceId) {
   const fields = (cat?.fields || []).filter((f) => specText(f, device));
   const admin = isAdmin();
   const shareUrl = `${location.origin}${location.pathname}#device-${device.id}`;
+  const deviceWa = whatsappHref(
+    state.data.store.whatsapp,
+    `سلام! درباره «${device.name}» (${device.stock > 0 ? 'موجود' : 'ناموجود'}) در ${state.data.store.name} سوال داشتم.`
+  );
   const specs = [
     ['دسته‌بندی', cat?.title || 'سایر'],
     ['برند', device.brand],
@@ -735,6 +748,7 @@ export function openDeviceDetail(deviceId) {
         </div>
         <div class="row" style="gap:8px;flex-wrap:wrap">
           <button class="btn btn--filled btn--sm" type="button" data-action="call-store">${icon('call', { size: 17 })} تماس برای خرید</button>
+          ${deviceWa ? `<a class="btn btn--tonal btn--sm" href="${escapeHtml(deviceWa)}" target="_blank" rel="noopener">${icon('chat', { size: 17 })} واتساپ</a>` : ''}
           <button class="btn btn--outlined btn--sm" type="button" data-copy-link="${escapeHtml(shareUrl)}">${icon('link', { size: 17 })} کپی لینک</button>
           ${admin ? `<button class="btn btn--tonal btn--sm" type="button" data-edit-device="${escapeHtml(device.id)}">${icon('edit', { size: 17 })} ویرایش</button>` : ''}
         </div>
@@ -811,6 +825,10 @@ function actionLabel(action) {
 
 export function openShareSheet() {
   const url = location.href.split('#')[0];
+  const store = state.data?.store || {};
+  const text = `${store.name || 'فروشگاه'} — لیست موجودی\n${url}`;
+  const wa = store.whatsapp ? `https://wa.me/?text=${encodeURIComponent(text)}` : '';
+  const tg = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(`${store.name || 'فروشگاه'} — لیست موجودی`)}`;
   openSheet({
     title: 'اشتراک‌گذاری لیست',
     subtitle: 'لینک این صفحه را برای مشتری بفرستید',
@@ -819,7 +837,12 @@ export function openShareSheet() {
       <div class="stack" style="gap:12px">
         <p class="t-sm" style="color:var(--text-2);line-height:1.9">با اشتراک‌گذاری این لینک، مشتری همیشه آخرین نسخه موجودی را می‌بیند.</p>
         <div class="code-block">${escapeHtml(url)}<button class="icon-btn" type="button" data-copy-link="${escapeHtml(url)}" aria-label="کپی">${icon('content_copy', { size: 16 })}</button></div>
-        ${navigator.share ? `<button class="btn btn--filled btn--sm" type="button" data-native-share>${icon('share', { size: 17 })} اشتراک‌گذاری با اپلیکیشن‌ها</button>` : ''}
+        <div class="share-row">
+          ${wa ? `<a class="btn btn--tonal btn--sm" href="${escapeHtml(wa)}" target="_blank" rel="noopener">${icon('chat', { size: 17 })} واتساپ</a>` : ''}
+          <a class="btn btn--tonal btn--sm" href="${escapeHtml(tg)}" target="_blank" rel="noopener">${icon('share', { size: 17 })} تلگرام</a>
+          ${navigator.share ? `<button class="btn btn--outlined btn--sm" type="button" data-native-share>${icon('share', { size: 17 })} سایر اپ‌ها</button>` : ''}
+        </div>
+        ${isAdmin() ? `<div class="form-note">${icon('info', { size: 18 })}<span>در حالت مدیریت، لینک شامل وضعیت اجرای شما نیست؛ فقط لیست عمومی را ارسال می‌کند.</span></div>` : ''}
       </div>
     `,
     onMount: (sheet) => {

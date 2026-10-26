@@ -16,3 +16,5 @@ jobs:
           node-version: 20
       - name: Static checks
         run: node tools/verify.mjs
+      - name: Unit tests
+        run: node tools/test.mjs

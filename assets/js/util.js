@@ -61,7 +61,11 @@ export function parseNumber(input) {
   return Number(cleaned);
 }
 
-export function clamp(n, min, max) { return Math.min(max, Math.max(min, n)); }
+export function clamp(n, min, max) {
+  const value = Number(n);
+  if (!Number.isFinite(value)) return min;
+  return Math.min(max, Math.max(min, value));
+}
 
 export function debounce(fn, wait = 180) {
   let t = 0;
@@ -231,6 +235,19 @@ export function safeUrl(url) {
   if (!s) return '';
   if (/^(https?:|data:image\/)/i.test(s)) return s;
   return '';
+}
+
+/** CSV with a UTF-8 BOM so Excel opens Persian text correctly. */
+export function toCsv(rows, { separator = ',', bom = true } = {}) {
+  const escapeCell = (value) => {
+    const str = String(value ?? '');
+    if (/[",;\n\r]/.test(str) || separator !== ',') {
+      return `"${str.replace(/"/g, '""')}"`;
+    }
+    return str;
+  };
+  const body = rows.map((row) => row.map(escapeCell).join(separator)).join('\r\n');
+  return `${bom ? '\uFEFF' : ''}${body}\r\n`;
 }
 
 export function download(filename, content, type = 'application/json') {

@@ -19,9 +19,10 @@ import {
 } from './ui.js';
 import {
   deepClone, download, escapeHtml, formatJalaliDateTime, formatJalaliStamp,
-  formatNum, parseNumber, slugify, storageGet, storageSet, uid
+  formatNum, parseNumber, slugify, storageGet, storageSet, toCsv, uid
 } from './util.js';
 import { icon } from './icons.js';
+import { computeStats } from './model.js';
 import { hydrateIcons } from './render.js';
 
 const REQUIRED_ACTIONS = new Set([
@@ -121,6 +122,11 @@ export function renderAdmin() {
   const name = state.data?.settings?.adminName || state.user?.name || 'مدیر';
   const initial = (name || 'م').trim().charAt(0);
   const statusLabel = demo ? 'پیش‌نمایش' : dirty ? 'منتشرنشده' : 'همگام با مخزن';
+  const stats = computeStats(state.data, { includeHidden: true });
+  const hiddenCount = (state.data?.devices || []).filter((d) => d.hidden).length;
+  const warnBits = [];
+  if (stats.out) warnBits.push({ label: `${formatNum(stats.out, currentNumerals())} ناموجود`, kind: 'out' });
+  if (hiddenCount) warnBits.push({ label: `${formatNum(hiddenCount, currentNumerals())} پنهان`, kind: 'hidden' });
   host.innerHTML = `
     <div class="adminbar ${dirty ? 'is-dirty' : 'is-live'} ${demo ? 'is-demo' : ''}" role="region" aria-label="نوار مدیریت">
       <div class="adminbar__inner">
@@ -130,6 +136,9 @@ export function renderAdmin() {
           <span class="label">${escapeHtml(statusLabel)}</span>
         </span>
         <span class="adminbar__divider" aria-hidden="true"></span>
+        ${warnBits.length ? `<div class="adminbar__warns">
+          ${warnBits.map((w) => `<button class="adminbar__warn" type="button" data-admin-focus="${w.kind}">${w.label}</button>`).join('')}
+        </div>` : ''}
         <div class="adminbar__actions">
           <button class="btn btn--filled btn--sm btn--publish" type="button" data-action="publish">
             ${icon('cloud_upload', { size: 17 })}
@@ -151,6 +160,16 @@ export function renderAdmin() {
       </div>
     </div>
   `;
+  host.querySelectorAll('[data-admin-focus]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const kind = btn.dataset.adminFocus;
+      if (kind === 'out') {
+        document.dispatchEvent(new CustomEvent('ol:admin-focus', { detail: { avail: 'out' } }));
+      } else {
+        document.dispatchEvent(new CustomEvent('ol:admin-focus', { detail: { hidden: true } }));
+      }
+    });
+  });
   hydrateIcons(host);
 }
 
@@ -1154,6 +1173,7 @@ function openSettings(tab = 'store') {
           <p class="t-xs" style="color:var(--text-3);line-height:1.9">فایل JSON دوره‌ای از لیست بگیرید؛ برای بازیابی یا انتقال به مخزن دیگر لازم است.</p>
           <div class="row" style="gap:8px;flex-wrap:wrap">
             <button class="btn btn--outlined btn--sm" type="button" data-inline-action="export-backup">${icon('download', { size: 17 })} دریافت نسخه پشتیبان</button>
+            <button class="btn btn--text btn--sm" type="button" data-inline-action="export-csv">${icon('table_rows', { size: 17 })} خروجی CSV (اکسل)</button>
             <button class="btn btn--text btn--sm" type="button" data-inline-action="import-backup">${icon('cloud_upload', { size: 17 })} بازیابی از فایل</button>
             ${state.dirty ? `<button class="btn btn--text btn--sm" type="button" data-inline-action="discard">${icon('replay', { size: 17 })} بازگشت به نسخه منتشرشده</button>` : ''}
           </div>
@@ -1176,6 +1196,7 @@ function openSettings(tab = 'store') {
           else if (kind === 'logout') doLogout();
           else if (kind === 'discard') discardChanges();
           else if (kind === 'export-backup') exportBackup();
+          else if (kind === 'export-csv') exportCsv();
           else if (kind === 'import-backup') importBackup();
         });
       });
@@ -1513,6 +1534,53 @@ function exportBackup() {
   const stamp = new Date().toISOString().slice(0, 10);
   download(`${slugify(state.data.store.name)}-store-${stamp}.json`, serializeStore(state.data));
   toast('نسخه پشتیبان دانلود شد.', { type: 'ok' });
+}
+
+function exportCsv() {
+  if (!state.data) return;
+  const { data } = state;
+  const catTitle = (id) => data.categories.find((c) => c.id === id)?.title || '';
+  const fieldKeys = [];
+  const fieldLabels = [];
+  for (const cat of data.categories) {
+    for (const field of cat.fields) {
+      const key = `${cat.id}:${field.key}`;
+      if (!fieldKeys.includes(key)) {
+        fieldKeys.push(key);
+        fieldLabels.push(`${cat.title} — ${field.label}${field.unit ? ` (${field.unit})` : ''}`);
+      }
+    }
+  }
+  const meta = [
+    ['نام فروشگاه', data.store.name],
+    ['تلفن', data.store.phone],
+    ['آدرس', data.store.address],
+    ['آخرین به‌روزرسانی', formatJalaliDateTime(data.meta.updatedAt)],
+    ['توسط', data.meta.updatedBy],
+    []
+  ];
+  const header = ['نام دستگاه', 'دسته', 'برند', 'وضعیت', 'موجودی', `قیمت (${data.settings.currency})`, 'گارانتی', ...fieldLabels, 'توضیح'];
+  const rows = data.devices.map((device) => {
+    const cat = data.categories.find((c) => c.id === device.categoryId);
+    return [
+      device.name,
+      cat?.title || '',
+      device.brand,
+      device.condition,
+      device.stock,
+      device.priceOnRequest || !device.price ? 'استعلام' : device.price,
+      device.warranty,
+      ...fieldKeys.map((key) => {
+        const [catId, fieldKey] = key.split(':');
+        if (catId !== device.categoryId) return '';
+        return device.specs?.[fieldKey] || '';
+      }),
+      device.note
+    ];
+  });
+  const csv = toCsv([...meta, header, ...rows]);
+  download(`${slugify(data.store.name)}-inventory-${new Date().toISOString().slice(0, 10)}.csv`, csv, 'text/csv');
+  toast('خروجی CSV آماده شد؛ در اکسل قابل باز کردن است.', { type: 'ok' });
 }
 
 function importBackup() {

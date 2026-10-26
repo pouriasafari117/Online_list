@@ -10,8 +10,14 @@ const RAW_BASE = 'https://raw.githubusercontent.com';
 const API_VERSION = '2022-11-28';
 const DEFAULT_TIMEOUT = 20_000;
 // Resolve data/ against the document base (reliable on Pages, file servers
-// and custom domains) instead of import.meta.url.
-const DATA_BASE = new URL('data/', document.baseURI);
+// and custom domains) instead of import.meta.url. Resolved lazily so this
+// module can also be unit-tested outside a browser.
+function dataBase() {
+  const base = (typeof document !== 'undefined' && document.baseURI)
+    || (typeof location !== 'undefined' && location.href)
+    || 'http://localhost/';
+  return new URL('data/', base);
+}
 
 
 export class ApiError extends Error {
@@ -117,7 +123,7 @@ export async function fetchStoreData(siteConfig, { timeout = 8000 } = {}) {
   }
   attempts.push({
     source: 'local',
-    url: new URL('store.json', DATA_BASE).href
+    url: new URL('store.json', dataBase()).href
   });
 
   let lastError = null;
@@ -143,7 +149,7 @@ export async function fetchVault(siteConfig, { timeout = 8000 } = {}) {
   if (siteConfig?.owner && siteConfig?.repo) {
     attempts.push(rawUrl({ ...siteConfig, path: 'data/vault.json' }, { cacheBust: true }));
   }
-  attempts.push(new URL('vault.json', DATA_BASE).href);
+  attempts.push(new URL('vault.json', dataBase()).href);
   for (const url of attempts) {
     try {
       const controller = new AbortController();
@@ -165,7 +171,7 @@ export async function fetchSiteConfig({ timeout = 6000 } = {}) {
   try {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeout);
-    const res = await fetch(new URL('site.json', DATA_BASE), {
+    const res = await fetch(new URL('site.json', dataBase()), {
       signal: controller.signal, cache: 'no-store', credentials: 'omit'
     });
     clearTimeout(timer);

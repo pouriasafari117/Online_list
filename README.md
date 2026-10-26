@@ -228,6 +228,8 @@ GH_TOKEN=github_pat_xxx OL_PASSWORD='یک-عبارت-طولانی' node tools/ma
 ```bash
 npm start          # http://localhost:8080  (+ /setup/)
 npm run verify     # بررسی JSON، سینتکس JS، ارجاع‌ها و عدم لو رفتن کلید
+npm test           # آزمون واحد: مدل داده، اعداد فارسی، CSV، رمزنگاری، API
+npm run check      # هر دو مورد بالا (همان چیزی که CI اجرا می‌کند)
 npm run vault      # ساخت vault از خط فرمان
 ```
 
