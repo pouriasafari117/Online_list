@@ -34,9 +34,9 @@
   --text-inverse: #eafaf0;
 
   /* Lines */
-  --outline: rgba(255, 255, 255, 0.76);
-  --outline-strong: rgba(255, 255, 255, 0.98);
-  --hairline: rgba(23, 33, 28, 0.08);
+  --outline: rgba(18, 63, 44, 0.42);
+  --outline-strong: rgba(18, 63, 44, 0.5);
+  --hairline: rgba(18, 63, 44, 0.2);
 
   /* Primary — deep forest ink: still serious, but alive next to the ivory */
   --primary: #123f2c;
@@ -153,9 +153,9 @@
   --text-3: #7b8c83;
   --text-inverse: #0b1a13;
 
-  --outline: rgba(255, 255, 255, 0.12);
-  --outline-strong: rgba(255, 255, 255, 0.24);
-  --hairline: rgba(255, 255, 255, 0.08);
+  --outline: rgba(159, 232, 193, 0.36);
+  --outline-strong: rgba(159, 232, 193, 0.5);
+  --hairline: rgba(159, 232, 193, 0.22);
 
   --primary: #9fe8c1;
   --on-primary: #06231a;
@@ -210,9 +210,9 @@
     --text-3: #7b8c83;
     --text-inverse: #0b1a13;
 
-    --outline: rgba(255, 255, 255, 0.12);
-    --outline-strong: rgba(255, 255, 255, 0.24);
-    --hairline: rgba(255, 255, 255, 0.08);
+    --outline: rgba(159, 232, 193, 0.36);
+    --outline-strong: rgba(159, 232, 193, 0.5);
+    --hairline: rgba(159, 232, 193, 0.22);
 
     --primary: #9fe8c1;
     --on-primary: #06231a;
@@ -265,7 +265,7 @@
   --aurora-sky: rgba(174, 217, 255, 0.72);
   --aurora-mint-2: rgba(184, 239, 207, 0.78);
 
-  --glass-line: rgba(255, 255, 255, 0.72);
+  --glass-line: rgba(18, 63, 44, 0.42);
   --glass-blur: 22px;
   --glass-shadow: 0 22px 44px -32px rgba(20, 50, 35, 0.5);
   --glass-shadow-lg: 0 40px 80px -44px rgba(20, 50, 35, 0.55);
@@ -274,7 +274,7 @@
   --glass-panel: rgba(255, 255, 255, 0.66);
   --glass-card: rgba(255, 255, 255, 0.78);
   --glass-card-hover: rgba(255, 255, 255, 0.92);
-  --glass-card-border: #ffffff;
+  --glass-card-border: rgba(18, 63, 44, 0.62);
   --glass-chip: rgba(255, 255, 255, 0.62);
   --glass-chip-hover: #ffffff;
   --glass-field: rgba(255, 255, 255, 0.72);
@@ -287,6 +287,13 @@
   --glass-gloss: rgba(255, 255, 255, 0.62);
   --page-mesh-veil: rgba(238, 244, 239, 0.34);
   --page-mesh-veil-end: rgba(238, 244, 239, 0.52);
+  --page-glow:
+    linear-gradient(180deg, transparent 0%, var(--page-mesh-veil) 30%, var(--page-mesh-veil-end) 100%),
+    radial-gradient(58% 54% at 84% 2%, var(--aurora-mint), transparent 68%),
+    radial-gradient(46% 46% at 8% 0%, var(--aurora-lilac), transparent 70%),
+    radial-gradient(48% 46% at 62% 34%, var(--aurora-peach), transparent 72%),
+    radial-gradient(52% 50% at -4% 58%, var(--aurora-sky), transparent 72%),
+    radial-gradient(56% 52% at 104% 86%, var(--aurora-mint-2), transparent 72%);
 }
 
 [data-theme="dark"] {
@@ -296,7 +303,7 @@
   --aurora-sky: rgba(44, 92, 132, 0.26);
   --aurora-mint-2: rgba(36, 108, 80, 0.3);
 
-  --glass-line: rgba(255, 255, 255, 0.1);
+  --glass-line: rgba(159, 232, 193, 0.38);
   --glass-shadow: 0 22px 44px -30px rgba(0, 0, 0, 0.8);
   --glass-shadow-lg: 0 40px 80px -40px rgba(0, 0, 0, 0.9);
 
@@ -304,7 +311,7 @@
   --glass-panel: rgba(22, 38, 30, 0.62);
   --glass-card: rgba(30, 50, 40, 0.56);
   --glass-card-hover: rgba(34, 56, 45, 0.74);
-  --glass-card-border: rgba(255, 255, 255, 0.14);
+  --glass-card-border: rgba(159, 232, 193, 0.52);
   --glass-chip: rgba(255, 255, 255, 0.07);
   --glass-chip-hover: rgba(255, 255, 255, 0.13);
   --glass-field: rgba(255, 255, 255, 0.06);
@@ -317,6 +324,12 @@
   --glass-gloss: rgba(255, 255, 255, 0.08);
   --page-mesh-veil: rgba(8, 18, 13, 0.3);
   --page-mesh-veil-end: rgba(8, 18, 13, 0.62);
+  --page-glow:
+    linear-gradient(180deg, rgba(8, 18, 13, 0.06) 0%, rgba(8, 18, 13, 0.42) 28%, rgba(8, 18, 13, 0.78) 100%),
+    radial-gradient(46% 44% at 86% -8%, rgba(46, 148, 105, 0.5), transparent 64%),
+    radial-gradient(40% 40% at 0% -12%, rgba(96, 80, 168, 0.44), transparent 66%),
+    radial-gradient(44% 42% at 100% 78%, rgba(44, 126, 94, 0.34), transparent 68%),
+    radial-gradient(40% 40% at 4% 92%, rgba(38, 96, 120, 0.28), transparent 70%);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -327,7 +340,7 @@
     --aurora-sky: rgba(44, 92, 132, 0.26);
     --aurora-mint-2: rgba(36, 108, 80, 0.3);
 
-    --glass-line: rgba(255, 255, 255, 0.1);
+    --glass-line: rgba(159, 232, 193, 0.38);
     --glass-shadow: 0 22px 44px -30px rgba(0, 0, 0, 0.8);
     --glass-shadow-lg: 0 40px 80px -40px rgba(0, 0, 0, 0.9);
 
@@ -335,7 +348,7 @@
     --glass-panel: rgba(22, 38, 30, 0.62);
     --glass-card: rgba(30, 50, 40, 0.56);
     --glass-card-hover: rgba(34, 56, 45, 0.74);
-    --glass-card-border: rgba(255, 255, 255, 0.14);
+    --glass-card-border: rgba(159, 232, 193, 0.52);
     --glass-chip: rgba(255, 255, 255, 0.07);
     --glass-chip-hover: rgba(255, 255, 255, 0.13);
     --glass-field: rgba(255, 255, 255, 0.06);
@@ -348,5 +361,17 @@
     --glass-gloss: rgba(255, 255, 255, 0.08);
     --page-mesh-veil: rgba(8, 18, 13, 0.3);
     --page-mesh-veil-end: rgba(8, 18, 13, 0.62);
+    --page-glow:
+      linear-gradient(180deg, rgba(8, 18, 13, 0.06) 0%, rgba(8, 18, 13, 0.42) 28%, rgba(8, 18, 13, 0.78) 100%),
+    radial-gradient(46% 44% at 86% -8%, rgba(46, 148, 105, 0.5), transparent 64%),
+    radial-gradient(40% 40% at 0% -12%, rgba(96, 80, 168, 0.44), transparent 66%),
+    radial-gradient(44% 42% at 100% 78%, rgba(44, 126, 94, 0.34), transparent 68%),
+    radial-gradient(40% 40% at 4% 92%, rgba(38, 96, 120, 0.28), transparent 70%);
+  --page-glow:
+    linear-gradient(180deg, rgba(8, 18, 13, 0.06) 0%, rgba(8, 18, 13, 0.42) 28%, rgba(8, 18, 13, 0.78) 100%),
+    radial-gradient(46% 44% at 86% -8%, rgba(46, 148, 105, 0.5), transparent 64%),
+    radial-gradient(40% 40% at 0% -12%, rgba(96, 80, 168, 0.44), transparent 66%),
+    radial-gradient(44% 42% at 100% 78%, rgba(44, 126, 94, 0.34), transparent 68%),
+    radial-gradient(40% 40% at 4% 92%, rgba(38, 96, 120, 0.28), transparent 70%);
   }
 }

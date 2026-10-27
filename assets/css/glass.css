@@ -14,46 +14,22 @@
 body,
 .help-page,
 .setup-page {
-  background:
-    linear-gradient(180deg, transparent 0%, var(--page-mesh-veil) 30%, var(--page-mesh-veil-end) 100%),
-    radial-gradient(58% 54% at 84% 2%, var(--aurora-mint), transparent 68%),
-    radial-gradient(46% 46% at 8% 0%, var(--aurora-lilac), transparent 70%),
-    radial-gradient(48% 46% at 62% 34%, var(--aurora-peach), transparent 72%),
-    radial-gradient(52% 50% at -4% 58%, var(--aurora-sky), transparent 72%),
-    radial-gradient(56% 52% at 104% 86%, var(--aurora-mint-2), transparent 72%),
-    var(--bg);
+  background-color: var(--bg);
+  background-image: var(--page-glow);
   background-attachment: fixed;
   background-repeat: no-repeat;
   background-size: 100% 100%;
 }
-/* Dark keeps the colour only at the corners: a foggy middle made every
-   heading fight the background. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) body,
-  :root:not([data-theme="light"]) .help-page,
-  :root:not([data-theme="light"]) .setup-page {
-  background:
-    linear-gradient(180deg, rgba(8, 18, 13, 0.06) 0%, rgba(8, 18, 13, 0.42) 28%, rgba(8, 18, 13, 0.78) 100%),
-    radial-gradient(46% 44% at 86% -8%, rgba(46, 148, 105, 0.5), transparent 64%),
-    radial-gradient(40% 40% at 0% -12%, rgba(96, 80, 168, 0.44), transparent 66%),
-    radial-gradient(44% 42% at 100% 78%, rgba(44, 126, 94, 0.34), transparent 68%),
-    radial-gradient(40% 40% at 4% 92%, rgba(38, 96, 120, 0.28), transparent 70%),
-    var(--bg);
-  background-attachment: fixed;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
-  }
-}
-[data-theme="dark"] body,
-[data-theme="dark"] .help-page,
-[data-theme="dark"] .setup-page {
-  background:
-    linear-gradient(180deg, rgba(8, 18, 13, 0.06) 0%, rgba(8, 18, 13, 0.42) 28%, rgba(8, 18, 13, 0.78) 100%),
-    radial-gradient(46% 44% at 86% -8%, rgba(46, 148, 105, 0.5), transparent 64%),
-    radial-gradient(40% 40% at 0% -12%, rgba(96, 80, 168, 0.44), transparent 66%),
-    radial-gradient(44% 42% at 100% 78%, rgba(44, 126, 94, 0.34), transparent 68%),
-    radial-gradient(40% 40% at 4% 92%, rgba(38, 96, 120, 0.28), transparent 70%),
-    var(--bg);
+
+/* The bar floats, but the strip around the pill has to hide what scrolls
+   under it. Instead of a translucent veil (which ghosted the cards) the bar
+   paints the very same viewport-anchored aurora, fully opaque — so it reads
+   as one continuous page and nothing shows through. */
+.appbar,
+.help-top,
+.setup-header {
+  background-color: var(--bg);
+  background-image: var(--page-glow);
   background-attachment: fixed;
   background-repeat: no-repeat;
   background-size: 100% 100%;
@@ -89,7 +65,10 @@ body,
 .appbar {
   height: auto;
   padding-block: 12px;
-  background: transparent;
+  /* The pill is a .container itself, so its own padding sits *inside* the
+     frame: at exactly 1200px wide the frame touched both screen edges.
+     Pad the bar instead, and the pill gets the same gutter as every card. */
+  padding-inline: var(--gutter);
   border: 0;
 }
 .appbar.is-stuck { border-bottom-color: transparent; box-shadow: none; }
@@ -126,7 +105,6 @@ body,
 @media (max-width: 760px) {
   .login-btn { padding-inline: 0; width: 38px; justify-content: center; }
 }
-
 /* ── Hero ────────────────────────────────────────────────────────────── */
 .hero__eyebrow {
   border: 1px solid var(--glass-line);
@@ -173,10 +151,13 @@ body,
 .update-card__stats { border-radius: var(--r-lg); }
 
 /* ── Trust strip ─────────────────────────────────────────────────────── */
+/* .trust paints its 1px gaps with the border colour, so using --glass-line
+   here turned the whole strip into a green slab. Give the gaps their own
+   faint tint and keep the frame green. */
 .trust {
   border-radius: var(--r-2xl);
-  border: 1px solid var(--glass-line);
-  background: var(--glass-line);
+  border: 1px solid var(--glass-card-border);
+  background: color-mix(in srgb, var(--glass-line) 34%, transparent);
   box-shadow: var(--glass-shadow);
 }
 .trust__item {
@@ -231,7 +212,8 @@ body,
   border-radius: var(--r-full);
   background-color: var(--glass-field);
   border: 1px solid var(--glass-line);
-  padding-inline: 46px 26px;
+  /* start = the magnifier, end = the «/» keyboard hint (44px + 30px wide). */
+  padding-inline: 46px 76px;
 }
 .search__input:focus {
   border-color: color-mix(in srgb, var(--ok) 40%, var(--glass-line));
@@ -470,6 +452,15 @@ dialog.sheet::backdrop {
 }
 .mp-badge, .mp__seg, .mp-seg { border-radius: var(--r-full); }
 .mp__seg { border: 1px solid var(--glass-line); background: var(--glass-chip); }
+.mp__search {
+  border: 1px solid var(--glass-line);
+  background: var(--glass-field);
+}
+.mp__search:focus-within {
+  border-color: color-mix(in srgb, var(--ok) 42%, var(--glass-line));
+  background: var(--glass-field-focus);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--ok) 15%, transparent);
+}
 .mp__seg-btn { border-radius: var(--r-full); }
 .mp__seg-btn.is-active {
   background: linear-gradient(160deg, color-mix(in srgb, var(--primary) 88%, #2f7a54), var(--primary));
@@ -512,8 +503,10 @@ dialog.sheet::backdrop {
 
 /* ── Help & setup pages ──────────────────────────────────────────────── */
 .help-top, .setup-header {
+  position: relative;
+  z-index: 40;
   padding-block: 10px;
-  background: transparent;
+  padding-inline: var(--gutter);
   border-bottom: 0;
   box-shadow: none;
 }
