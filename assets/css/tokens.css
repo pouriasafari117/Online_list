@@ -17,41 +17,41 @@
 :root {
   color-scheme: light;
 
-  /* Surfaces — milk white: a soft ivory page with pure-white cards.
-     Kept almost neutral so the green / amber / red accents read as signals. */
-  --bg: #f8f7f3;
-  --bg-deep: #efece6;
+  /* Surfaces — milky white with a whisper of mint. The page reads airy and
+     alive instead of flat greige, while the cards stay pure white. */
+  --bg: #f3f8f0;
+  --bg-deep: #e7f0e4;
   --surface: #ffffff;
-  --surface-2: #f4f2ed;
-  --surface-3: #ebe8e2;
-  --surface-4: #e2ded7;
-  --surface-inverse: #1a1916;
+  --surface-2: #f2f7ef;
+  --surface-3: #e6efe2;
+  --surface-4: #d8e5d4;
+  --surface-inverse: #12251a;
 
   /* Text */
-  --text: #191814;
-  --text-2: #56524a;
-  --text-3: #7f7a70;
-  --text-inverse: #fbfaf6;
+  --text: #131a14;
+  --text-2: #495447;
+  --text-3: #6f7f6c;
+  --text-inverse: #f5fcf6;
 
   /* Lines */
-  --outline: #ddd9d2;
-  --outline-strong: #c6c1b8;
-  --hairline: rgba(25, 24, 20, 0.075);
+  --outline: #d8e4d4;
+  --outline-strong: #b9ccb4;
+  --hairline: rgba(18, 44, 26, 0.085);
 
-  /* Primary — ink, not colour */
-  --primary: #1d1c18;
-  --on-primary: #fbfaf6;
-  --primary-container: #eae7e0;
-  --on-primary-container: #1d1c18;
-  --primary-soft: rgba(29, 28, 24, 0.06);
+  /* Primary — deep forest ink: still serious, but alive next to the ivory */
+  --primary: #14402d;
+  --on-primary: #f3fbf5;
+  --primary-container: #dcefe2;
+  --on-primary-container: #0c2c1d;
+  --primary-soft: rgba(20, 64, 45, 0.075);
 
   /* Semantic accents — green / amber / red, kept muted so they read as
      signals rather than decoration */
-  --ok: #2f7d52;
-  --ok-container: #e3f1e8;
+  --ok: #1f7d4b;
+  --ok-container: #ddf3e5;
   --on-ok: #ffffff;
-  --low: #9a6b12;
-  --low-container: #f7ecd7;
+  --low: #94650f;
+  --low-container: #f9edd8;
   --out: #8b8579;
   --danger: #b33a2d;
   --danger-container: #f9e5e1;
@@ -71,14 +71,14 @@
   --tone-5-container: #f8eddc;
 
   /* Elevated surfaces */
-  --shadow-1: 0 1px 2px rgba(48, 40, 26, 0.045), 0 1px 1px rgba(48, 40, 26, 0.03);
-  --shadow-2: 0 1px 2px rgba(48, 40, 26, 0.05), 0 10px 24px -14px rgba(48, 40, 26, 0.22);
-  --shadow-3: 0 2px 4px rgba(48, 40, 26, 0.05), 0 24px 60px -24px rgba(48, 40, 26, 0.26);
-  --shadow-pop: 0 18px 48px -18px rgba(48, 40, 26, 0.34);
+  --shadow-1: 0 1px 2px rgba(17, 48, 30, 0.05), 0 1px 1px rgba(17, 48, 30, 0.03);
+  --shadow-2: 0 1px 2px rgba(17, 48, 30, 0.05), 0 12px 26px -16px rgba(17, 48, 30, 0.26);
+  --shadow-3: 0 2px 4px rgba(17, 48, 30, 0.05), 0 26px 62px -26px rgba(17, 48, 30, 0.3);
+  --shadow-pop: 0 18px 48px -18px rgba(17, 48, 30, 0.36);
 
-  --glass: rgba(255, 255, 255, 0.84);
-  --scrim: rgba(23, 22, 19, 0.42);
-  --grain-opacity: 0.035;
+  --glass: rgba(255, 255, 255, 0.86);
+  --scrim: rgba(12, 28, 18, 0.44);
+  --grain-opacity: 0.028;
 
   /* Typography */
   --font: "Vazirmatn", "Segoe UI", system-ui, -apple-system, sans-serif;
@@ -102,6 +102,9 @@
   --sp-7: 48px;
   --sp-8: 64px;
   --sp-9: 96px;
+  /* Vertical air between page sections and inside forms. */
+  --gap-section: clamp(48px, 6vw, 80px);
+  --gap-field: 10px;
   --container: 1200px;
   --gutter: clamp(16px, 4vw, 32px);
 

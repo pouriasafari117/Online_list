@@ -266,9 +266,13 @@ test('diff تغییرات را درست تشخیص می‌دهد', () => {
   assert.equal(diff.total, 3);
   assert.equal(diff.settingsChanged, false);
 
+  // createdAt is pinned: normalizeStore stamps a fresh one when it is missing,
+  // which made this assertion flip whenever the two calls landed in different
+  // milliseconds.
+  const made = '2025-12-01T00:00:00.000Z';
   const stockOnly = model.computeDiff(
-    model.normalizeStore({ devices: [{ id: 'a', name: 'A', stock: 1, updatedAt: '2026-01-01T00:00:00.000Z' }] }),
-    model.normalizeStore({ devices: [{ id: 'a', name: 'A', stock: 9, updatedAt: '2026-02-01T00:00:00.000Z' }] })
+    model.normalizeStore({ devices: [{ id: 'a', name: 'A', stock: 1, createdAt: made, updatedAt: '2026-01-01T00:00:00.000Z' }] }),
+    model.normalizeStore({ devices: [{ id: 'a', name: 'A', stock: 9, createdAt: made, updatedAt: '2026-02-01T00:00:00.000Z' }] })
   );
   assert.equal(stockOnly.stockOnly, true);
 });
@@ -661,6 +665,25 @@ test('رنگ‌های تأکیدی فقط روی همین چند عنصر پنل
   assert.ok(/\.mp-row__danger[^{]*\{[^}]*var\(--danger\)/.test(css), 'حذف باید قرمز باشد');
   const base = fs.readFileSync(path.join(ROOT, 'assets/css/base.css'), 'utf8');
   assert.ok(/\.btn--ok\s*\{/.test(base), 'دکمهٔ سبز تأیید تعریف نشده');
+});
+
+test('فاصله‌ها و ارتفاع‌ها جوری‌اند که کادرها روی هم نیفتند', () => {
+  const css = fs.readFileSync(path.join(ROOT, 'assets/css/app.css'), 'utf8');
+  const base = fs.readFileSync(path.join(ROOT, 'assets/css/base.css'), 'utf8');
+  const tokens = fs.readFileSync(path.join(ROOT, 'assets/css/tokens.css'), 'utf8');
+  // A shared rhythm token instead of ad-hoc paddings per section.
+  assert.ok(/--gap-section:/.test(tokens), 'توکن فاصلهٔ بخش‌ها تعریف نشده');
+  assert.ok(/\.section \{[^}]*var\(--gap-section\)/.test(css), 'فاصلهٔ بخش‌ها از توکن نمی‌آید');
+  // The sheet body has to clear its sticky footer, otherwise the last field
+  // slides under the buttons.
+  assert.ok(/\.sheet__body \{[^}]*padding: 22px 22px 30px/.test(base), 'دکمه‌های پایین برگه روی فیلدها می‌افتند');
+  // The management page reserves room for its fixed action bar.
+  assert.ok(/--gap-section:/.test(tokens) && /\.mpage \{[^}]*padding-bottom: calc\(112px/.test(css),
+    'ردیف آخر پنل زیر نوار پایین می‌رود');
+  // Category rows fold into two lines on phones instead of squeezing 6 cells.
+  assert.ok(/grid-template-areas:\s*\n?\s*"label unit show"/.test(css), 'ردیف مشخصهٔ دسته در گوشی جا نمی‌شود');
+  // The icon picker shows whole rows of icons, never a half-cut one.
+  assert.ok(/\.icon-picker \{[^}]*max-height: 202px/.test(css), 'انتخاب آیکون، آیکون نصفه نشان می‌دهد');
 });
 
 test('کلیک روی هر ردیف کالا کارت جزئیات را باز می‌کند — حتی بعد از ورود مدیر', () => {
