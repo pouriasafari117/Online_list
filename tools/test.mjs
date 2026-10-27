@@ -663,6 +663,20 @@ test('رنگ‌های تأکیدی فقط روی همین چند عنصر پنل
   assert.ok(/\.btn--ok\s*\{/.test(base), 'دکمهٔ سبز تأیید تعریف نشده');
 });
 
+test('کلیک روی هر ردیف کالا کارت جزئیات را باز می‌کند — حتی بعد از ورود مدیر', () => {
+  const render = fs.readFileSync(path.join(ROOT, 'assets/js/render.js'), 'utf8');
+  // Regression: admin mode used to emit rows with no data-clickable at all, so
+  // after publishing from the panel a tap on a row did nothing.
+  assert.ok(!/\$\{admin \? '' : 'data-clickable/.test(render),
+    'ردیف کالا در حالت مدیر قابل کلیک نیست');
+  assert.ok(/data-clickable="true"[^>]*tabindex="\$\{admin \? '-1' : '0'\}"/.test(render)
+    || /\$\{admin \? 'data-clickable="true" tabindex="-1"'/.test(render),
+    'ردیف کالا همیشه data-clickable ندارد');
+  const app = fs.readFileSync(path.join(ROOT, 'assets/js/app.js'), 'utf8');
+  assert.ok(/\.device\[data-clickable="true"\]/.test(app), 'کلیک روی ردیف به کارت وصل نیست');
+  assert.ok(/openDeviceDetail\(/.test(app), 'کارت جزئیات باز نمی‌شود');
+});
+
 test('رنگ‌ها روی آیکون‌ها دیده می‌شوند، نه فقط روی متن', () => {
   const render = fs.readFileSync(path.join(ROOT, 'assets/js/render.js'), 'utf8');
   // The stock pill must carry a coloured glyph: ✓ green, ! amber, ✕ red.
@@ -675,9 +689,14 @@ test('رنگ‌ها روی آیکون‌ها دیده می‌شوند، نه ف�
   assert.ok(/\.stock-badge__ic \.ic\s*\{[^}]*width/.test(css), 'اندازهٔ آیکون نشان موجودی تعیین نشده');
   assert.ok(/\.stock-badge\[data-state="out"\]\s*\{[^}]*var\(--danger\)/.test(css), 'ناموجود قرمز نیست');
   for (const n of [1, 2, 3, 4, 5]) {
-    assert.ok(new RegExp(`\\.device__thumb\\[data-tone="${n}"\\]`).test(css),
+    assert.ok(new RegExp(`\\[data-tone="${n}"\\]\\s*\\{[^}]*--tone:\\s*var\\(--tone-${n}\\)`).test(css),
       `رنگ آیکون شمارهٔ ${n} در CSS استفاده نشده`);
   }
+  // the public page must spend those tones too, not only the panel
+  assert.ok(/\.device__thumb\[data-tone\][^{]*\{[^}]*var\(--tone-bg\)/.test(css), 'آیکون کالا در لیست رنگ نمی‌گیرد');
+  assert.ok(/\.chip\[data-tone\]\s+\.ic\s*\{[^}]*var\(--tone\)/.test(css), 'آیکون دستهٔ فیلتر رنگ نمی‌گیرد');
+  assert.ok(/#availabilityFilter \[data-avail="in"\]::before\s*\{[^}]*var\(--ok\)/.test(css),
+    'دکمهٔ «موجود» نقطهٔ سبز ندارد');
   const tokens = fs.readFileSync(path.join(ROOT, 'assets/css/tokens.css'), 'utf8');
   assert.equal((tokens.match(/--tone-1:/g) || []).length, 3, 'رنگ‌های آیکون باید در روشن و هر دو بلوک تاریک باشند');
 });
