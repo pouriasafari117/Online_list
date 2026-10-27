@@ -1,0 +1,422 @@
+/* ==========================================================================
+   «شب شامپاین» — the cinematic layer.
+   Loaded last, after glass.css: it keeps every layout rule where it is and
+   only re-tunes the light. Near-black stone, antique-gold hairlines, warm
+   champagne type and one filmic dune photograph behind the first screen.
+   Both themes share the same metals; only the paper under them changes.
+   ========================================================================== */
+
+/* ── Fill tokens: dark glass needs gold text, ivory paper needs ink ────── */
+:root {
+  --sky-fill: linear-gradient(160deg, #3a3218 0%, #241f0f 58%, #1a1609 100%);
+  --sky-ink: #e6dcae;
+  --sky-glow: rgba(86, 66, 24, 0.42);
+  --sky-shine: rgba(255, 245, 210, 0.16);
+  --hero-halo: rgba(207, 169, 87, 0.16);
+  --stage-rule: rgba(120, 96, 40, 0.34);
+}
+[data-theme="dark"] {
+  --sky-fill: linear-gradient(160deg, #f2eaba 0%, #ded59b 44%, #c3ab68 100%);
+  --sky-ink: #171304;
+  --sky-glow: rgba(207, 169, 87, 0.34);
+  --sky-shine: rgba(255, 255, 255, 0.55);
+  --hero-halo: rgba(207, 169, 87, 0.22);
+  --stage-rule: rgba(222, 213, 155, 0.26);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --sky-fill: linear-gradient(160deg, #f2eaba 0%, #ded59b 44%, #c3ab68 100%);
+    --sky-ink: #171304;
+    --sky-glow: rgba(207, 169, 87, 0.34);
+    --sky-shine: rgba(255, 255, 255, 0.55);
+    --hero-halo: rgba(207, 169, 87, 0.22);
+    --stage-rule: rgba(222, 213, 155, 0.26);
+  }
+}
+
+/* More film grain than paper grain, but still a whisper. */
+body::before { opacity: var(--grain-opacity); }
+
+/* ── The first screen: a dune photograph, faded at both ends ──────────── */
+.hero { isolation: isolate; }
+/* The photograph lives in its own layer; the content must sit above it. */
+.hero > .container { position: relative; z-index: 1; }
+.hero__stage {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.hero__stage-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  object-position: 50% 58%;
+  /* Mirrored: the glow lands on the summary card, the calm sky under the
+     headline. */
+  transform: scaleX(-1) scale(1.04);
+  opacity: var(--hero-stage-opacity);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 12%, #000 66%, transparent 98%);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 12%, #000 66%, transparent 98%);
+}
+.hero__stage-img--dark { display: none; }
+[data-theme="dark"] .hero__stage-img--dark { display: block; }
+[data-theme="dark"] .hero__stage-img--light { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .hero__stage-img--dark { display: block; }
+  :root:not([data-theme="light"]) .hero__stage-img--light { display: none; }
+}
+/* A veil on the text side so the headline never fights the photograph. */
+.hero__stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(270deg,
+    var(--hero-veil) 0%,
+    color-mix(in srgb, var(--hero-veil) 62%, transparent) 30%,
+    transparent 62%);
+}
+/* The old aurora wash would muddy the photograph; the dune is the light now. */
+.hero::before { display: none; }
+.hero::after { display: none; }
+
+@media (max-width: 899px) {
+  /* Stacked layout: the card sits straight over the dunes, so it needs a
+     more solid seat than the wide screen does. */
+  .update-card {
+    background:
+      linear-gradient(168deg, color-mix(in srgb, var(--gold-soft) 55%, transparent) 0%, transparent 42%),
+      color-mix(in srgb, var(--bg) 82%, transparent);
+  }
+  .hero__stage-img { object-position: 50% 30%; -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 10%, #000 52%, transparent 88%); mask-image: linear-gradient(180deg, transparent 0%, #000 10%, #000 52%, transparent 88%); }
+  .hero__stage::after {
+    background: linear-gradient(180deg,
+      color-mix(in srgb, var(--hero-veil) 55%, transparent) 0%,
+      var(--hero-veil) 44%,
+      color-mix(in srgb, var(--hero-veil) 72%, transparent) 78%,
+      transparent 100%);
+  }
+}
+
+/* ── Typography: fine strokes, wide air, champagne ink ────────────────── */
+.hero__eyebrow {
+  height: 34px;
+  padding-inline: 14px 18px;
+  border: 1px solid var(--gold-line);
+  background: color-mix(in srgb, var(--glass-eyebrow-bg) 82%, transparent);
+  color: var(--gold-strong);
+  font-weight: 600;
+  letter-spacing: 0;
+  box-shadow: 0 14px 34px -26px var(--gold-glow);
+}
+.hero__eyebrow::before {
+  content: "";
+  width: 18px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.55;
+  order: -1;
+}
+.hero__title { gap: 10px; }
+.hero__name {
+  font-weight: 300;
+  letter-spacing: -0.015em;
+  line-height: 1.14;
+  background: linear-gradient(172deg,
+    var(--text) 24%,
+    color-mix(in srgb, var(--gold) 62%, var(--text)) 86%,
+    var(--gold) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+.hero__headline {
+  font-weight: 450;
+  font-size: clamp(1.02rem, 1.6vw, 1.22rem);
+  color: color-mix(in srgb, var(--text-2) 88%, var(--gold));
+  letter-spacing: 0;
+}
+.hero__lead {
+  color: var(--text-2);
+  font-weight: 350;
+  line-height: 2.05;
+}
+.hero__meta { color: var(--text-3); }
+.hero__meta .ic { color: var(--gold); opacity: 0.9; }
+
+.t-eyebrow {
+  color: var(--gold-strong);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+}
+.section__title { font-weight: 600; letter-spacing: -0.012em; }
+.section__sub { color: var(--text-3); }
+
+/* ── Header ───────────────────────────────────────────────────────────── */
+.appbar__inner {
+  border-color: var(--gold-line);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-gloss);
+}
+.appbar.is-stuck .appbar__inner { box-shadow: var(--glass-shadow-lg), inset 0 1px 0 var(--glass-gloss); }
+.appbar__link { font-weight: 500; }
+.appbar__link[aria-current="page"] {
+  background: color-mix(in srgb, var(--gold-soft) 78%, transparent);
+  color: var(--gold-strong);
+  box-shadow: none;
+}
+.login-btn {
+  border-color: var(--gold-line);
+  box-shadow: 0 10px 24px -18px var(--gold-glow);
+}
+.admin-pill { box-shadow: 0 12px 26px -14px var(--gold-glow); }
+.brand__mark {
+  background: var(--sky-fill);
+  color: var(--sky-ink);
+  box-shadow: 0 10px 24px -14px var(--sky-glow), inset 0 1px 0 var(--sky-shine);
+}
+.brand__sub { color: var(--text-3); }
+
+/* ── The summary card ─────────────────────────────────────────────────── */
+.update-card {
+  border-color: var(--gold-line);
+  background:
+    linear-gradient(168deg, color-mix(in srgb, var(--gold-soft) 62%, transparent) 0%, transparent 44%),
+    var(--glass-panel);
+  box-shadow: var(--glass-shadow-lg), 0 30px 70px -40px var(--gold-glow);
+}
+.update-card::before {
+  background: radial-gradient(circle, color-mix(in srgb, var(--gold) 30%, transparent), transparent 68%);
+}
+.update-card::after {
+  content: "";
+  position: absolute;
+  inset-inline: 26px;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-line) 22%, color-mix(in srgb, var(--gold-strong) 70%, transparent) 50%, var(--gold-line) 78%, transparent);
+}
+.update-card__icon {
+  border-color: var(--gold-line);
+  background: color-mix(in srgb, var(--gold-soft) 60%, transparent);
+  color: var(--gold-strong);
+}
+.update-card__icon .ic { color: inherit; }
+.update-card__ago {
+  font-weight: 300;
+  color: var(--gold-strong);
+  font-variant-numeric: tabular-nums;
+}
+.update-card__stats {
+  border: 1px solid var(--hairline);
+  background: color-mix(in srgb, var(--gold-soft) 30%, transparent);
+}
+.stat__value { font-weight: 450; color: var(--text); }
+.stat__label { color: var(--text-3); }
+
+/* ── The trust strip: three golden cells ──────────────────────────────── */
+.trust {
+  border-color: var(--gold-line);
+  background: color-mix(in srgb, var(--gold-line) 30%, transparent);
+  box-shadow: var(--glass-shadow), 0 24px 60px -46px var(--gold-glow);
+}
+.trust__item { background: var(--glass-panel); }
+.trust__title { font-weight: 550; }
+.trust__desc { line-height: 1.8; text-wrap: balance; }
+.trust__title, .device__name, .section__title, .update-card__label { text-wrap: balance; }
+
+/* ── Controls ─────────────────────────────────────────────────────────── */
+.btn { font-weight: 500; }
+.btn--filled {
+  --btn-bg: var(--sky-fill);
+  --btn-fg: var(--sky-ink);
+  --btn-border: transparent;
+  box-shadow: 0 20px 40px -24px var(--sky-glow), inset 0 1px 0 var(--sky-shine);
+}
+.btn--filled:hover {
+  box-shadow: 0 24px 46px -22px var(--sky-glow), inset 0 1px 0 var(--sky-shine);
+  filter: brightness(1.06);
+}
+.btn--outlined { --btn-border: var(--gold-line); }
+/* A faded gold fill read as a pale green slab on paper. Disabled means
+   "quiet outline", not "dim gradient". */
+.btn--filled[disabled], .btn--filled[aria-disabled="true"] {
+  opacity: 1;
+  --btn-bg: color-mix(in srgb, var(--gold-soft) 52%, var(--glass-chip));
+  --btn-fg: color-mix(in srgb, var(--text-3) 86%, transparent);
+  --btn-border: var(--hairline);
+  box-shadow: none;
+  filter: none;
+}
+.btn--outlined:hover { --btn-border: color-mix(in srgb, var(--gold) 58%, var(--gold-line)); }
+#heroCall { --btn-bg: color-mix(in srgb, var(--glass-chip) 92%, transparent); }
+#heroCall .ic { color: var(--gold-strong); }
+
+.chip { border-color: var(--gold-line); font-weight: 500; }
+.chip[aria-pressed="true"], .chip.is-active {
+  background: var(--sky-fill);
+  color: var(--sky-ink);
+  border-color: transparent;
+  box-shadow: 0 16px 30px -20px var(--sky-glow), inset 0 1px 0 var(--sky-shine);
+}
+.chip[aria-pressed="true"] .ic, .chip.is-active .ic { color: inherit; }
+.chip[data-tone]:not([aria-pressed="true"]) .ic { opacity: 0.9; }
+
+.filterbar {
+  border-color: var(--gold-line);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-gloss), 0 30px 70px -60px var(--gold-glow);
+}
+.search__input:focus,
+.input:focus, .select:focus, .textarea:focus {
+  border-color: color-mix(in srgb, var(--gold) 60%, var(--glass-line));
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--gold) 14%, transparent);
+}
+.segmented { border-color: var(--gold-line); }
+.segmented__item[aria-pressed="true"] {
+  background: var(--sky-fill);
+  color: var(--sky-ink);
+  box-shadow: 0 12px 22px -18px var(--sky-glow);
+}
+
+/* ── Device cards ─────────────────────────────────────────────────────── */
+.device {
+  border-color: var(--glass-card-border);
+  box-shadow:
+    0 22px 44px -34px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 var(--glass-gloss);
+}
+.device:hover {
+  border-color: color-mix(in srgb, var(--gold) 62%, var(--glass-card-border));
+  background: var(--glass-card-hover);
+  box-shadow:
+    var(--glass-shadow-lg),
+    inset 0 1px 0 var(--glass-gloss),
+    0 0 42px -26px var(--gold-glow);
+}
+.device__thumb {
+  border-color: var(--gold-line);
+  background: color-mix(in srgb, var(--gold-soft) 46%, var(--glass-card-hover));
+  box-shadow: 0 14px 26px -22px rgba(0, 0, 0, 0.6);
+}
+.device__name { font-weight: 550; }
+.device__price b { font-weight: 600; color: var(--text); }
+.device__price small { color: var(--text-3); }
+.stock-badge {
+  border-color: color-mix(in srgb, currentColor 26%, transparent);
+  background: color-mix(in srgb, currentColor 9%, transparent);
+  font-weight: 550;
+}
+.stock-jump { border-color: var(--gold-line); }
+.stock-jump:hover { border-color: color-mix(in srgb, var(--gold) 58%, var(--gold-line)); }
+
+/* Featured rail */
+.feature-card {
+  border-color: var(--glass-card-border);
+  background: var(--glass-card);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-gloss);
+}
+.feature-card:hover {
+  border-color: color-mix(in srgb, var(--gold) 62%, var(--glass-card-border));
+  box-shadow: var(--glass-shadow-lg), 0 0 46px -30px var(--gold-glow);
+}
+.group__icon { border-color: var(--gold-line); }
+.group__title { font-weight: 550; }
+.group__count { color: var(--gold-strong); }
+
+/* ── Sheets, menus, fields ────────────────────────────────────────────── */
+dialog.sheet {
+  border-color: var(--gold-line);
+  box-shadow: 0 60px 120px -50px rgba(0, 0, 0, 0.8), inset 0 1px 0 var(--glass-gloss);
+}
+.sheet__head { border-bottom-color: var(--hairline); }
+.sheet__title { font-weight: 600; }
+.menu { border-color: var(--gold-line); }
+.menu__item:hover { background: color-mix(in srgb, var(--gold-soft) 70%, transparent); }
+.toast {
+  border-color: color-mix(in srgb, var(--sky-ink) 18%, transparent);
+  background: color-mix(in srgb, var(--surface-inverse) 96%, transparent);
+  color: var(--text-inverse);
+}
+
+/* ── Footer ───────────────────────────────────────────────────────────── */
+.footer {
+  border-top-color: var(--gold-line);
+  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--gold-soft) 30%, transparent));
+}
+.footer__title { color: var(--gold-strong); font-weight: 600; }
+
+/* ── Management page ──────────────────────────────────────────────────── */
+.mpage__head { border-bottom-color: var(--gold-line); }
+.mp-stat {
+  border-color: var(--glass-card-border);
+  background: var(--glass-card);
+  box-shadow: 0 16px 34px -30px rgba(0, 0, 0, 0.6), inset 0 1px 0 var(--glass-gloss);
+}
+.mp-stat__icon { border-color: var(--gold-line); color: var(--gold-strong); }
+.mp-row { border-color: var(--glass-card-border); }
+.mp-row:hover { border-color: color-mix(in srgb, var(--gold) 52%, var(--glass-card-border)); }
+.mp__stepper { border-color: var(--gold-line); }
+.mp__seg { border-color: var(--gold-line); }
+.mp__seg-btn.is-active {
+  background: var(--sky-fill);
+  color: var(--sky-ink);
+  box-shadow: 0 12px 24px -18px var(--sky-glow);
+}
+.mp__search:focus-within {
+  border-color: color-mix(in srgb, var(--gold) 60%, var(--glass-line));
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--gold) 14%, transparent);
+}
+.mp-apply {
+  border-color: var(--gold-line);
+  background: color-mix(in srgb, var(--gold-soft) 52%, var(--glass-card));
+  box-shadow: 0 26px 56px -38px var(--gold-glow);
+}
+.mp-apply__icon {
+  background: var(--sky-fill);
+  color: var(--sky-ink);
+  box-shadow: 0 12px 22px -14px var(--sky-glow);
+}
+.mpage__foot-inner { border-color: var(--gold-line); }
+.mpage__admin-badge { border-color: var(--gold-line); }
+
+/* ── Help & setup ─────────────────────────────────────────────────────── */
+.help-hero, .setup-card, .help-card, .help-toc {
+  border-color: var(--gold-line);
+  box-shadow: var(--glass-shadow), 0 30px 70px -60px var(--gold-glow);
+}
+.help-hero {
+  background:
+    linear-gradient(166deg, color-mix(in srgb, var(--gold-soft) 55%, transparent) 0%, transparent 42%),
+    var(--glass-panel);
+}
+.help-hero__accent, .setup-intro__accent {
+  background: linear-gradient(118deg, var(--gold-strong) 0%, color-mix(in srgb, var(--gold) 74%, var(--champagne)) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+.help-figure img, .help-steps li::before { border-color: var(--gold-line); }
+.help-toc__link.is-active { border-color: var(--gold-line); background: color-mix(in srgb, var(--gold-soft) 70%, transparent); }
+.setup-warn {
+  border-color: color-mix(in srgb, var(--low) 34%, var(--gold-line));
+  background: color-mix(in srgb, var(--low-container) 48%, var(--glass-card));
+}
+.setup-badge { border-color: var(--gold-line); }
+
+/* ── Phones ───────────────────────────────────────────────────────────── */
+@media (max-width: 760px) {
+  .hero__name { font-size: clamp(2.1rem, 10.5vw, 2.9rem); }
+  .hero__lead { line-height: 1.95; }
+  .update-card { box-shadow: var(--glass-shadow-lg), 0 24px 50px -36px var(--gold-glow); }
+  .appbar__inner { border-radius: var(--r-xl); }
+}
+
+/* Nothing here should move for someone who asked it not to. */
+@media (prefers-reduced-motion: reduce) {
+  .device:hover, .feature-card:hover, .btn--filled:hover { transition: none; }
+}
