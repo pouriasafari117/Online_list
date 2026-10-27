@@ -19,66 +19,66 @@
 
   /* Surfaces — milky white with a whisper of mint. The page reads airy and
      alive instead of flat greige, while the cards stay pure white. */
-  --bg: #f3f8f0;
-  --bg-deep: #e7f0e4;
-  --surface: #ffffff;
-  --surface-2: #f2f7ef;
-  --surface-3: #e6efe2;
-  --surface-4: #d8e5d4;
-  --surface-inverse: #12251a;
+  --bg: #eef4ef;
+  --bg-deep: #e3ece5;
+  --surface: rgba(255, 255, 255, 0.66);
+  --surface-2: rgba(255, 255, 255, 0.52);
+  --surface-3: rgba(255, 255, 255, 0.82);
+  --surface-4: rgba(23, 33, 28, 0.07);
+  --surface-inverse: #123f2c;
 
   /* Text */
-  --text: #131a14;
-  --text-2: #495447;
-  --text-3: #6f7f6c;
-  --text-inverse: #f5fcf6;
+  --text: #17211c;
+  --text-2: #47554d;
+  --text-3: #6d7c73;
+  --text-inverse: #eafaf0;
 
   /* Lines */
-  --outline: #d8e4d4;
-  --outline-strong: #b9ccb4;
-  --hairline: rgba(18, 44, 26, 0.085);
+  --outline: rgba(255, 255, 255, 0.76);
+  --outline-strong: rgba(255, 255, 255, 0.98);
+  --hairline: rgba(23, 33, 28, 0.08);
 
   /* Primary — deep forest ink: still serious, but alive next to the ivory */
-  --primary: #14402d;
-  --on-primary: #f3fbf5;
-  --primary-container: #dcefe2;
-  --on-primary-container: #0c2c1d;
-  --primary-soft: rgba(20, 64, 45, 0.075);
+  --primary: #123f2c;
+  --on-primary: #eafaf0;
+  --primary-container: #d6efe1;
+  --on-primary-container: #0b2a1d;
+  --primary-soft: rgba(18, 63, 44, 0.075);
 
   /* Semantic accents — green / amber / red, kept muted so they read as
      signals rather than decoration */
   --ok: #1f7d4b;
-  --ok-container: #ddf3e5;
+  --ok-container: #d7f2e2;
   --on-ok: #ffffff;
-  --low: #94650f;
-  --low-container: #f9edd8;
-  --out: #8b8579;
-  --danger: #b33a2d;
-  --danger-container: #f9e5e1;
+  --low: #8f6210;
+  --low-container: #fbeed6;
+  --out: #8b938c;
+  --danger: #b0452f;
+  --danger-container: #fbe6e1;
   --on-danger: #ffffff;
 
   /* Decorative tones — low-saturation chips so lists read at a glance
      without turning into a rainbow */
-  --tone-1: #3d6ea8;
-  --tone-1-container: #e6eefa;
-  --tone-2: #77569f;
-  --tone-2-container: #efe8f9;
-  --tone-3: #2b7a72;
-  --tone-3-container: #e0f1ee;
-  --tone-4: #a4506f;
-  --tone-4-container: #fae7ee;
-  --tone-5: #9a6320;
-  --tone-5-container: #f8eddc;
+  --tone-1: #3d6f96;
+  --tone-1-container: #e3f0fa;
+  --tone-2: #6a58a8;
+  --tone-2-container: #ece7fd;
+  --tone-3: #22795f;
+  --tone-3-container: #ddf4ea;
+  --tone-4: #a5527a;
+  --tone-4-container: #fbe7f0;
+  --tone-5: #96631f;
+  --tone-5-container: #fbeddb;
 
   /* Elevated surfaces */
-  --shadow-1: 0 1px 2px rgba(17, 48, 30, 0.05), 0 1px 1px rgba(17, 48, 30, 0.03);
-  --shadow-2: 0 1px 2px rgba(17, 48, 30, 0.05), 0 12px 26px -16px rgba(17, 48, 30, 0.26);
-  --shadow-3: 0 2px 4px rgba(17, 48, 30, 0.05), 0 26px 62px -26px rgba(17, 48, 30, 0.3);
-  --shadow-pop: 0 18px 48px -18px rgba(17, 48, 30, 0.36);
+  --shadow-1: 0 1px 2px rgba(20, 50, 35, 0.06);
+  --shadow-2: 0 2px 6px rgba(20, 50, 35, 0.05), 0 18px 38px -26px rgba(20, 50, 35, 0.45);
+  --shadow-3: 0 4px 10px rgba(20, 50, 35, 0.06), 0 36px 66px -34px rgba(20, 50, 35, 0.5);
+  --shadow-pop: 0 26px 56px -26px rgba(20, 50, 35, 0.55);
 
-  --glass: rgba(255, 255, 255, 0.86);
-  --scrim: rgba(12, 28, 18, 0.44);
-  --grain-opacity: 0.028;
+  --glass: rgba(255, 255, 255, 0.6);
+  --scrim: rgba(12, 30, 20, 0.4);
+  --grain-opacity: 0.02;
 
   /* Typography */
   --font: "Vazirmatn", "Segoe UI", system-ui, -apple-system, sans-serif;
@@ -109,12 +109,12 @@
   --gutter: clamp(16px, 4vw, 32px);
 
   /* Shape */
-  --r-xs: 6px;
-  --r-sm: 10px;
-  --r-md: 14px;
-  --r-lg: 20px;
-  --r-xl: 28px;
-  --r-2xl: 36px;
+  --r-xs: 8px;
+  --r-sm: 14px;
+  --r-md: 18px;
+  --r-lg: 24px;
+  --r-xl: 30px;
+  --r-2xl: 40px;
   --r-full: 999px;
 
   /* Motion */
@@ -140,114 +140,213 @@
 /* ── Dark ────────────────────────────────────────────────────────────────── */
 [data-theme="dark"] {
   color-scheme: dark;
-  --bg: #0e0e0c;
-  --bg-deep: #0a0a09;
-  --surface: #161613;
-  --surface-2: #1c1b18;
-  --surface-3: #24221e;
-  --surface-4: #2d2a25;
-  --surface-inverse: #f4f1ea;
+  --bg: #08120d;
+  --bg-deep: #060d09;
+  --surface: rgba(30, 50, 40, 0.55);
+  --surface-2: rgba(255, 255, 255, 0.055);
+  --surface-3: rgba(255, 255, 255, 0.09);
+  --surface-4: rgba(255, 255, 255, 0.13);
+  --surface-inverse: #eafaf0;
 
-  --text: #f1eee7;
-  --text-2: #b5afa2;
-  --text-3: #847e71;
-  --text-inverse: #171613;
+  --text: #e9f2ec;
+  --text-2: #a6b8ae;
+  --text-3: #7b8c83;
+  --text-inverse: #0b1a13;
 
-  --outline: #333028;
-  --outline-strong: #4a463c;
+  --outline: rgba(255, 255, 255, 0.12);
+  --outline-strong: rgba(255, 255, 255, 0.24);
   --hairline: rgba(255, 255, 255, 0.08);
 
-  --primary: #efebe2;
-  --on-primary: #1a1916;
-  --primary-container: #2a2721;
-  --on-primary-container: #f1eee7;
-  --primary-soft: rgba(255, 255, 255, 0.07);
+  --primary: #9fe8c1;
+  --on-primary: #06231a;
+  --primary-container: #143528;
+  --on-primary-container: #d6f7e5;
+  --primary-soft: rgba(159, 232, 193, 0.12);
 
-  --ok: #83c79f;
-  --ok-container: #17281e;
-  --on-ok: #0d1a12;
-  --low: #e2bd74;
-  --low-container: #2c2314;
-  --out: #928c7f;
-  --danger: #f0968d;
-  --danger-container: #331b19;
-  --on-danger: #2a1412;
+  --ok: #6fd39a;
+  --ok-container: #12291d;
+  --on-ok: #06231a;
+  --low: #e6bd7a;
+  --low-container: #2a2113;
+  --out: #97a29a;
+  --danger: #f2958c;
+  --danger-container: #331b18;
+  --on-danger: #2a1210;
 
-  --tone-1: #93b8e6;
-  --tone-1-container: #1a2635;
-  --tone-2: #bda4e4;
+  --tone-1: #8fc4ea;
+  --tone-1-container: #142632;
+  --tone-2: #c0b0ee;
   --tone-2-container: #241f36;
-  --tone-3: #7fc9c0;
-  --tone-3-container: #132a27;
-  --tone-4: #e4a2bd;
-  --tone-4-container: #301f27;
-  --tone-5: #e3b583;
-  --tone-5-container: #2c2417;
+  --tone-3: #7fd9b8;
+  --tone-3-container: #102a22;
+  --tone-4: #eda5c2;
+  --tone-4-container: #2e1c25;
+  --tone-5: #e6ba86;
+  --tone-5-container: #2b2215;
 
   --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-2: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 28px -16px rgba(0, 0, 0, 0.7);
-  --shadow-3: 0 2px 6px rgba(0, 0, 0, 0.45), 0 30px 70px -28px rgba(0, 0, 0, 0.85);
-  --shadow-pop: 0 22px 56px -20px rgba(0, 0, 0, 0.9);
+  --shadow-2: 0 1px 2px rgba(0, 0, 0, 0.4), 0 14px 30px -18px rgba(0, 0, 0, 0.72);
+  --shadow-3: 0 2px 6px rgba(0, 0, 0, 0.45), 0 32px 70px -30px rgba(0, 0, 0, 0.85);
+  --shadow-pop: 0 24px 58px -20px rgba(0, 0, 0, 0.9);
 
-  --glass: rgba(22, 22, 19, 0.82);
-  --scrim: rgba(0, 0, 0, 0.62);
-  --grain-opacity: 0.05;
+  --glass: rgba(14, 28, 21, 0.66);
+  --scrim: rgba(0, 0, 0, 0.66);
+  --grain-opacity: 0.04;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --bg: #0e0e0c;
-    --bg-deep: #0a0a09;
-    --surface: #161613;
-    --surface-2: #1c1b18;
-    --surface-3: #24221e;
-    --surface-4: #2d2a25;
-    --surface-inverse: #f4f1ea;
+    --bg: #08120d;
+    --bg-deep: #060d09;
+    --surface: rgba(30, 50, 40, 0.55);
+    --surface-2: rgba(255, 255, 255, 0.055);
+    --surface-3: rgba(255, 255, 255, 0.09);
+    --surface-4: rgba(255, 255, 255, 0.13);
+    --surface-inverse: #eafaf0;
 
-    --text: #f1eee7;
-    --text-2: #b5afa2;
-    --text-3: #847e71;
-    --text-inverse: #171613;
+    --text: #e9f2ec;
+    --text-2: #a6b8ae;
+    --text-3: #7b8c83;
+    --text-inverse: #0b1a13;
 
-    --outline: #333028;
-    --outline-strong: #4a463c;
+    --outline: rgba(255, 255, 255, 0.12);
+    --outline-strong: rgba(255, 255, 255, 0.24);
     --hairline: rgba(255, 255, 255, 0.08);
 
-    --primary: #efebe2;
-    --on-primary: #1a1916;
-    --primary-container: #2a2721;
-    --on-primary-container: #f1eee7;
-    --primary-soft: rgba(255, 255, 255, 0.07);
+    --primary: #9fe8c1;
+    --on-primary: #06231a;
+    --primary-container: #143528;
+    --on-primary-container: #d6f7e5;
+    --primary-soft: rgba(159, 232, 193, 0.12);
 
-    --ok: #83c79f;
-    --ok-container: #17281e;
-    --on-ok: #0d1a12;
-    --low: #e2bd74;
-    --low-container: #2c2314;
-    --out: #928c7f;
-    --danger: #f0968d;
-    --danger-container: #331b19;
-    --on-danger: #2a1412;
+    --ok: #6fd39a;
+    --ok-container: #12291d;
+    --on-ok: #06231a;
+    --low: #e6bd7a;
+    --low-container: #2a2113;
+    --out: #97a29a;
+    --danger: #f2958c;
+    --danger-container: #331b18;
+    --on-danger: #2a1210;
 
-    --tone-1: #93b8e6;
-    --tone-1-container: #1a2635;
-    --tone-2: #bda4e4;
+    --tone-1: #8fc4ea;
+    --tone-1-container: #142632;
+    --tone-2: #c0b0ee;
     --tone-2-container: #241f36;
-    --tone-3: #7fc9c0;
-    --tone-3-container: #132a27;
-    --tone-4: #e4a2bd;
-    --tone-4-container: #301f27;
-    --tone-5: #e3b583;
-    --tone-5-container: #2c2417;
+    --tone-3: #7fd9b8;
+    --tone-3-container: #102a22;
+    --tone-4: #eda5c2;
+    --tone-4-container: #2e1c25;
+    --tone-5: #e6ba86;
+    --tone-5-container: #2b2215;
 
     --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
-    --shadow-2: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 28px -16px rgba(0, 0, 0, 0.7);
-    --shadow-3: 0 2px 6px rgba(0, 0, 0, 0.45), 0 30px 70px -28px rgba(0, 0, 0, 0.85);
-    --shadow-pop: 0 22px 56px -20px rgba(0, 0, 0, 0.9);
+    --shadow-2: 0 1px 2px rgba(0, 0, 0, 0.4), 0 14px 30px -18px rgba(0, 0, 0, 0.72);
+    --shadow-3: 0 2px 6px rgba(0, 0, 0, 0.45), 0 32px 70px -30px rgba(0, 0, 0, 0.85);
+    --shadow-pop: 0 24px 58px -20px rgba(0, 0, 0, 0.9);
 
-    --glass: rgba(22, 22, 19, 0.82);
-    --scrim: rgba(0, 0, 0, 0.62);
-    --grain-opacity: 0.05;
+    --glass: rgba(14, 28, 21, 0.66);
+    --scrim: rgba(0, 0, 0, 0.66);
+    --grain-opacity: 0.04;
+  }
+}
+
+/* ==========================================================================
+   Aurora & glass — the «شیشه و نور» layer.
+   Pastel light sits behind every page; surfaces are translucent sheets with
+   a hairline of white along the top edge. Everything resolves through the
+   --glass-* tokens, so light and dark swap with no second set of rules.
+   ========================================================================== */
+:root {
+  --aurora-mint: rgba(169, 232, 198, 0.9);
+  --aurora-lilac: rgba(195, 184, 255, 0.72);
+  --aurora-peach: rgba(255, 201, 171, 0.72);
+  --aurora-sky: rgba(174, 217, 255, 0.72);
+  --aurora-mint-2: rgba(184, 239, 207, 0.78);
+
+  --glass-line: rgba(255, 255, 255, 0.72);
+  --glass-blur: 22px;
+  --glass-shadow: 0 22px 44px -32px rgba(20, 50, 35, 0.5);
+  --glass-shadow-lg: 0 40px 80px -44px rgba(20, 50, 35, 0.55);
+
+  --glass-bar: rgba(255, 255, 255, 0.62);
+  --glass-panel: rgba(255, 255, 255, 0.66);
+  --glass-card: rgba(255, 255, 255, 0.78);
+  --glass-card-hover: rgba(255, 255, 255, 0.92);
+  --glass-card-border: #ffffff;
+  --glass-chip: rgba(255, 255, 255, 0.62);
+  --glass-chip-hover: #ffffff;
+  --glass-field: rgba(255, 255, 255, 0.72);
+  --glass-field-focus: #ffffff;
+  --glass-sheet: rgba(252, 255, 253, 0.94);
+  --glass-menu: rgba(252, 255, 253, 0.9);
+  --glass-eyebrow-bg: rgba(255, 255, 255, 0.92);
+  --glass-eyebrow-fg: #1f6b45;
+  --glass-note: rgba(255, 255, 255, 0.5);
+  --glass-gloss: rgba(255, 255, 255, 0.62);
+  --page-mesh-veil: rgba(238, 244, 239, 0.34);
+  --page-mesh-veil-end: rgba(238, 244, 239, 0.52);
+}
+
+[data-theme="dark"] {
+  --aurora-mint: rgba(38, 122, 86, 0.34);
+  --aurora-lilac: rgba(84, 70, 148, 0.3);
+  --aurora-peach: rgba(140, 82, 54, 0.2);
+  --aurora-sky: rgba(44, 92, 132, 0.26);
+  --aurora-mint-2: rgba(36, 108, 80, 0.3);
+
+  --glass-line: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 22px 44px -30px rgba(0, 0, 0, 0.8);
+  --glass-shadow-lg: 0 40px 80px -40px rgba(0, 0, 0, 0.9);
+
+  --glass-bar: rgba(20, 36, 28, 0.62);
+  --glass-panel: rgba(22, 38, 30, 0.62);
+  --glass-card: rgba(30, 50, 40, 0.56);
+  --glass-card-hover: rgba(34, 56, 45, 0.74);
+  --glass-card-border: rgba(255, 255, 255, 0.14);
+  --glass-chip: rgba(255, 255, 255, 0.07);
+  --glass-chip-hover: rgba(255, 255, 255, 0.13);
+  --glass-field: rgba(255, 255, 255, 0.06);
+  --glass-field-focus: rgba(255, 255, 255, 0.1);
+  --glass-sheet: rgba(16, 30, 23, 0.94);
+  --glass-menu: rgba(16, 30, 23, 0.92);
+  --glass-eyebrow-bg: rgba(111, 211, 154, 0.14);
+  --glass-eyebrow-fg: #6fd39a;
+  --glass-note: rgba(255, 255, 255, 0.05);
+  --glass-gloss: rgba(255, 255, 255, 0.08);
+  --page-mesh-veil: rgba(8, 18, 13, 0.3);
+  --page-mesh-veil-end: rgba(8, 18, 13, 0.62);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --aurora-mint: rgba(38, 122, 86, 0.34);
+    --aurora-lilac: rgba(84, 70, 148, 0.3);
+    --aurora-peach: rgba(140, 82, 54, 0.2);
+    --aurora-sky: rgba(44, 92, 132, 0.26);
+    --aurora-mint-2: rgba(36, 108, 80, 0.3);
+
+    --glass-line: rgba(255, 255, 255, 0.1);
+    --glass-shadow: 0 22px 44px -30px rgba(0, 0, 0, 0.8);
+    --glass-shadow-lg: 0 40px 80px -40px rgba(0, 0, 0, 0.9);
+
+    --glass-bar: rgba(20, 36, 28, 0.62);
+    --glass-panel: rgba(22, 38, 30, 0.62);
+    --glass-card: rgba(30, 50, 40, 0.56);
+    --glass-card-hover: rgba(34, 56, 45, 0.74);
+    --glass-card-border: rgba(255, 255, 255, 0.14);
+    --glass-chip: rgba(255, 255, 255, 0.07);
+    --glass-chip-hover: rgba(255, 255, 255, 0.13);
+    --glass-field: rgba(255, 255, 255, 0.06);
+    --glass-field-focus: rgba(255, 255, 255, 0.1);
+    --glass-sheet: rgba(16, 30, 23, 0.94);
+    --glass-menu: rgba(16, 30, 23, 0.92);
+    --glass-eyebrow-bg: rgba(111, 211, 154, 0.14);
+    --glass-eyebrow-fg: #6fd39a;
+    --glass-note: rgba(255, 255, 255, 0.05);
+    --glass-gloss: rgba(255, 255, 255, 0.08);
+    --page-mesh-veil: rgba(8, 18, 13, 0.3);
+    --page-mesh-veil-end: rgba(8, 18, 13, 0.62);
   }
 }
