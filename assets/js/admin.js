@@ -733,7 +733,7 @@ function openDeviceEditor({ id = null, categoryId = '' } = {}) {
           ${fieldHtml({ label: 'قیمت', name: 'price', value: draft.price ? String(draft.price) : '', type: 'text', inputmode: 'numeric', ltr: true, hint: `به ${state.data.settings.currency || 'تومان'} — خالی یا صفر یعنی «استعلام قیمت»` })}
           ${fieldHtml({ label: 'موجودی', name: 'stock', value: String(draft.stock), type: 'number', min: 0, max: 9999, step: 1, ltr: true, hint: 'تعداد دستگاه موجود در انبار' })}
         </div>
-        <label class="check" style="margin-top:-4px">
+        <label class="check check--card">
           <input type="checkbox" name="priceOnRequest" ${draft.priceOnRequest ? 'checked' : ''}>
           <span>قیمت را اعلام نکنید و به‌جای آن «استعلام قیمت» نمایش داده شود.</span>
         </label>
@@ -1044,6 +1044,26 @@ function openCategoryEditor({ id = null } = {}) {
       const iconValue = c.el.querySelector('#catIconValue');
       const saveBtn = c.el.querySelector('[data-save]');
 
+      // The picker is a short scrolling window; bring the pressed icon into
+      // view and then snap to a whole row, so the window never opens (or ends
+      // up) on a half-cut icon at its top or bottom edge.
+      const revealIcon = (btn) => {
+        btn.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+        const styles = getComputedStyle(picker);
+        const gap = parseFloat(styles.rowGap) || 0;
+        const rowHeight = parseFloat(String(styles.gridTemplateRows).split(' ')[0]) || 0;
+        const step = rowHeight + gap;
+        if (!step) return;
+        picker.scrollTop = Math.round(picker.scrollTop / step) * step;
+        const win = picker.getBoundingClientRect();
+        const box = btn.getBoundingClientRect();
+        if (box.top < win.top - 1) picker.scrollTop -= step;
+        else if (box.bottom > win.bottom + 1) picker.scrollTop += step;
+      };
+
+      const pressedIcon = picker.querySelector('[aria-pressed="true"]');
+      if (pressedIcon) revealIcon(pressedIcon);
+
       (draft.fields || []).forEach((f) => host.append(catFieldRow(f)));
       if (!(draft.fields || []).length) {
         host.append(catFieldRow(defaultField({ label: '', key: uid('f'), showInRow: true })));
@@ -1055,6 +1075,9 @@ function openCategoryEditor({ id = null } = {}) {
         picker.querySelectorAll('[data-icon-opt]').forEach((b) => b.setAttribute('aria-pressed', 'false'));
         btn.setAttribute('aria-pressed', 'true');
         iconValue.value = btn.dataset.iconOpt;
+        // Scrolling to the pressed option keeps it whole instead of leaving a
+        // half-cut icon at the edge of the 4-row window.
+        revealIcon(btn);
       });
 
       host.addEventListener('click', (event) => {

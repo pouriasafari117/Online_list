@@ -93,9 +93,13 @@ body { padding-bottom: 0; }
   position: absolute;
   inset: -20% -10% auto -10%;
   height: 620px;
+  /* A soft aurora behind the first screen: mint + sky + a hint of amber.
+     It gives the page daylight instead of a flat single-colour plane. */
   background:
-    radial-gradient(58% 62% at 72% 18%, color-mix(in srgb, var(--text) 7%, transparent), transparent 70%),
-    radial-gradient(46% 50% at 18% 0%, color-mix(in srgb, var(--text) 4%, transparent), transparent 70%);
+    radial-gradient(44% 52% at 78% 6%, color-mix(in srgb, var(--ok) 16%, transparent), transparent 72%),
+    radial-gradient(40% 46% at 16% -4%, color-mix(in srgb, var(--tone-1) 11%, transparent), transparent 74%),
+    radial-gradient(34% 40% at 52% -14%, color-mix(in srgb, var(--low) 9%, transparent), transparent 76%);
+  filter: blur(6px);
   pointer-events: none;
 }
 .hero::after {
@@ -249,8 +253,9 @@ body { padding-bottom: 0; }
   display: grid;
   grid-template-columns: 1fr;
   gap: 1px;
-  margin-top: clamp(32px, 5vw, 56px);
+  margin-top: clamp(36px, 5.5vw, 64px);
   border: 1px solid var(--outline);
+  box-shadow: var(--shadow-1);
   border-radius: var(--r-lg);
   background: var(--outline);
   overflow: hidden;
@@ -281,8 +286,10 @@ body { padding-bottom: 0; }
 .trust__desc { font-size: var(--fs-2xs); color: var(--text-3); line-height: 1.7; }
 
 /* ── Sections ───────────────────────────────────────────────────────────── */
-.section { padding-block: clamp(36px, 5vw, 64px); }
-.section--tight { padding-block: clamp(20px, 3vw, 32px); }
+.section { padding-block: var(--gap-section); }
+.section--tight { padding-block: clamp(28px, 3.6vw, 44px); }
+/* Two sections back to back share one rhythm instead of doubling the gap. */
+.section + .section { padding-top: clamp(28px, 3.4vw, 48px); }
 .section__head {
   display: flex;
   align-items: flex-end;
@@ -384,8 +391,8 @@ body { padding-bottom: 0; }
   z-index: 2;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 16px;
+  gap: 16px;
+  padding: 18px;
   border-radius: var(--r-lg);
   border: 1px solid var(--outline);
   background: var(--surface);
@@ -458,13 +465,16 @@ body { padding-bottom: 0; }
 .chip[data-tone] .ic { color: var(--tone); }
 .chip[data-tone][aria-pressed="true"] .ic { color: var(--on-primary); }
 .chip--all .ic { color: var(--text-2); }
+/* The «همه» chip picks up the dark primary fill when selected; without this
+   its grid icon stayed --text-2 on that fill and disappeared. */
+.chip--all[aria-pressed="true"] .ic { color: var(--on-primary); }
 
 .resultbar {
   display: flex;
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
-  padding-block: 18px 10px;
+  padding-block: 22px 12px;
   min-height: 54px;
 }
 .resultbar__count { font-size: var(--fs-xs); color: var(--text-3); }
@@ -472,8 +482,8 @@ body { padding-bottom: 0; }
 .resultbar__actions { margin-inline-start: auto; display: flex; align-items: center; gap: 4px; }
 
 /* ── Device groups & rows ───────────────────────────────────────────────── */
-.group { margin-top: 10px; }
-.group + .group { margin-top: 34px; }
+.group { margin-top: 14px; }
+.group + .group { margin-top: 40px; }
 .group__head {
   display: flex;
   align-items: center;
@@ -501,8 +511,8 @@ body { padding-bottom: 0; }
 .group__actions { display: flex; align-items: center; gap: 2px; }
 .group__actions .icon-btn { width: 34px; height: 34px; }
 .group__actions .icon-btn .ic { width: 18px; height: 18px; }
-.group__list { display: flex; flex-direction: column; gap: 8px; }
-.group--grid .group__list { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.group__list { display: flex; flex-direction: column; gap: 10px; }
+.group--grid .group__list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
 
 .device {
   --pad: 14px;
@@ -812,15 +822,26 @@ body { padding-bottom: 0; }
 .contact__row .ic { width: 18px; height: 18px; color: var(--text-3); flex: none; }
 /* Contact rows: coloured icon chips, one per kind of information. */
 .contact__row > span[data-icon] {
+  order: -1;
   display: grid;
   place-items: center;
-  width: 32px; height: 32px;
-  border-radius: 10px;
+  width: 34px; height: 34px;
+  border-radius: 11px;
   flex: none;
   background: var(--tone-bg);
   color: var(--tone);
   border: 1px solid color-mix(in srgb, var(--tone) 20%, transparent);
 }
+.contact__row > div {
+  min-width: 0;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.contact__row .k { flex: none; }
+.contact__row .v { text-align: start; }
 .contact__row > span[data-icon] .ic { color: inherit; }
 .contact__row:nth-child(1) { --tone: var(--tone-1); --tone-bg: var(--tone-1-container); }
 .contact__row:nth-child(2) { --tone: var(--tone-5); --tone-bg: var(--tone-5-container); }
@@ -900,6 +921,9 @@ body { padding-bottom: 0; }
 }
 .password-wrap .icon-btn .ic { width: 19px; height: 19px; }
 .pw-meter { display: flex; gap: 4px; margin-top: 2px; }
+/* Empty meter = four pale stubs that read as a stray rule; keep the space so
+   nothing jumps, but do not draw it until a password is typed. */
+.pw-meter[data-score="0"] span { background: transparent; }
 .pw-meter span {
   height: 3px;
   flex: 1;
@@ -987,19 +1011,21 @@ body { padding-bottom: 0; }
 }
 
 /* Category editor */
-.cat-fields { display: flex; flex-direction: column; gap: 8px; }
+.cat-fields { display: flex; flex-direction: column; gap: 10px; }
 .cat-field {
   display: grid;
-  grid-template-columns: 1fr 116px 32px 32px 32px;
-  gap: 6px;
+  /* minmax(0, …) stops a long label from pushing the row wider than the card */
+  grid-template-columns: minmax(0, 1fr) 104px 34px 34px 34px 34px;
+  gap: 8px;
   align-items: center;
-  padding: 8px;
+  padding: 10px;
   border-radius: var(--r-sm);
   border: 1px solid var(--outline);
   background: var(--surface);
 }
+.cat-field > * { min-width: 0; }
 .cat-field .input, .cat-field .select { min-height: 38px; height: 38px; font-size: var(--fs-2xs); }
-.cat-field__show { display: grid; place-items: center; width: 32px; height: 38px; }
+.cat-field__show { display: grid; place-items: center; width: 34px; height: 38px; }
 .cat-field__show input { margin: 0; }
 .cat-field .icon-btn { width: 30px; height: 30px; }
 .cat-field .icon-btn .ic { width: 16px; height: 16px; }
@@ -1036,26 +1062,37 @@ body { padding-bottom: 0; }
 fieldset.spec-section {
   border: 0;
   border-radius: var(--r-md);
-  padding: 14px;
+  padding: 16px;
   margin: 0;
   background: var(--surface-2);
 }
 fieldset.spec-section .sheet__legend { padding: 0; margin-bottom: 2px; }
+.check--card {
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--hairline);
+  background: var(--surface-2);
+}
+.check--card input { margin-top: 0; }
+.check--card input:checked { background: var(--ok); border-color: var(--ok); }
+
 .spec-section__hint {
-  margin: 0 0 10px;
+  margin: 0 0 12px;
   font-size: var(--fs-2xs);
   color: var(--text-3);
   line-height: 1.85;
 }
 
-.extra-specs { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+.extra-specs { display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
 .extra-specs:empty { display: none; }
 .extra-spec {
   display: grid;
-  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr) 34px;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr) 34px;
   gap: 8px;
   align-items: center;
-  padding: 6px;
+  padding: 8px;
   border-radius: var(--r-sm);
   border: 1px solid var(--hairline);
   background: var(--surface);
@@ -1068,12 +1105,15 @@ fieldset.spec-section .sheet__legend { padding: 0; margin-bottom: 2px; }
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
   gap: 6px;
-  max-height: 190px;
+  /* 8 + 4 rows of 42 + 3 gaps + 8 = 202: exactly four rows, no clipped icon */
+  max-height: 202px;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 8px;
   border-radius: var(--r-sm);
   border: 1px solid var(--outline);
   background: var(--surface-2);
+  scroll-padding-block: 8px;
 }
 .icon-picker__opt {
   width: 100%;
@@ -1215,8 +1255,28 @@ fieldset.spec-section .sheet__legend { padding: 0; margin-bottom: 2px; }
   .sheet__head { padding: 16px 16px 12px; }
   .sheet__foot { padding: 12px 16px; }
   .grid-2, .grid-3 { grid-template-columns: 1fr; }
-  .cat-field { grid-template-columns: 1fr 96px 30px 30px 30px; }
-  .publish-summary { gap: 6px; }
+  .filterbar { padding: 14px; gap: 14px; }
+  .sheet__body { padding: 16px 16px 26px; }
+  /* Six cells in one line never fit a phone: label + unit on the first row,
+     the show/move/delete controls on the second. */
+  .cat-field {
+    grid-template-columns: minmax(0, 1fr) 92px 34px;
+    grid-template-areas:
+      "label unit show"
+      "up down remove";
+    row-gap: 8px;
+    padding: 10px;
+  }
+  .cat-field > [data-field-label] { grid-area: label; }
+  .cat-field > [data-field-unit] { grid-area: unit; }
+  .cat-field > .cat-field__show { grid-area: show; justify-self: center; }
+  .cat-field > [data-move="up"] { grid-area: up; justify-self: start; }
+  .cat-field > [data-move="down"] { grid-area: down; justify-self: start; }
+  .cat-field > [data-remove-field] { grid-area: remove; justify-self: end; }
+  .cat-field .icon-btn { width: 34px; height: 34px; }
+  .extra-spec { grid-template-columns: minmax(0, 1fr) 34px; }
+  .extra-spec [data-extra-value] { grid-column: 1 / -1; grid-row: 2; }
+  .publish-summary { gap: 8px; }
 }
 
 /* ── Print ──────────────────────────────────────────────────────────────── */
@@ -1391,8 +1451,11 @@ body.has-dialog { overflow: hidden; }
     scrollbar-width: none;
   }
   #availabilityFilter::-webkit-scrollbar { display: none; }
-  .filterbar__tools > .filterbar__tools { flex: 1 1 auto; min-width: 0; flex-wrap: wrap; }
-  #sortSelect { max-width: 100%; min-width: 0; }
+  .filterbar__tools { flex-direction: column; align-items: stretch; gap: 10px; }
+  .filterbar__tools > .filterbar__tools { flex: 1 1 auto; width: 100%; }
+  #availabilityFilter { width: 100%; justify-content: space-between; }
+  #sortSelect { width: 100%; max-width: none; min-width: 0; }
+  .filterbar__cats { gap: 10px; padding-bottom: 4px; }
 }
 
 /* ── Select: proper chevron, both themes ────────────────────────────────── */
@@ -1577,7 +1640,8 @@ body.is-manage-page .skip { display: none !important; }
 
 .mpage {
   min-height: 100dvh;
-  padding-bottom: calc(88px + env(safe-area-inset-bottom));
+  /* Room for the fixed action bar plus a full row of air below the last card. */
+  padding-bottom: calc(112px + env(safe-area-inset-bottom));
   background: var(--bg);
 }
 /* The page takes focus when it opens (so screen readers announce it and phones
@@ -1828,7 +1892,7 @@ body.is-manage-page .skip { display: none !important; }
   grid-template-columns: 44px minmax(0, 1fr) auto auto auto;
   align-items: center;
   gap: 12px;
-  padding: 10px 12px;
+  padding: 12px 14px;
   border-radius: var(--r-lg);
   border: 1px solid var(--hairline);
   background: var(--surface);
@@ -2004,7 +2068,9 @@ body.is-manage-page .skip { display: none !important; }
   flex: 0 0 auto;
 }
 .mp-apply__head b { display: block; font-size: var(--fs-sm); }
-.mp-apply__head span { display: block; font-size: var(--fs-2xs); color: var(--text-2); line-height: 1.85; }
+/* Only the text span, not the icon chip beside it — a bare `span` selector
+   here painted the cloud icon in --text-2 on the green chip and made it vanish. */
+.mp-apply__head div > span { display: block; font-size: var(--fs-2xs); color: var(--text-2); line-height: 1.85; }
 .mp-apply__list {
   margin: 0;
   padding: 0;
@@ -2070,7 +2136,7 @@ body.is-manage-page .skip { display: none !important; }
 
 /* ── Phones ─────────────────────────────────────────────────────────────── */
 @media (max-width: 760px) {
-  .mpage { padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
+  .mpage { padding-bottom: calc(104px + env(safe-area-inset-bottom)); }
   .mpage__bar-inner { gap: 8px; min-height: 60px; padding-block: 8px; }
   .mpage__sub { display: none; }
   .mpage__sync { max-width: none; padding-inline: 9px; height: 28px; font-size: 0.66rem; }
@@ -2167,6 +2233,17 @@ body.is-manage-page .skip { display: none !important; }
 /* While the management page is open its own action bar owns the bottom edge,
    so toasts sit above it instead of covering the confirm button. */
 body.is-manage-page .toast-root { bottom: calc(78px + env(safe-area-inset-bottom)); }
+/* A soft edge above the fixed bar so rows fade out instead of being sliced
+   mid-word. Pointer-events stay off: the strip must never eat a tap. */
+.mpage__foot::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: 100%;
+  height: 22px;
+  pointer-events: none;
+  background: linear-gradient(to top, color-mix(in srgb, var(--bg) 92%, transparent), color-mix(in srgb, var(--bg) 0%, transparent));
+}
 @media (max-width: 760px) {
   body.is-manage-page .toast-root { bottom: calc(72px + env(safe-area-inset-bottom)); }
 }
