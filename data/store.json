@@ -52,7 +52,7 @@
       "categoryId": "cat_mvpq1twgentn6",
       "price": 120000,
       "priceOnRequest": false,
-      "stock": 3,
+      "stock": 4,
       "condition": "استوک",
       "warranty": "",
       "specs": {
@@ -66,13 +66,48 @@
       "hidden": false,
       "order": 1,
       "createdAt": "2026-10-26T20:41:56.315Z",
-      "updatedAt": "2026-10-26T20:41:56.315Z"
+      "updatedAt": "2026-10-27T04:51:57.093Z"
+    },
+    {
+      "id": "dev_mvq7lu3rl3vtw",
+      "name": "غلام",
+      "brand": "ممپ",
+      "categoryId": "cat_mvpq1twgentn6",
+      "price": 0,
+      "priceOnRequest": false,
+      "stock": 1,
+      "condition": "نو",
+      "warranty": "",
+      "specs": {
+        "f_mvpq02pm8y4j7": "۱",
+        "f_mvpq10dqxmdum": "۲"
+      },
+      "extraSpecs": [],
+      "note": "",
+      "image": "",
+      "featured": false,
+      "hidden": false,
+      "order": 2,
+      "createdAt": "2026-10-27T04:52:39.207Z",
+      "updatedAt": "2026-10-27T04:52:39.207Z"
     }
   ],
   "meta": {
-    "updatedAt": "2026-10-26T20:42:16.180Z",
+    "updatedAt": "2026-10-27T04:52:47.936Z",
     "updatedBy": "پوریا صفری",
     "history": [
+      {
+        "id": "h_mvq7m0u8bhfgb",
+        "at": "2026-10-27T04:52:47.936Z",
+        "by": "پوریا صفری",
+        "action": "publish",
+        "summary": "۱ دستگاه جدید · ۱ دستگاه به‌روزرسانی",
+        "stats": {
+          "added": 1,
+          "updated": 1,
+          "removed": 0
+        }
+      },
       {
         "id": "h_mvpq375g60xnd",
         "at": "2026-10-26T20:42:16.180Z",
