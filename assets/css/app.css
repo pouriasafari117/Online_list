@@ -123,11 +123,11 @@ body { padding-bottom: 0; }
   height: 30px;
   padding-inline: 12px 14px;
   border-radius: var(--r-full);
-  border: 1px solid var(--outline);
-  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ok) 24%, var(--outline));
+  background: color-mix(in srgb, var(--ok-container) 62%, var(--surface));
   font-size: var(--fs-2xs);
-  font-weight: 550;
-  color: var(--text-2);
+  font-weight: 600;
+  color: color-mix(in srgb, var(--ok) 86%, var(--text));
 }
 .live-dot { position: relative; width: 7px; height: 7px; border-radius: 99px; background: var(--ok); flex: none; }
 .live-dot::after {
@@ -166,6 +166,17 @@ body { padding-bottom: 0; }
 }
 .hero__lead { max-width: 46ch; color: var(--text-2); font-size: var(--fs-lead); line-height: 1.95; }
 .hero__cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
+/* The call action is the one place the page uses a real colour button. */
+#heroCall { border-color: color-mix(in srgb, var(--ok) 30%, var(--outline-strong)); }
+#heroCall .ic { color: var(--ok); }
+#heroCall:hover {
+  background: color-mix(in srgb, var(--ok-container) 52%, var(--surface));
+  border-color: color-mix(in srgb, var(--ok) 42%, var(--outline-strong));
+}
+#contactCall { --btn-bg: var(--ok); --btn-fg: var(--on-ok); --btn-border: var(--ok); }
+#contactWhatsapp { --btn-border: color-mix(in srgb, var(--ok) 32%, var(--outline-strong)); }
+#contactWhatsapp .ic { color: var(--ok); }
+#contactWhatsapp:hover { --btn-bg: var(--ok-container); }
 .hero__meta {
   display: flex;
   flex-wrap: wrap;
@@ -251,7 +262,21 @@ body { padding-bottom: 0; }
   padding: 16px 18px;
   background: color-mix(in srgb, var(--surface) 70%, transparent);
 }
-.trust__item .ic { width: 20px; height: 20px; color: var(--text-3); margin-top: 3px; }
+.trust__item .ic { width: 20px; height: 20px; color: var(--text-3); }
+.trust__item > span[data-icon] {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  flex: none;
+  background: var(--surface-2);
+  border: 1px solid var(--hairline);
+}
+.trust__item:nth-child(1) > span[data-icon] { background: var(--ok-container); color: var(--ok); border-color: color-mix(in srgb, var(--ok) 20%, transparent); }
+.trust__item:nth-child(2) > span[data-icon] { background: var(--low-container); color: var(--low); border-color: color-mix(in srgb, var(--low) 22%, transparent); }
+.trust__item:nth-child(3) > span[data-icon] { background: var(--tone-1-container); color: var(--tone-1); border-color: color-mix(in srgb, var(--tone-1) 20%, transparent); }
+.trust__item > span[data-icon] .ic { color: inherit; margin: 0; }
 .trust__title { font-size: var(--fs-xs); font-weight: 650; }
 .trust__desc { font-size: var(--fs-2xs); color: var(--text-3); line-height: 1.7; }
 
@@ -425,9 +450,14 @@ body { padding-bottom: 0; }
   margin-inline: -4px;
   padding-inline: 4px;
   scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(to left, #000 92%, transparent);
+  mask-image: linear-gradient(to left, #000 92%, transparent);
 }
 .filterbar__cats::-webkit-scrollbar { display: none; }
 .filterbar__cats .chip { flex: none; }
+.chip[data-tone] .ic { color: var(--tone); }
+.chip[data-tone][aria-pressed="true"] .ic { color: var(--on-primary); }
+.chip--all .ic { color: var(--text-2); }
 
 .resultbar {
   display: flex;
@@ -536,11 +566,12 @@ body { padding-bottom: 0; }
     var(--tone-bg);
   border-color: color-mix(in srgb, var(--tone) 26%, transparent);
 }
-.device__thumb[data-tone="1"], .group__icon[data-tone="1"], .feature-card__media[data-tone="1"] { --tone: var(--tone-1); --tone-bg: var(--tone-1-container); }
-.device__thumb[data-tone="2"], .group__icon[data-tone="2"], .feature-card__media[data-tone="2"] { --tone: var(--tone-2); --tone-bg: var(--tone-2-container); }
-.device__thumb[data-tone="3"], .group__icon[data-tone="3"], .feature-card__media[data-tone="3"] { --tone: var(--tone-3); --tone-bg: var(--tone-3-container); }
-.device__thumb[data-tone="4"], .group__icon[data-tone="4"], .feature-card__media[data-tone="4"] { --tone: var(--tone-4); --tone-bg: var(--tone-4-container); }
-.device__thumb[data-tone="5"], .group__icon[data-tone="5"], .feature-card__media[data-tone="5"] { --tone: var(--tone-5); --tone-bg: var(--tone-5-container); }
+/* One palette for every tinted chip on the page. */
+[data-tone="1"] { --tone: var(--tone-1); --tone-bg: var(--tone-1-container); }
+[data-tone="2"] { --tone: var(--tone-2); --tone-bg: var(--tone-2-container); }
+[data-tone="3"] { --tone: var(--tone-3); --tone-bg: var(--tone-3-container); }
+[data-tone="4"] { --tone: var(--tone-4); --tone-bg: var(--tone-4-container); }
+[data-tone="5"] { --tone: var(--tone-5); --tone-bg: var(--tone-5-container); }
 .device--oos .device__thumb[data-tone] { filter: saturate(0.35); }
 
 /* Large surfaces stay calmer than 54 px chips: the featured rail is a big
@@ -709,6 +740,11 @@ body { padding-bottom: 0; }
   color: var(--text-3);
   margin-bottom: 4px;
 }
+.empty__icon[data-tone] {
+  background: var(--tone-bg);
+  color: var(--tone);
+  border: 1px solid color-mix(in srgb, var(--tone) 22%, transparent);
+}
 .empty__icon .ic { width: 30px; height: 30px; }
 .empty__title { font-weight: 700; font-size: 0.9375rem; }
 .empty__desc { font-size: var(--fs-xs); color: var(--text-3); max-width: 42ch; line-height: 1.9; }
@@ -773,7 +809,22 @@ body { padding-bottom: 0; }
   background: color-mix(in srgb, var(--surface) 72%, transparent);
   border: 1px solid var(--hairline);
 }
-.contact__row .ic { width: 18px; height: 18px; color: var(--text-3); margin-top: 3px; flex: none; }
+.contact__row .ic { width: 18px; height: 18px; color: var(--text-3); flex: none; }
+/* Contact rows: coloured icon chips, one per kind of information. */
+.contact__row > span[data-icon] {
+  display: grid;
+  place-items: center;
+  width: 32px; height: 32px;
+  border-radius: 10px;
+  flex: none;
+  background: var(--tone-bg);
+  color: var(--tone);
+  border: 1px solid color-mix(in srgb, var(--tone) 20%, transparent);
+}
+.contact__row > span[data-icon] .ic { color: inherit; }
+.contact__row:nth-child(1) { --tone: var(--tone-1); --tone-bg: var(--tone-1-container); }
+.contact__row:nth-child(2) { --tone: var(--tone-5); --tone-bg: var(--tone-5-container); }
+.contact__row:nth-child(3) { --tone: var(--ok); --tone-bg: var(--ok-container); }
 .contact__row .k { font-size: 10px; color: var(--text-3); }
 .contact__row .v { font-size: var(--fs-xs); font-weight: 550; line-height: 1.7; word-break: break-word; }
 .contact__row .v a:hover { text-decoration: underline; text-underline-offset: 3px; }
@@ -1305,6 +1356,29 @@ body.has-dialog { overflow: hidden; }
   .sheet__foot .btn { flex: 1 1 auto; }
 }
 
+/* Status dots in the availability filter — the same green / amber / red the
+   stock badges use, so the filter reads before you read the words. */
+#availabilityFilter .segmented__item { padding-inline: 9px 10px; }
+#availabilityFilter .segmented__item::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.45;
+  flex: none;
+}
+#availabilityFilter [data-avail="in"]::before { background: var(--ok); opacity: 1; }
+#availabilityFilter [data-avail="low"]::before { background: var(--low); opacity: 1; }
+#availabilityFilter [data-avail="out"]::before { background: var(--danger); opacity: 1; }
+#availabilityFilter [data-avail="all"]::before { opacity: 0.35; }
+
+/* The refresh action is a sync: give it the green "everything is in sync" tone. */
+#refreshBtn .ic { color: var(--ok); }
+#refreshBtn:hover { background: var(--ok-container); }
+#loadMoreBtn { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 30%, var(--outline)); }
+#loadMoreBtn:hover { background: var(--ok-container); }
+
 /* ── Mobile header decluttering ─────────────────────────────────────────── */
 @media (max-width: 640px) {
   #searchJump, #historyBtn { display: none; }
@@ -1317,8 +1391,8 @@ body.has-dialog { overflow: hidden; }
     scrollbar-width: none;
   }
   #availabilityFilter::-webkit-scrollbar { display: none; }
-  .filterbar__tools > .filterbar__tools { flex: 1; min-width: 0; }
-  #sortSelect { max-width: 160px; }
+  .filterbar__tools > .filterbar__tools { flex: 1 1 auto; min-width: 0; flex-wrap: wrap; }
+  #sortSelect { max-width: 100%; min-width: 0; }
 }
 
 /* ── Select: proper chevron, both themes ────────────────────────────────── */

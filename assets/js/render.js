@@ -359,7 +359,7 @@ function renderCategoryChips() {
   const counts = countByCategory(state.data, { includeHidden: isAdmin() });
   const total = [...counts.values()].reduce((a, b) => a + b, 0);
   const items = [
-    `<button class="chip" type="button" data-action="filter-cat" data-cat="all" aria-pressed="${state.ui.category === 'all'}">
+    `<button class="chip chip--all" type="button" data-action="filter-cat" data-cat="all" aria-pressed="${state.ui.category === 'all'}">
       ${icon('grid_view', { size: 17 })} همه <span class="chip__count">${num(total)}</span>
     </button>`
   ];
@@ -367,7 +367,7 @@ function renderCategoryChips() {
     if (!counts.get(cat.id) && !isAdmin()) continue;
     items.push(`
       <button class="chip" type="button" data-action="filter-cat" data-cat="${escapeHtml(cat.id)}"
-              aria-pressed="${state.ui.category === cat.id}">
+              data-tone="${pickTone(cat.title)}" aria-pressed="${state.ui.category === cat.id}">
         ${icon(cat.icon || 'category', { size: 17 })}
         ${escapeHtml(cat.title)}
         <span class="chip__count">${num(counts.get(cat.id) || 0)}</span>
@@ -375,7 +375,7 @@ function renderCategoryChips() {
   }
   if (counts.get('__none__')) {
     items.push(`
-      <button class="chip" type="button" data-action="filter-cat" data-cat="__none__"
+      <button class="chip" type="button" data-action="filter-cat" data-cat="__none__" data-tone="5"
               aria-pressed="${state.ui.category === '__none__'}">
         ${icon('category', { size: 17 })} سایر <span class="chip__count">${num(counts.get('__none__') || 0)}</span>
       </button>`);
@@ -530,8 +530,8 @@ function deviceRowHtml(device, index = 0, { showCategory = false } = {}) {
   return `
     <article class="device ${stock === 'out' ? 'device--oos' : ''} ${device.featured ? 'device--featured' : ''}"
       data-device-id="${escapeHtml(device.id)}" style="--i:${Math.min(index, 12)}"
-      ${admin ? '' : 'data-clickable="true" role="button" tabindex="0"'}
-      aria-label="${escapeHtml(device.name)}${admin ? '' : ' — مشاهده جزئیات'}">
+      ${admin ? 'data-clickable="true" tabindex="-1"' : 'data-clickable="true" role="button" tabindex="0"'}
+      aria-label="${escapeHtml(device.name)} — مشاهده جزئیات">
       <div class="device__thumb" data-tone="${pickTone(device.name + device.brand)}">
         ${device.image
           ? `<img src="${escapeHtml(safeUrl(device.image))}" alt="" loading="lazy" decoding="async">`
@@ -629,7 +629,7 @@ function emptyStateHtml(nothingAtAll) {
   if (nothingAtAll) {
     return `
       <div class="empty">
-        <span class="empty__icon">${icon('inventory_2', { size: 30 })}</span>
+        <span class="empty__icon" data-tone="3">${icon('inventory_2', { size: 30 })}</span>
         <div class="empty__title">لیست موجودی هنوز خالی است</div>
         <div class="empty__desc">
           ${isAdmin()
@@ -644,7 +644,7 @@ function emptyStateHtml(nothingAtAll) {
   }
   return `
     <div class="empty">
-      <span class="empty__icon">${icon('search_off', { size: 30 })}</span>
+      <span class="empty__icon" data-tone="5">${icon('search_off', { size: 30 })}</span>
       <div class="empty__title">چیزی با این فیلتر پیدا نشد</div>
       <div class="empty__desc">جستجو یا فیلترها را تغییر دهید. شاید دستگاه در دسته دیگری باشد.</div>
       <div class="empty__actions">

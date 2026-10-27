@@ -17,30 +17,31 @@
 :root {
   color-scheme: light;
 
-  /* Surfaces — warm paper greys, deliberately unsaturated */
-  --bg: #f4f2ed;
-  --bg-deep: #ebe8e1;
-  --surface: #fbfaf7;
-  --surface-2: #f2efe9;
-  --surface-3: #e9e5dd;
-  --surface-4: #dfdad0;
+  /* Surfaces — milk white: a soft ivory page with pure-white cards.
+     Kept almost neutral so the green / amber / red accents read as signals. */
+  --bg: #f8f7f3;
+  --bg-deep: #efece6;
+  --surface: #ffffff;
+  --surface-2: #f4f2ed;
+  --surface-3: #ebe8e2;
+  --surface-4: #e2ded7;
   --surface-inverse: #1a1916;
 
   /* Text */
   --text: #191814;
-  --text-2: #57534a;
-  --text-3: #857f73;
-  --text-inverse: #faf8f4;
+  --text-2: #56524a;
+  --text-3: #7f7a70;
+  --text-inverse: #fbfaf6;
 
   /* Lines */
-  --outline: #d8d2c7;
-  --outline-strong: #c3bcaf;
-  --hairline: rgba(25, 24, 20, 0.08);
+  --outline: #ddd9d2;
+  --outline-strong: #c6c1b8;
+  --hairline: rgba(25, 24, 20, 0.075);
 
   /* Primary — ink, not colour */
   --primary: #1d1c18;
-  --on-primary: #faf8f3;
-  --primary-container: #e7e2d9;
+  --on-primary: #fbfaf6;
+  --primary-container: #eae7e0;
   --on-primary-container: #1d1c18;
   --primary-soft: rgba(29, 28, 24, 0.06);
 
@@ -70,12 +71,12 @@
   --tone-5-container: #f8eddc;
 
   /* Elevated surfaces */
-  --shadow-1: 0 1px 2px rgba(38, 32, 22, 0.05), 0 1px 1px rgba(38, 32, 22, 0.03);
-  --shadow-2: 0 1px 2px rgba(38, 32, 22, 0.05), 0 10px 24px -14px rgba(38, 32, 22, 0.28);
-  --shadow-3: 0 2px 4px rgba(38, 32, 22, 0.05), 0 24px 60px -24px rgba(38, 32, 22, 0.32);
-  --shadow-pop: 0 18px 48px -18px rgba(38, 32, 22, 0.4);
+  --shadow-1: 0 1px 2px rgba(48, 40, 26, 0.045), 0 1px 1px rgba(48, 40, 26, 0.03);
+  --shadow-2: 0 1px 2px rgba(48, 40, 26, 0.05), 0 10px 24px -14px rgba(48, 40, 26, 0.22);
+  --shadow-3: 0 2px 4px rgba(48, 40, 26, 0.05), 0 24px 60px -24px rgba(48, 40, 26, 0.26);
+  --shadow-pop: 0 18px 48px -18px rgba(48, 40, 26, 0.34);
 
-  --glass: rgba(251, 250, 247, 0.82);
+  --glass: rgba(255, 255, 255, 0.84);
   --scrim: rgba(23, 22, 19, 0.42);
   --grain-opacity: 0.035;
 
