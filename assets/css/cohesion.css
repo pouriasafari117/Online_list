@@ -1,0 +1,172 @@
+/* Shared visual language for the storefront, manager, help and setup pages.
+   The React Fera canvas stays in the hero; these rules only frame its artwork. */
+:root {
+  --bg: #f5f7fd;
+  --bg-deep: #e9edf9;
+  --surface: #ffffff;
+  --surface-2: #f1f3fc;
+  --surface-3: #ffffff;
+  --surface-4: #e8ebf7;
+  --surface-inverse: #30365d;
+  --text: #242b49;
+  --text-2: #4d5875;
+  --text-3: #65718f;
+  --text-inverse: #ffffff;
+  --outline: #cbd2e8;
+  --outline-strong: #a9b5d4;
+  --hairline: #e0e5f1;
+  --primary: #46559e;
+  --on-primary: #ffffff;
+  --primary-container: #e6eaff;
+  --on-primary-container: #2c3978;
+  --primary-soft: rgba(70, 85, 158, .1);
+  --tone-1: #356b91; --tone-1-container: #e0eff8;
+  --tone-2: #6455a0; --tone-2-container: #eee9fc;
+  --tone-3: #277a70; --tone-3-container: #def3ed;
+  --tone-4: #98577f; --tone-4-container: #f9e9f3;
+  --tone-5: #875d36; --tone-5-container: #f9eedc;
+  --glass-line: #d7ddef;
+  --glass-card-border: #d5dced;
+  --glass-bar: rgba(255, 255, 255, .96);
+  --glass-panel: rgba(255, 255, 255, .94);
+  --glass-card: #ffffff;
+  --glass-card-hover: #f9faff;
+  --glass-chip: #f5f7fd;
+  --glass-chip-hover: #ebeffb;
+  --glass-field: #ffffff;
+  --glass-field-focus: #ffffff;
+  --glass-sheet: #ffffff;
+  --glass-menu: #ffffff;
+  --glass-eyebrow-bg: #eff3ff;
+  --glass-eyebrow-fg: #354783;
+  --glass-note: #f3f5fc;
+  --glass-gloss: rgba(255, 255, 255, .9);
+  --glass-shadow: 0 12px 36px -24px rgba(43, 58, 121, .36);
+  --glass-shadow-lg: 0 24px 52px -28px rgba(43, 58, 121, .4);
+  --page-glow: linear-gradient(180deg, #f5f7fd 0%, #f9faff 48%, #f1f4fb 100%);
+}
+
+/* Emerald is still Fera's dark-mode recipe; match its calmer jade palette. */
+:root[data-theme="dark"] {
+  --bg: #0b181a; --bg-deep: #102326;
+  --surface: #14292b; --surface-2: #193234; --surface-3: #20383a;
+  --surface-4: #294448; --surface-inverse: #e8f6ed;
+  --text: #eff9f4; --text-2: #c1d7d0; --text-3: #9fbbb2;
+  --text-inverse: #102326;
+  --outline: #365453; --outline-strong: #55716b; --hairline: #294543;
+  --primary: #9be6c5; --on-primary: #102820;
+  --primary-container: #244b3d; --on-primary-container: #d7f9e5;
+  --primary-soft: rgba(155, 230, 197, .12);
+  --glass-line: #355550; --glass-card-border: #365450;
+  --glass-bar: rgba(15, 36, 36, .97);
+  --glass-panel: rgba(20, 42, 42, .96);
+  --glass-card: #182f30; --glass-card-hover: #203b3a;
+  --glass-chip: #203a39; --glass-chip-hover: #294a44;
+  --glass-field: #172e2e; --glass-field-focus: #1e3836;
+  --glass-sheet: #142726; --glass-menu: #1a302e;
+  --glass-eyebrow-bg: #23463b; --glass-eyebrow-fg: #b6efcf;
+  --glass-note: #1e3835; --glass-gloss: rgba(192, 242, 214, .08);
+  --glass-shadow: 0 12px 36px -22px rgba(0, 0, 0, .65);
+  --glass-shadow-lg: 0 24px 52px -24px rgba(0, 0, 0, .75);
+  --page-glow: linear-gradient(180deg, #0b181a 0%, #102123 52%, #0d1a1c 100%);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b181a; --bg-deep: #102326;
+    --surface: #14292b; --surface-2: #193234; --surface-3: #20383a;
+    --surface-4: #294448; --surface-inverse: #e8f6ed;
+    --text: #eff9f4; --text-2: #c1d7d0; --text-3: #9fbbb2;
+    --text-inverse: #102326;
+    --outline: #365453; --outline-strong: #55716b; --hairline: #294543;
+    --primary: #9be6c5; --on-primary: #102820;
+    --primary-container: #244b3d; --on-primary-container: #d7f9e5;
+    --primary-soft: rgba(155, 230, 197, .12);
+    --glass-line: #355550; --glass-card-border: #365450;
+    --glass-bar: rgba(15, 36, 36, .97);
+    --glass-panel: rgba(20, 42, 42, .96);
+    --glass-card: #182f30; --glass-card-hover: #203b3a;
+    --glass-chip: #203a39; --glass-chip-hover: #294a44;
+    --glass-field: #172e2e; --glass-field-focus: #1e3836;
+    --glass-sheet: #142726; --glass-menu: #1a302e;
+    --glass-eyebrow-bg: #23463b; --glass-eyebrow-fg: #b6efcf;
+    --glass-note: #1e3835; --glass-gloss: rgba(192, 242, 214, .08);
+    --glass-shadow: 0 12px 36px -22px rgba(0, 0, 0, .65);
+    --glass-shadow-lg: 0 24px 52px -24px rgba(0, 0, 0, .75);
+    --page-glow: linear-gradient(180deg, #0b181a 0%, #102123 52%, #0d1a1c 100%);
+  }
+}
+
+/* One calm header, instead of a separate animated stripe fighting the hero. */
+.appbar, .help-top, .setup-header {
+  background: var(--bg);
+  background-image: none;
+  border-bottom: 1px solid var(--hairline);
+  padding-block: 10px;
+}
+.appbar__inner, .help-top__inner, .setup-header__inner {
+  background: var(--glass-bar);
+  box-shadow: var(--glass-shadow);
+}
+.appbar__inner::before { display: none; }
+.appbar { height: auto; }
+.hero {
+  margin-top: 0;
+  padding-block-start: clamp(48px, 6vw, 80px);
+  background: var(--bg-deep); /* graceful fallback before the canvas mounts */
+}
+.hero > .container { position: relative; z-index: 2; }
+.hero::before {
+  display: block;
+  content: "";
+  position: absolute;
+  inset: 0;
+  height: auto;
+  z-index: 1;
+  filter: none;
+  background: linear-gradient(270deg, color-mix(in srgb, var(--bg) 72%, transparent), color-mix(in srgb, var(--bg) 24%, transparent) 72%, transparent);
+  pointer-events: none;
+}
+.hero::after { display: none; }
+:root[data-theme="dark"] .hero::before {
+  background: linear-gradient(270deg, color-mix(in srgb, var(--bg) 78%, transparent), color-mix(in srgb, var(--bg) 28%, transparent) 75%, transparent);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .hero::before {
+    background: linear-gradient(270deg, color-mix(in srgb, var(--bg) 78%, transparent), color-mix(in srgb, var(--bg) 28%, transparent) 75%, transparent);
+  }
+}
+.hero__name { background: none; -webkit-text-fill-color: currentColor; color: var(--text); }
+.hero__eyebrow { color: var(--glass-eyebrow-fg); }
+#heroCall, .login-btn { border-color: var(--glass-line); }
+#heroCall .ic { color: var(--primary); }
+.update-card, .filterbar, .trust, .device, .feature-card,
+.contact-grid, .help-hero, .help-card, .help-toc, .setup-card {
+  border-color: var(--glass-card-border);
+  box-shadow: var(--glass-shadow);
+}
+.trust { background: var(--hairline); }
+.trust__item { background: var(--glass-panel); }
+.update-card__icon { background: var(--primary-container); color: var(--on-primary-container); }
+.section__title, .contact__title { color: var(--text); }
+.section__head { border-bottom: 1px solid var(--hairline); padding-bottom: 16px; }
+.search__input:focus, .input:focus, .select:focus, .textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+.chip[aria-pressed="true"], .chip.is-active, .mp__seg-btn.is-active {
+  background: var(--primary);
+  color: var(--on-primary);
+  box-shadow: var(--glass-shadow);
+}
+.btn--filled { --btn-bg: var(--primary); box-shadow: var(--glass-shadow); }
+#contactCall { --btn-bg: var(--primary); --btn-fg: var(--on-primary); --btn-border: var(--primary); }
+.site-footer { border-top-color: var(--hairline); background: var(--bg-deep); }
+
+@media (max-width: 760px) {
+  .hero { padding-block-start: 48px; }
+  .hero::before { background: color-mix(in srgb, var(--bg) 50%, transparent); }
+  .appbar { padding-block: 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .appbar__inner::before { animation: none; }
+}
