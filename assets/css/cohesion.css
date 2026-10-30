@@ -276,3 +276,51 @@ body > main, body > .site-footer, body > #managePageHost {
 @media (prefers-reduced-motion: reduce) {
   .appbar__inner::before { animation: none; }
 }
+
+/* A circular daylight / moonlight reveal, originating at the clicked toggle.
+   The outgoing page stays still; the new page expands over it. */
+html.theme-reveal::view-transition-old(root),
+html.theme-reveal::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+html.theme-reveal::view-transition-old(root) { z-index: 1; }
+html.theme-reveal::view-transition-new(root) { z-index: 2; }
+
+/* Keep every header control and navigation link reachable on phones. */
+@media (max-width: 640px) {
+  .appbar__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+    height: auto;
+    min-height: 0;
+    gap: 6px;
+    padding: 8px 10px;
+    overflow: visible;
+  }
+  .appbar .brand { grid-column: 1; grid-row: 1; gap: 6px; min-width: 0; }
+  .appbar .brand__mark { width: 34px; height: 34px; }
+  .appbar .brand__text { min-width: 0; }
+  .appbar .brand__name { max-width: clamp(42px, 19vw, 120px); }
+  .appbar .appbar__actions { grid-column: 2; grid-row: 1; margin: 0; flex: none; }
+  .appbar__actions #searchJump, .appbar__actions #historyBtn { display: inline-grid; }
+  .appbar__actions .icon-btn { width: 40px; height: 40px; }
+  .appbar .appbar__divider { margin-inline: 2px; }
+  .appbar .login-btn { width: 40px; height: 40px; padding: 0; }
+  .appbar .login-btn span[data-icon] { display: inline-flex; }
+  .appbar .appbar__nav {
+    display: flex;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    margin: 0;
+    padding-top: 6px;
+    justify-content: space-around;
+    border-top: 1px solid var(--hairline);
+  }
+  .appbar__nav .appbar__link { padding: 6px 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html.theme-reveal::view-transition-old(root),
+  html.theme-reveal::view-transition-new(root) { animation: none; }
+}

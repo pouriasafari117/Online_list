@@ -96,12 +96,47 @@ function applyTheme(mode, { persist = false } = {}) {
   updateThemeIcon();
 }
 
-function toggleTheme() {
+let themeTransitionActive = false;
+function toggleTheme(trigger) {
+  if (themeTransitionActive) return;
   const next = effectiveTheme() === 'dark' ? 'light' : 'dark';
   const run = () => applyTheme(next, { persist: true });
-  if (document.startViewTransition && !prefersReducedMotion()) {
-    document.startViewTransition(run);
-  } else {
+  if (!document.startViewTransition || prefersReducedMotion() || document.visibilityState !== 'visible') {
+    run();
+    return;
+  }
+
+  // Reveal the new palette from the pressed control, like turning on a light.
+  // Capture the new snapshot after React has had a chance to repaint the
+  // Opal/Emerald canvas as well as the CSS surfaces.
+  const rect = trigger?.getBoundingClientRect();
+  const x = rect ? rect.left + rect.width / 2 : innerWidth / 2;
+  const y = rect ? rect.top + rect.height / 2 : innerHeight / 2;
+  const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+  themeTransitionActive = true;
+  document.documentElement.classList.add('theme-reveal');
+  try {
+    const transition = document.startViewTransition(async () => {
+      run();
+      // Timed fallback also resolves if the browser suspends animation frames.
+      await Promise.race([
+        new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+        new Promise((resolve) => setTimeout(resolve, 90))
+      ]);
+    });
+    transition.ready.then(() => {
+      document.documentElement.animate(
+        { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
+        { duration: 720, easing: 'cubic-bezier(.2,.8,.2,1)', pseudoElement: '::view-transition-new(root)' }
+      );
+    }).catch(() => {});
+    transition.finished.finally(() => {
+      document.documentElement.classList.remove('theme-reveal');
+      themeTransitionActive = false;
+    });
+  } catch {
+    document.documentElement.classList.remove('theme-reveal');
+    themeTransitionActive = false;
     run();
   }
 }
@@ -296,7 +331,7 @@ function initDelegation() {
       } else if (action === 'detail') {
         openDeviceDetail(actionEl.dataset.deviceId);
       } else if (action === 'theme') {
-        toggleTheme();
+        toggleTheme(actionEl);
       } else if (action === 'history') {
         openHistory();
       } else if (action === 'print') {
