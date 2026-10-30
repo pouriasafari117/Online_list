@@ -96,12 +96,40 @@ function applyTheme(mode, { persist = false } = {}) {
   updateThemeIcon();
 }
 
-function toggleTheme() {
+let themeTransitionActive = false;
+function toggleTheme(trigger) {
+  if (themeTransitionActive) return;
   const next = effectiveTheme() === 'dark' ? 'light' : 'dark';
   const run = () => applyTheme(next, { persist: true });
-  if (document.startViewTransition && !prefersReducedMotion()) {
-    document.startViewTransition(run);
-  } else {
+  if (!document.startViewTransition || prefersReducedMotion() || document.visibilityState !== 'visible') {
+    run();
+    return;
+  }
+
+  // Keep the same circular reveal, but don't hold the transition open for
+  // extra animation frames. The background canvas rests only while the
+  // captured layers are expanding, then continues at its normal speed.
+  const rect = trigger?.getBoundingClientRect();
+  const x = rect ? rect.left + rect.width / 2 : innerWidth / 2;
+  const y = rect ? rect.top + rect.height / 2 : innerHeight / 2;
+  const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+  themeTransitionActive = true;
+  document.documentElement.classList.add('theme-reveal');
+  const cleanup = () => {
+    document.documentElement.classList.remove('theme-reveal');
+    themeTransitionActive = false;
+  };
+  try {
+    const transition = document.startViewTransition(run);
+    transition.ready.then(() => {
+      document.documentElement.animate(
+        { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
+        { duration: 520, easing: 'cubic-bezier(.22, 1, .36, 1)', pseudoElement: '::view-transition-new(root)' }
+      );
+    }).catch(cleanup);
+    transition.finished.then(cleanup, cleanup);
+  } catch {
+    cleanup();
     run();
   }
 }
@@ -296,7 +324,7 @@ function initDelegation() {
       } else if (action === 'detail') {
         openDeviceDetail(actionEl.dataset.deviceId);
       } else if (action === 'theme') {
-        toggleTheme();
+        toggleTheme(actionEl);
       } else if (action === 'history') {
         openHistory();
       } else if (action === 'print') {

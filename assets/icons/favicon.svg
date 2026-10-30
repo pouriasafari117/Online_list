@@ -1,24 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="پوریا استور">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="آیکون خانه">
   <defs>
-    <linearGradient id="bg" x1="60" y1="32" x2="450" y2="490" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#493323"/>
-      <stop offset="1" stop-color="#211a15"/>
+    <linearGradient id="bg" x1="50" y1="20" x2="460" y2="490" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#344779"/>
+      <stop offset="1" stop-color="#173e45"/>
     </linearGradient>
-    <linearGradient id="awn" x1="128" y1="150" x2="380" y2="244" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#e4ba7c"/>
-      <stop offset="1" stop-color="#bd8450"/>
+    <linearGradient id="roof" x1="110" y1="135" x2="400" y2="275" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#c9bbfa"/>
+      <stop offset="1" stop-color="#8cddcf"/>
     </linearGradient>
-    <radialGradient id="glow" cx="0" cy="0" r="1" gradientTransform="matrix(300 0 0 290 256 40)" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#96704d" stop-opacity=".28"/>
-      <stop offset="1" stop-color="#96704d" stop-opacity="0"/>
-    </radialGradient>
   </defs>
   <rect width="512" height="512" rx="116" fill="url(#bg)"/>
-  <rect width="512" height="512" rx="116" fill="url(#glow)"/>
-  <path d="M154 221 178 165a20 20 0 0 1 18-12h120a20 20 0 0 1 18 12l24 56v29H154v-29Z" fill="url(#awn)"/>
-  <path d="M154 232h204v162a20 20 0 0 1-20 20H174a20 20 0 0 1-20-20V232Z" fill="#f3e6d1"/>
-  <path d="M154 222h204v23c0 18-22 27-36 13-14 14-36 5-36-13 0 18-22 27-36 13-14 14-36 5-36-13 0 18-22 27-36 13-14 14-24 5-24-13v-23Z" fill="#d19a5e"/>
-  <path d="M194 296h75M194 333h56M194 370h39" stroke="#674a34" stroke-width="17" stroke-linecap="round"/>
-  <circle cx="322" cy="334" r="34" fill="#47785e"/>
-  <path d="m306 334 11 11 22-25" fill="none" stroke="#f5ead7" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M110 252 237 131a28 28 0 0 1 38 0L402 252" fill="none" stroke="url(#roof)" stroke-width="42" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M147 259v126a26 26 0 0 0 26 26h166a26 26 0 0 0 26-26V259" fill="#f3f8ff"/>
+  <path d="M220 411v-99a20 20 0 0 1 20-20h32a20 20 0 0 1 20 20v99" fill="#426f79"/>
+  <circle cx="275" cy="356" r="6" fill="#d0f3e8"/>
+  <path d="M153 253 256 156l103 97" fill="none" stroke="#f3f8ff" stroke-opacity=".55" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

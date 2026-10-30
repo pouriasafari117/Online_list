@@ -17,7 +17,7 @@ function currentTheme() {
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
 
-function HeroGradient() {
+function PageGradient() {
   const [theme, setTheme] = useState(currentTheme);
 
   useEffect(() => {
@@ -38,11 +38,11 @@ function HeroGradient() {
     <FeraGradient
       key={theme}
       recipe={recipe}
-      className="hero-gradient-engine"
+      className="page-gradient-engine"
       style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', aspectRatio: 'auto' }}
     />
   );
 }
 
-const mount = document.getElementById('heroGradientRoot');
-if (mount) createRoot(mount).render(<HeroGradient />);
+const mount = document.getElementById('pageGradientRoot');
+if (mount) createRoot(mount).render(<PageGradient />);
