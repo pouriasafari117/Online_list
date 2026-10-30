@@ -42,6 +42,28 @@
           "showInRow": true
         }
       ]
+    },
+    {
+      "id": "cat_mvv3ldzdg2udc",
+      "title": "موبایل",
+      "description": "همون گوشی خودمون",
+      "icon": "mobile_2",
+      "fields": [
+        {
+          "key": "f_mvv3kf9frw89d",
+          "label": "رم",
+          "unit": "گیگ",
+          "type": "text",
+          "showInRow": true
+        },
+        {
+          "key": "f_mvv3l1iejrj3u",
+          "label": "حافظه",
+          "unit": "گیگ",
+          "type": "text",
+          "showInRow": true
+        }
+      ]
     }
   ],
   "devices": [
@@ -90,12 +112,47 @@
       "order": 2,
       "createdAt": "2026-10-27T04:52:39.207Z",
       "updatedAt": "2026-10-27T04:52:39.207Z"
+    },
+    {
+      "id": "dev_mvv3mcz4v16hk",
+      "name": "سامسونگ سگی",
+      "brand": "سامسونگ",
+      "categoryId": "cat_mvv3ldzdg2udc",
+      "price": 5000000,
+      "priceOnRequest": false,
+      "stock": 6,
+      "condition": "کارکرده",
+      "warranty": "",
+      "specs": {
+        "f_mvv3kf9frw89d": "1",
+        "f_mvv3l1iejrj3u": "8"
+      },
+      "extraSpecs": [],
+      "note": "",
+      "image": "",
+      "featured": false,
+      "hidden": false,
+      "order": 3,
+      "createdAt": "2026-10-30T14:59:56.080Z",
+      "updatedAt": "2026-10-30T14:59:56.080Z"
     }
   ],
   "meta": {
-    "updatedAt": "2026-10-27T04:52:47.936Z",
+    "updatedAt": "2026-10-30T14:59:59.422Z",
     "updatedBy": "پوریا صفری",
     "history": [
+      {
+        "id": "h_mvv3mfjys9b3v",
+        "at": "2026-10-30T14:59:59.422Z",
+        "by": "پوریا صفری",
+        "action": "publish",
+        "summary": "۱ دستگاه جدید · ۱ دسته جدید",
+        "stats": {
+          "added": 1,
+          "updated": 0,
+          "removed": 0
+        }
+      },
       {
         "id": "h_mvq7m0u8bhfgb",
         "at": "2026-10-27T04:52:47.936Z",
