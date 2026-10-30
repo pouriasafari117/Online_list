@@ -1,5 +1,5 @@
 /* Shared visual language for the storefront, manager, help and setup pages.
-   The React Fera canvas stays in the hero; these rules only frame its artwork. */
+   The React Fera canvas paints the viewport behind the entire storefront. */
 :root {
   --bg: #f5f7fd;
   --bg-deep: #e9edf9;
@@ -96,44 +96,65 @@
   }
 }
 
-/* One calm header, instead of a separate animated stripe fighting the hero. */
-.appbar, .help-top, .setup-header {
-  background: var(--bg);
+/* The Opal / Emerald React canvas is fixed to the viewport, not the hero.
+   Keep a flat fallback while JavaScript starts and keep print output clean. */
+html { background: var(--bg); }
+body:not(.help-page):not(.setup-page) {
+  background: transparent;
   background-image: none;
-  border-bottom: 1px solid var(--hairline);
-  padding-block: 10px;
 }
-.appbar__inner, .help-top__inner, .setup-header__inner {
-  background: var(--glass-bar);
-  box-shadow: var(--glass-shadow);
+#pageGradientRoot {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--bg);
 }
-.appbar__inner::before { display: none; }
-.appbar { height: auto; }
-.hero {
-  margin-top: 0;
-  padding-block-start: clamp(48px, 6vw, 80px);
-  background: var(--bg-deep); /* graceful fallback before the canvas mounts */
-}
-.hero > .container { position: relative; z-index: 2; }
-.hero::before {
-  display: block;
+#pageGradientRoot::after {
   content: "";
   position: absolute;
   inset: 0;
-  height: auto;
-  z-index: 1;
-  filter: none;
-  background: linear-gradient(270deg, color-mix(in srgb, var(--bg) 72%, transparent), color-mix(in srgb, var(--bg) 24%, transparent) 72%, transparent);
+  background: color-mix(in srgb, var(--bg) 18%, transparent);
   pointer-events: none;
 }
-.hero::after { display: none; }
-:root[data-theme="dark"] .hero::before {
-  background: linear-gradient(270deg, color-mix(in srgb, var(--bg) 78%, transparent), color-mix(in srgb, var(--bg) 28%, transparent) 75%, transparent);
+:root[data-theme="dark"] #pageGradientRoot::after {
+  background: color-mix(in srgb, var(--bg) 58%, transparent);
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .hero::before {
-    background: linear-gradient(270deg, color-mix(in srgb, var(--bg) 78%, transparent), color-mix(in srgb, var(--bg) 28%, transparent) 75%, transparent);
+  :root:not([data-theme="light"]) #pageGradientRoot::after {
+    background: color-mix(in srgb, var(--bg) 58%, transparent);
   }
+}
+/* Keep the actual page above the fixed canvas. The appbar's own sticky
+   stacking context remains on top of scrolling content. */
+body > main, body > .site-footer, body > #managePageHost {
+  position: relative;
+  z-index: 1;
+}
+/* No opaque full-width header strip: only its inner floating pill remains. */
+.appbar {
+  background: transparent;
+  background-image: none;
+  border: 0;
+  box-shadow: none;
+  padding-block: 10px;
+}
+.appbar.is-stuck { background: transparent; border: 0; box-shadow: none; }
+.appbar__inner { background: var(--glass-bar); box-shadow: var(--glass-shadow); }
+.appbar__inner::before { display: none; }
+.hero {
+  margin-top: 0;
+  padding-block-start: clamp(48px, 6vw, 80px);
+  background: transparent;
+}
+.hero > .container { position: relative; z-index: 2; }
+.hero::before, .hero::after { display: none; }
+.mpage { background: transparent; }
+.site-footer { background: color-mix(in srgb, var(--bg) 65%, transparent); }
+@media print {
+  #pageGradientRoot { display: none !important; }
+  body:not(.help-page):not(.setup-page) { background: #fff; }
 }
 .hero__name { background: none; -webkit-text-fill-color: currentColor; color: var(--text); }
 .hero__eyebrow { color: var(--glass-eyebrow-fg); }
@@ -160,11 +181,10 @@
 }
 .btn--filled { --btn-bg: var(--primary); box-shadow: var(--glass-shadow); }
 #contactCall { --btn-bg: var(--primary); --btn-fg: var(--on-primary); --btn-border: var(--primary); }
-.site-footer { border-top-color: var(--hairline); background: var(--bg-deep); }
+.site-footer { border-top-color: var(--hairline); }
 
 @media (max-width: 760px) {
   .hero { padding-block-start: 48px; }
-  .hero::before { background: color-mix(in srgb, var(--bg) 50%, transparent); }
   .appbar { padding-block: 8px; }
 }
 @media (prefers-reduced-motion: reduce) {
