@@ -26,8 +26,11 @@ jobs:
         with:
           node-version: 20
 
-      - name: Verify project
-        run: node tools/verify.mjs
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build React hero and verify project
+        run: npm run build && node tools/verify.mjs
 
       - name: Check Pages is enabled
         env:
