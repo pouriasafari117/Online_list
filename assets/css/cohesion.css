@@ -277,14 +277,23 @@ body > main, body > .site-footer, body > #managePageHost {
   .appbar__inner::before { animation: none; }
 }
 
-/* Circular theme reveal from the toggle: captured layers avoid live repaints. */
+/* The original expanding circle, but registered as a CSS animation when
+   the transition snapshots are created (not later in transition.ready).
+   Static captured layers + a paused FLOW renderer keep the reveal cheap. */
+@keyframes theme-circle-reveal {
+  from { clip-path: circle(0px at var(--reveal-x) var(--reveal-y)); }
+  to { clip-path: circle(var(--reveal-radius) at var(--reveal-x) var(--reveal-y)); }
+}
 html.theme-reveal::view-transition-old(root),
 html.theme-reveal::view-transition-new(root) {
-  animation: none;
   mix-blend-mode: normal;
 }
-html.theme-reveal::view-transition-old(root) { z-index: 1; }
-html.theme-reveal::view-transition-new(root) { z-index: 2; will-change: clip-path; }
+html.theme-reveal::view-transition-old(root) { animation: none; z-index: 1; }
+html.theme-reveal::view-transition-new(root) {
+  animation: theme-circle-reveal 560ms cubic-bezier(.22, 1, .36, 1) both;
+  z-index: 2;
+  will-change: clip-path;
+}
 
 /* Keep every header control and navigation link reachable on phones. */
 @media (max-width: 640px) {
