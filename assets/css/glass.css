@@ -692,17 +692,53 @@ body:has(.mpage) .toast-root { bottom: calc(96px + env(safe-area-inset-bottom));
   to { background-position: 0 0, 230% 0, 240% 0, 0 0; }
 }
 
-/* Fera's FLOW engine supplies the hero artwork; don't overlay the old CSS mock. */
-:root { --floating-header-height: 84px; }
-.appbar {
-  background-color: transparent;
-  background-image: none;
+/* Fera UI gradient preset integration: Opal for day, Emerald for night.
+   Preset values are kept intact: Opal #F6F9FF/#9BE0E8/#C4B5F7/#F8B8D9
+   (scale 52, distortion 46, swirl 8, grain 5, speed 24); Emerald
+   #F0FBEF/#8FE3B0/#22C79A/#0B5F51 (scale 50, distortion 44,
+   swirl 6, grain 5, speed 26). CSS multi-spot flow recreates the preset
+   movement without a remote canvas or runtime dependency. */
+.appbar__inner::before { display: none; }
+.hero::before {
+  inset: 0;
+  height: 100%;
+  z-index: 0;
+  filter: none;
+  opacity: 1;
+  background:
+    radial-gradient(ellipse 82% 74% at 82% 12%, rgba(246, 249, 255, .94) 0%, rgba(246, 249, 255, .35) 24%, transparent 70%),
+    radial-gradient(ellipse 68% 84% at 76% 38%, rgba(155, 224, 232, .55) 0%, transparent 68%),
+    radial-gradient(ellipse 72% 74% at 20% 10%, rgba(196, 181, 247, .48) 0%, transparent 72%),
+    radial-gradient(ellipse 74% 82% at 58% 96%, rgba(248, 184, 217, .42) 0%, transparent 72%),
+    linear-gradient(136deg, #F6F9FF 0%, #eef3ff 52%, #e9f7fb 100%);
+  background-size: 190% 180%, 180% 190%, 190% 180%, 175% 190%, 100% 100%;
+  background-position: 0 0, 0 0, 0 0, 0 0, 0 0;
+  animation: opal-flow 24s ease-in-out infinite alternate;
 }
-.hero {
-  margin-top: calc(-1 * var(--floating-header-height));
-  padding-block-start: calc(var(--floating-header-height) + clamp(36px, 6vw, 72px));
+[data-theme="dark"] .hero::before {
+  background:
+    radial-gradient(ellipse 82% 74% at 82% 12%, rgba(240, 251, 239, .18) 0%, rgba(240, 251, 239, .06) 24%, transparent 70%),
+    radial-gradient(ellipse 68% 84% at 76% 38%, rgba(143, 227, 176, .34) 0%, transparent 68%),
+    radial-gradient(ellipse 72% 74% at 20% 10%, rgba(34, 199, 154, .26) 0%, transparent 72%),
+    radial-gradient(ellipse 74% 82% at 58% 96%, rgba(11, 95, 81, .4) 0%, transparent 72%),
+    linear-gradient(136deg, #071a16 0%, #0b5f51 54%, #061511 100%);
+  background-size: 190% 180%, 180% 190%, 190% 180%, 175% 190%, 100% 100%;
+  animation-name: emerald-flow;
+  animation-duration: 26s;
 }
-.hero::before { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .hero::before {
+    background:
+      radial-gradient(ellipse 82% 74% at 82% 12%, rgba(240, 251, 239, .18) 0%, rgba(240, 251, 239, .06) 24%, transparent 70%),
+      radial-gradient(ellipse 68% 84% at 76% 38%, rgba(143, 227, 176, .34) 0%, transparent 68%),
+      radial-gradient(ellipse 72% 74% at 20% 10%, rgba(34, 199, 154, .26) 0%, transparent 72%),
+      radial-gradient(ellipse 74% 82% at 58% 96%, rgba(11, 95, 81, .4) 0%, transparent 72%),
+      linear-gradient(136deg, #071a16 0%, #0b5f51 54%, #061511 100%);
+    background-size: 190% 180%, 180% 190%, 190% 180%, 175% 190%, 100% 100%;
+    animation-name: emerald-flow;
+    animation-duration: 26s;
+  }
+}
 .hero::after {
   display: block;
   content: "";
@@ -713,9 +749,16 @@ body:has(.mpage) .toast-root { bottom: calc(96px + env(safe-area-inset-bottom));
   opacity: .035;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.86' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
 }
-.hero > .container { position: relative; z-index: 2; }
 .hero__grid { z-index: 2; }
-#heroGradientRoot { z-index: 0; }
-@media (max-width: 760px) {
-  :root { --floating-header-height: 72px; }
+.hero > .container { position: relative; z-index: 2; }
+@keyframes opal-flow {
+  from { background-position: 0% 0%, 100% 0%, 0% 100%, 100% 100%, 0% 0%; }
+  to { background-position: 100% 100%, 0% 100%, 100% 0%, 0% 0%, 0% 0%; }
+}
+@keyframes emerald-flow {
+  from { background-position: 0% 0%, 100% 0%, 0% 100%, 100% 100%, 0% 0%; }
+  to { background-position: 100% 100%, 0% 100%, 100% 0%, 0% 0%, 0% 0%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero::before { animation: none; }
 }
