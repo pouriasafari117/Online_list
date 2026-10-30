@@ -18,24 +18,24 @@
   color-scheme: light;
 
   /* Warm parchment and soft ivory: a calm cream daylight palette. */
-  --bg: #f3ecdf;
-  --bg-deep: #e9dfce;
-  --surface: rgba(255, 251, 243, 0.76);
-  --surface-2: rgba(255, 250, 240, 0.62);
-  --surface-3: rgba(255, 252, 246, 0.9);
+  --bg: #e8d7bf;
+  --bg-deep: #d9c3a3;
+  --surface: rgba(244, 231, 208, 0.84);
+  --surface-2: rgba(232, 212, 181, 0.68);
+  --surface-3: rgba(247, 237, 218, 0.94);
   --surface-4: rgba(23, 33, 28, 0.07);
   --surface-inverse: #123f2c;
 
   /* Text */
-  --text: #17211c;
-  --text-2: #47554d;
-  --text-3: #6d7c73;
+  --text: #30251c;
+  --text-2: #574535;
+  --text-3: #7c6854;
   --text-inverse: #eafaf0;
 
   /* Lines */
-  --outline: rgba(18, 63, 44, 0.42);
-  --outline-strong: rgba(18, 63, 44, 0.5);
-  --hairline: rgba(18, 63, 44, 0.2);
+  --outline: rgba(91, 62, 35, 0.38);
+  --outline-strong: rgba(91, 62, 35, 0.5);
+  --hairline: rgba(91, 62, 35, 0.2);
 
   /* Primary — deep forest ink: still serious, but alive next to the ivory */
   --primary: #123f2c;
@@ -75,7 +75,7 @@
   --shadow-3: 0 4px 10px rgba(20, 50, 35, 0.06), 0 36px 66px -34px rgba(20, 50, 35, 0.5);
   --shadow-pop: 0 26px 56px -26px rgba(20, 50, 35, 0.55);
 
-  --glass: rgba(255, 250, 241, 0.72);
+  --glass: rgba(241, 225, 198, 0.76);
   --scrim: rgba(12, 30, 20, 0.4);
   --grain-opacity: 0.02;
 
@@ -258,34 +258,34 @@
    --glass-* tokens, so light and dark swap with no second set of rules.
    ========================================================================== */
 :root {
-  --aurora-mint: rgba(213, 190, 132, 0.72);
-  --aurora-lilac: rgba(218, 192, 154, 0.52);
-  --aurora-peach: rgba(243, 190, 139, 0.55);
-  --aurora-sky: rgba(188, 202, 190, 0.48);
-  --aurora-mint-2: rgba(222, 204, 165, 0.62);
+  --aurora-mint: rgba(184, 130, 70, 0.48);
+  --aurora-lilac: rgba(163, 117, 75, 0.34);
+  --aurora-peach: rgba(205, 143, 86, 0.4);
+  --aurora-sky: rgba(159, 121, 84, 0.28);
+  --aurora-mint-2: rgba(198, 157, 98, 0.42);
 
-  --glass-line: rgba(107, 83, 50, 0.32);
+  --glass-line: rgba(103, 70, 39, 0.38);
   --glass-blur: 22px;
   --glass-shadow: 0 22px 44px -32px rgba(20, 50, 35, 0.5);
   --glass-shadow-lg: 0 40px 80px -44px rgba(20, 50, 35, 0.55);
 
-  --glass-bar: rgba(255, 249, 238, 0.82);
-  --glass-panel: rgba(255, 250, 241, 0.78);
-  --glass-card: rgba(255, 251, 243, 0.88);
-  --glass-card-hover: #fffaf0;
+  --glass-bar: rgba(238, 222, 194, 0.88);
+  --glass-panel: rgba(239, 222, 191, 0.86);
+  --glass-card: rgba(245, 231, 207, 0.94);
+  --glass-card-hover: #f1e0c4;
   --glass-card-border: rgba(18, 63, 44, 0.62);
-  --glass-chip: rgba(255, 249, 238, 0.82);
-  --glass-chip-hover: #fffaf0;
-  --glass-field: rgba(255, 249, 238, 0.9);
-  --glass-field-focus: #fffaf0;
-  --glass-sheet: rgba(255, 250, 241, 0.97);
-  --glass-menu: rgba(255, 250, 241, 0.94);
-  --glass-eyebrow-bg: #fffaf0;
+  --glass-chip: rgba(238, 222, 194, 0.88);
+  --glass-chip-hover: #f1e0c4;
+  --glass-field: rgba(241, 224, 196, 0.96);
+  --glass-field-focus: #f1e0c4;
+  --glass-sheet: rgba(241, 224, 196, 0.98);
+  --glass-menu: rgba(241, 224, 196, 0.96);
+  --glass-eyebrow-bg: #f1e0c4;
   --glass-eyebrow-fg: #1f6b45;
-  --glass-note: rgba(255, 248, 235, 0.65);
-  --glass-gloss: rgba(255, 249, 238, 0.82);
-  --page-mesh-veil: rgba(243, 236, 223, 0.3);
-  --page-mesh-veil-end: rgba(243, 236, 223, 0.48);
+  --glass-note: rgba(226, 205, 173, 0.7);
+  --glass-gloss: rgba(238, 222, 194, 0.88);
+  --page-mesh-veil: rgba(232, 215, 191, 0.24);
+  --page-mesh-veil-end: rgba(232, 215, 191, 0.42);
   --page-glow:
     linear-gradient(180deg, transparent 0%, var(--page-mesh-veil) 30%, var(--page-mesh-veil-end) 100%),
     radial-gradient(58% 54% at 84% 2%, var(--aurora-mint), transparent 68%),
