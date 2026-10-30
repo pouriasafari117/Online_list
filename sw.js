@@ -1,5 +1,5 @@
 /* Online List — offline shell + fresh data */
-const VERSION = 'v1.17.0';
+const VERSION = 'v1.18.0';
 const CACHE = `online-list-${VERSION}`;
 const ASSETS = [
   './',

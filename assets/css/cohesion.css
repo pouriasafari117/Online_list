@@ -277,16 +277,14 @@ body > main, body > .site-footer, body > #managePageHost {
   .appbar__inner::before { animation: none; }
 }
 
-/* The new palette is already in place while the old snapshot dissolves.
-   Its opacity/transform animate on the compositor instead of repainting a
-   full-screen circular clip on every frame. */
+/* Circular theme reveal from the toggle: captured layers avoid live repaints. */
 html.theme-reveal::view-transition-old(root),
 html.theme-reveal::view-transition-new(root) {
   animation: none;
   mix-blend-mode: normal;
 }
-html.theme-reveal::view-transition-old(root) { z-index: 2; }
-html.theme-reveal::view-transition-new(root) { z-index: 1; }
+html.theme-reveal::view-transition-old(root) { z-index: 1; }
+html.theme-reveal::view-transition-new(root) { z-index: 2; will-change: clip-path; }
 
 /* Keep every header control and navigation link reachable on phones. */
 @media (max-width: 640px) {

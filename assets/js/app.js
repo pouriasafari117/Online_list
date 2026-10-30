@@ -106,12 +106,13 @@ function toggleTheme(trigger) {
     return;
   }
 
-  // Only opacity and a tiny transform of the outgoing screenshot are animated.
-  // Unlike a full-screen clip-path, both can run on the compositor without
-  // repainting the live Opal/Emerald canvas on every transition frame.
+  // Keep the same circular reveal, but don't hold the transition open for
+  // extra animation frames. The background canvas rests only while the
+  // captured layers are expanding, then continues at its normal speed.
   const rect = trigger?.getBoundingClientRect();
   const x = rect ? rect.left + rect.width / 2 : innerWidth / 2;
   const y = rect ? rect.top + rect.height / 2 : innerHeight / 2;
+  const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
   themeTransitionActive = true;
   document.documentElement.classList.add('theme-reveal');
   const cleanup = () => {
@@ -122,11 +123,8 @@ function toggleTheme(trigger) {
     const transition = document.startViewTransition(run);
     transition.ready.then(() => {
       document.documentElement.animate(
-        [
-          { opacity: 1, transform: 'scale(1)', transformOrigin: `${x}px ${y}px` },
-          { opacity: 0, transform: 'scale(1.015)', transformOrigin: `${x}px ${y}px` }
-        ],
-        { duration: 440, easing: 'cubic-bezier(.22, 1, .36, 1)', pseudoElement: '::view-transition-old(root)' }
+        { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
+        { duration: 520, easing: 'cubic-bezier(.22, 1, .36, 1)', pseudoElement: '::view-transition-new(root)' }
       );
     }).catch(cleanup);
     transition.finished.then(cleanup, cleanup);
