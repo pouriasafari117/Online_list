@@ -692,9 +692,12 @@ body:has(.mpage) .toast-root { bottom: calc(96px + env(safe-area-inset-bottom));
   to { background-position: 0 0, 230% 0, 240% 0, 0 0; }
 }
 
-/* Move the animated light field off the navigation and into the hero, where
-   it sits behind the headline and store summary. Inspired by mesh/aurora
-   gradient compositions from the Fera UI gradient studio. */
+/* Fera UI gradient preset integration: Opal for day, Emerald for night.
+   Preset values are kept intact: Opal #F6F9FF/#9BE0E8/#C4B5F7/#F8B8D9
+   (scale 52, distortion 46, swirl 8, grain 5, speed 24); Emerald
+   #F0FBEF/#8FE3B0/#22C79A/#0B5F51 (scale 50, distortion 44,
+   swirl 6, grain 5, speed 26). CSS multi-spot flow recreates the preset
+   movement without a remote canvas or runtime dependency. */
 .appbar__inner::before { display: none; }
 .hero::before {
   inset: 0;
@@ -703,36 +706,70 @@ body:has(.mpage) .toast-root { bottom: calc(96px + env(safe-area-inset-bottom));
   filter: none;
   opacity: 1;
   background:
-    radial-gradient(ellipse 70% 76% at 84% 8%, rgba(192, 133, 74, .34), transparent 72%),
-    radial-gradient(ellipse 68% 80% at 10% 20%, rgba(151, 101, 59, .22), transparent 72%),
-    radial-gradient(ellipse 62% 78% at 55% 92%, rgba(215, 174, 116, .36), transparent 74%),
-    radial-gradient(ellipse 42% 56% at 42% 14%, rgba(245, 225, 190, .64), transparent 76%),
-    linear-gradient(132deg, #e5d0b1 0%, #eddfc8 48%, #dfc7a5 100%);
-  background-size: 130% 130%, 120% 130%, 140% 130%, 120% 120%, 100% 100%;
+    radial-gradient(ellipse 82% 74% at 82% 12%, rgba(246, 249, 255, .94) 0%, rgba(246, 249, 255, .35) 24%, transparent 70%),
+    radial-gradient(ellipse 68% 84% at 76% 38%, rgba(155, 224, 232, .55) 0%, transparent 68%),
+    radial-gradient(ellipse 72% 74% at 20% 10%, rgba(196, 181, 247, .48) 0%, transparent 72%),
+    radial-gradient(ellipse 74% 82% at 58% 96%, rgba(248, 184, 217, .42) 0%, transparent 72%),
+    linear-gradient(136deg, #F6F9FF 0%, #eef3ff 52%, #e9f7fb 100%);
+  background-size: 120% 128%, 140% 132%, 130% 130%, 140% 140%, 100% 100%;
   background-position: 0 0, 0 0, 0 0, 0 0, 0 0;
-  animation: hero-mesh-flow 32s ease-in-out infinite alternate;
+  animation: opal-flow 24s ease-in-out infinite alternate;
 }
 [data-theme="dark"] .hero::before {
   background:
-    radial-gradient(ellipse 72% 78% at 86% 8%, rgba(38, 130, 94, .32), transparent 72%),
-    radial-gradient(ellipse 65% 78% at 8% 18%, rgba(101, 77, 151, .25), transparent 73%),
-    radial-gradient(ellipse 60% 72% at 58% 92%, rgba(153, 93, 57, .17), transparent 72%),
-    radial-gradient(ellipse 44% 58% at 44% 10%, rgba(53, 104, 82, .2), transparent 74%),
-    linear-gradient(132deg, #09140f 0%, #10251a 48%, #111a1a 100%);
+    radial-gradient(ellipse 82% 74% at 82% 12%, rgba(240, 251, 239, .18) 0%, rgba(240, 251, 239, .06) 24%, transparent 70%),
+    radial-gradient(ellipse 68% 84% at 76% 38%, rgba(143, 227, 176, .34) 0%, transparent 68%),
+    radial-gradient(ellipse 72% 74% at 20% 10%, rgba(34, 199, 154, .26) 0%, transparent 72%),
+    radial-gradient(ellipse 74% 82% at 58% 96%, rgba(11, 95, 81, .4) 0%, transparent 72%),
+    linear-gradient(136deg, #071a16 0%, #0b5f51 54%, #061511 100%);
+  animation-name: emerald-flow;
+  animation-duration: 26s;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .hero::before {
     background:
-      radial-gradient(ellipse 72% 78% at 86% 8%, rgba(38, 130, 94, .32), transparent 72%),
-      radial-gradient(ellipse 65% 78% at 8% 18%, rgba(101, 77, 151, .25), transparent 73%),
-      radial-gradient(ellipse 60% 72% at 58% 92%, rgba(153, 93, 57, .17), transparent 72%),
-      radial-gradient(ellipse 44% 58% at 44% 10%, rgba(53, 104, 82, .2), transparent 74%),
-      linear-gradient(132deg, #09140f 0%, #10251a 48%, #111a1a 100%);
+      radial-gradient(ellipse 82% 74% at 82% 12%, rgba(240, 251, 239, .18) 0%, rgba(240, 251, 239, .06) 24%, transparent 70%),
+      radial-gradient(ellipse 68% 84% at 76% 38%, rgba(143, 227, 176, .34) 0%, transparent 68%),
+      radial-gradient(ellipse 72% 74% at 20% 10%, rgba(34, 199, 154, .26) 0%, transparent 72%),
+      radial-gradient(ellipse 74% 82% at 58% 96%, rgba(11, 95, 81, .4) 0%, transparent 72%),
+      linear-gradient(136deg, #071a16 0%, #0b5f51 54%, #061511 100%);
+    animation-name: emerald-flow;
+    animation-duration: 26s;
   }
 }
-@keyframes hero-mesh-flow {
+.hero::after {
+  display: block;
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  pointer-events: none;
+  opacity: .035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.86' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+}
+.hero__art {
+  position: absolute;
+  z-index: 1;
+  left: 32%;
+  top: 2%;
+  width: min(39vw, 470px);
+  height: auto;
+  pointer-events: none;
+  opacity: .96;
+  filter: drop-shadow(0 24px 34px rgba(10, 32, 24, .18));
+}
+.hero__grid { z-index: 2; }
+.hero > .container { position: relative; z-index: 2; }
+@keyframes opal-flow {
   from { background-position: 0 0, 0 0, 0 0, 0 0, 0 0; }
-  to { background-position: 8% 12%, -7% 8%, 9% -6%, -5% 7%, 0 0; }
+  to { background-position: -8% 4%, 9% -7%, -7% 9%, 8% -6%, 0 0; }
+}
+@keyframes emerald-flow {
+  from { background-position: 0 0, 0 0, 0 0, 0 0, 0 0; }
+  to { background-position: -8% 4%, 9% -7%, -7% 9%, 8% -6%, 0 0; }
+}
+@media (max-width: 760px) {
+  .hero__art { left: 12%; top: 12%; width: min(65vw, 330px); opacity: .25; }
 }
 @media (prefers-reduced-motion: reduce) {
   .hero::before { animation: none; }
