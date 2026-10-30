@@ -17,13 +17,12 @@
 :root {
   color-scheme: light;
 
-  /* Surfaces — milky white with a whisper of mint. The page reads airy and
-     alive instead of flat greige, while the cards stay pure white. */
-  --bg: #eef4ef;
-  --bg-deep: #e3ece5;
-  --surface: rgba(255, 255, 255, 0.66);
-  --surface-2: rgba(255, 255, 255, 0.52);
-  --surface-3: rgba(255, 255, 255, 0.82);
+  /* Warm parchment and soft ivory: a calm cream daylight palette. */
+  --bg: #f3ecdf;
+  --bg-deep: #e9dfce;
+  --surface: rgba(255, 251, 243, 0.76);
+  --surface-2: rgba(255, 250, 240, 0.62);
+  --surface-3: rgba(255, 252, 246, 0.9);
   --surface-4: rgba(23, 33, 28, 0.07);
   --surface-inverse: #123f2c;
 
@@ -76,7 +75,7 @@
   --shadow-3: 0 4px 10px rgba(20, 50, 35, 0.06), 0 36px 66px -34px rgba(20, 50, 35, 0.5);
   --shadow-pop: 0 26px 56px -26px rgba(20, 50, 35, 0.55);
 
-  --glass: rgba(255, 255, 255, 0.6);
+  --glass: rgba(255, 250, 241, 0.72);
   --scrim: rgba(12, 30, 20, 0.4);
   --grain-opacity: 0.02;
 
@@ -259,34 +258,34 @@
    --glass-* tokens, so light and dark swap with no second set of rules.
    ========================================================================== */
 :root {
-  --aurora-mint: rgba(169, 232, 198, 0.9);
-  --aurora-lilac: rgba(195, 184, 255, 0.72);
-  --aurora-peach: rgba(255, 201, 171, 0.72);
-  --aurora-sky: rgba(174, 217, 255, 0.72);
-  --aurora-mint-2: rgba(184, 239, 207, 0.78);
+  --aurora-mint: rgba(213, 190, 132, 0.72);
+  --aurora-lilac: rgba(218, 192, 154, 0.52);
+  --aurora-peach: rgba(243, 190, 139, 0.55);
+  --aurora-sky: rgba(188, 202, 190, 0.48);
+  --aurora-mint-2: rgba(222, 204, 165, 0.62);
 
-  --glass-line: rgba(18, 63, 44, 0.42);
+  --glass-line: rgba(107, 83, 50, 0.32);
   --glass-blur: 22px;
   --glass-shadow: 0 22px 44px -32px rgba(20, 50, 35, 0.5);
   --glass-shadow-lg: 0 40px 80px -44px rgba(20, 50, 35, 0.55);
 
-  --glass-bar: rgba(255, 255, 255, 0.62);
-  --glass-panel: rgba(255, 255, 255, 0.66);
-  --glass-card: rgba(255, 255, 255, 0.78);
-  --glass-card-hover: rgba(255, 255, 255, 0.92);
+  --glass-bar: rgba(255, 249, 238, 0.82);
+  --glass-panel: rgba(255, 250, 241, 0.78);
+  --glass-card: rgba(255, 251, 243, 0.88);
+  --glass-card-hover: #fffaf0;
   --glass-card-border: rgba(18, 63, 44, 0.62);
-  --glass-chip: rgba(255, 255, 255, 0.62);
-  --glass-chip-hover: #ffffff;
-  --glass-field: rgba(255, 255, 255, 0.72);
-  --glass-field-focus: #ffffff;
-  --glass-sheet: rgba(252, 255, 253, 0.94);
-  --glass-menu: rgba(252, 255, 253, 0.9);
-  --glass-eyebrow-bg: rgba(255, 255, 255, 0.92);
+  --glass-chip: rgba(255, 249, 238, 0.82);
+  --glass-chip-hover: #fffaf0;
+  --glass-field: rgba(255, 249, 238, 0.9);
+  --glass-field-focus: #fffaf0;
+  --glass-sheet: rgba(255, 250, 241, 0.97);
+  --glass-menu: rgba(255, 250, 241, 0.94);
+  --glass-eyebrow-bg: #fffaf0;
   --glass-eyebrow-fg: #1f6b45;
-  --glass-note: rgba(255, 255, 255, 0.5);
-  --glass-gloss: rgba(255, 255, 255, 0.62);
-  --page-mesh-veil: rgba(238, 244, 239, 0.34);
-  --page-mesh-veil-end: rgba(238, 244, 239, 0.52);
+  --glass-note: rgba(255, 248, 235, 0.65);
+  --glass-gloss: rgba(255, 249, 238, 0.82);
+  --page-mesh-veil: rgba(243, 236, 223, 0.3);
+  --page-mesh-veil-end: rgba(243, 236, 223, 0.48);
   --page-glow:
     linear-gradient(180deg, transparent 0%, var(--page-mesh-veil) 30%, var(--page-mesh-veil-end) 100%),
     radial-gradient(58% 54% at 84% 2%, var(--aurora-mint), transparent 68%),
