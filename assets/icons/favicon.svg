@@ -1,10 +1,24 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Online List">
-  <rect width="512" height="512" rx="116" fill="#1a1916"/>
-  <g stroke="#faf8f3" stroke-width="34" stroke-linecap="round">
-    <path d="M120 168h172"/>
-    <path d="M120 252h272"/>
-    <path d="M120 336h116"/>
-  </g>
-  <circle cx="360" cy="168" r="25" fill="#faf8f3"/>
-  <circle cx="308" cy="336" r="25" fill="#faf8f3"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="پوریا استور">
+  <defs>
+    <linearGradient id="bg" x1="60" y1="32" x2="450" y2="490" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#493323"/>
+      <stop offset="1" stop-color="#211a15"/>
+    </linearGradient>
+    <linearGradient id="awn" x1="128" y1="150" x2="380" y2="244" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#e4ba7c"/>
+      <stop offset="1" stop-color="#bd8450"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientTransform="matrix(300 0 0 290 256 40)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#96704d" stop-opacity=".28"/>
+      <stop offset="1" stop-color="#96704d" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="116" fill="url(#bg)"/>
+  <rect width="512" height="512" rx="116" fill="url(#glow)"/>
+  <path d="M154 221 178 165a20 20 0 0 1 18-12h120a20 20 0 0 1 18 12l24 56v29H154v-29Z" fill="url(#awn)"/>
+  <path d="M154 232h204v162a20 20 0 0 1-20 20H174a20 20 0 0 1-20-20V232Z" fill="#f3e6d1"/>
+  <path d="M154 222h204v23c0 18-22 27-36 13-14 14-36 5-36-13 0 18-22 27-36 13-14 14-36 5-36-13 0 18-22 27-36 13-14 14-24 5-24-13v-23Z" fill="#d19a5e"/>
+  <path d="M194 296h75M194 333h56M194 370h39" stroke="#674a34" stroke-width="17" stroke-linecap="round"/>
+  <circle cx="322" cy="334" r="34" fill="#47785e"/>
+  <path d="m306 334 11 11 22-25" fill="none" stroke="#f5ead7" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
