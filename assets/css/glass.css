@@ -232,7 +232,7 @@ body,
 }
 .chip:hover { background: var(--glass-chip-hover); border-color: var(--glass-card-border); }
 .chip[aria-pressed="true"], .chip.is-active {
-  background: linear-gradient(160deg, color-mix(in srgb, var(--primary) 88%, #2f7a54), var(--primary));
+  background: linear-gradient(160deg, color-mix(in srgb, var(--primary) 88%, #68734F), var(--primary));
   border-color: transparent;
   color: var(--on-primary);
   box-shadow: 0 14px 26px -16px rgba(18, 63, 44, 0.9);
@@ -299,7 +299,7 @@ body,
 
 /* ── Buttons ─────────────────────────────────────────────────────────── */
 .btn--filled {
-  --btn-bg: linear-gradient(160deg, color-mix(in srgb, var(--primary) 88%, #2f7a54), var(--primary));
+  --btn-bg: linear-gradient(160deg, color-mix(in srgb, var(--primary) 88%, #68734F), var(--primary));
   --btn-fg: var(--on-primary);
   --btn-border: transparent;
   box-shadow: 0 18px 30px -18px rgba(18, 63, 44, 0.85);
@@ -463,7 +463,7 @@ dialog.sheet::backdrop {
 }
 .mp__seg-btn { border-radius: var(--r-full); }
 .mp__seg-btn.is-active {
-  background: linear-gradient(160deg, color-mix(in srgb, var(--primary) 88%, #2f7a54), var(--primary));
+  background: linear-gradient(160deg, color-mix(in srgb, var(--primary) 88%, #68734F), var(--primary));
   color: var(--on-primary);
   box-shadow: 0 12px 22px -16px rgba(18, 63, 44, 0.9);
 }
@@ -692,17 +692,6 @@ body:has(.mpage) .toast-root { bottom: calc(96px + env(safe-area-inset-bottom));
   to { background-position: 0 0, 230% 0, 240% 0, 0 0; }
 }
 
-/* Fera's FLOW engine supplies the hero artwork; don't overlay the old CSS mock. */
-:root { --floating-header-height: 84px; }
-.appbar {
-  background-color: transparent;
-  background-image: none;
-}
-.hero {
-  margin-top: calc(-1 * var(--floating-header-height));
-  padding-block-start: calc(var(--floating-header-height) + clamp(36px, 6vw, 72px));
-}
-.hero::before { display: none; }
 .hero::after {
   display: block;
   content: "";
@@ -713,9 +702,27 @@ body:has(.mpage) .toast-root { bottom: calc(96px + env(safe-area-inset-bottom));
   opacity: .035;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.86' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
 }
-.hero > .container { position: relative; z-index: 2; }
 .hero__grid { z-index: 2; }
-#heroGradientRoot { z-index: 0; }
-@media (max-width: 760px) {
-  :root { --floating-header-height: 72px; }
+.hero > .container { position: relative; z-index: 2; }
+
+/* The hero follows the site's olive-and-cream palette in both color modes. */
+.hero::before {
+  background:
+    radial-gradient(46% 62% at 74% 42%, rgba(255, 250, 237, 0.62), transparent 74%),
+    radial-gradient(38% 50% at 24% 26%, rgba(109, 122, 78, 0.22), transparent 78%),
+    radial-gradient(56% 58% at 88% 78%, rgba(185, 151, 104, 0.18), transparent 74%);
+}
+[data-theme="dark"] .hero::before {
+  background:
+    radial-gradient(46% 62% at 74% 42%, rgba(211, 190, 150, 0.20), transparent 74%),
+    radial-gradient(38% 50% at 24% 26%, rgba(105, 123, 77, 0.34), transparent 78%),
+    radial-gradient(56% 58% at 88% 78%, rgba(163, 130, 86, 0.18), transparent 74%);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .hero::before {
+    background:
+      radial-gradient(46% 62% at 74% 42%, rgba(211, 190, 150, 0.20), transparent 74%),
+      radial-gradient(38% 50% at 24% 26%, rgba(105, 123, 77, 0.34), transparent 78%),
+      radial-gradient(56% 58% at 88% 78%, rgba(163, 130, 86, 0.18), transparent 74%);
+  }
 }

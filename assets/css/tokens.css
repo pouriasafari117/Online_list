@@ -17,7 +17,7 @@
 :root {
   color-scheme: light;
 
-  /* Day palette follows Fera UI's Opal gradient: mist blue, aqua, lilac, rose. */
+  /* Base palette is overridden below with the warm cream-and-olive theme. */
   --bg: #F6F9FF;
   --bg-deep: #EAF0FF;
   --surface: rgba(255, 255, 255, 0.82);
@@ -58,16 +58,16 @@
 
   /* Decorative tones — low-saturation chips so lists read at a glance
      without turning into a rainbow */
-  --tone-1: #3d6f96;
-  --tone-1-container: #e3f0fa;
-  --tone-2: #6a58a8;
-  --tone-2-container: #ece7fd;
-  --tone-3: #22795f;
-  --tone-3-container: #ddf4ea;
-  --tone-4: #a5527a;
-  --tone-4-container: #fbe7f0;
-  --tone-5: #96631f;
-  --tone-5-container: #fbeddb;
+  --tone-1: #61776E;
+  --tone-1-container: #E3EBE4;
+  --tone-2: #77704E;
+  --tone-2-container: #EEE9D9;
+  --tone-3: #596B43;
+  --tone-3-container: #E0E7D2;
+  --tone-4: #96685E;
+  --tone-4-container: #F1E3DC;
+  --tone-5: #8B6740;
+  --tone-5-container: #F1E4CE;
 
   /* Elevated surfaces */
   --shadow-1: 0 1px 2px rgba(20, 50, 35, 0.06);
@@ -172,16 +172,16 @@
   --danger-container: #331b18;
   --on-danger: #2a1210;
 
-  --tone-1: #8fc4ea;
-  --tone-1-container: #142632;
-  --tone-2: #c0b0ee;
-  --tone-2-container: #241f36;
-  --tone-3: #7fd9b8;
-  --tone-3-container: #102a22;
-  --tone-4: #eda5c2;
-  --tone-4-container: #2e1c25;
-  --tone-5: #e6ba86;
-  --tone-5-container: #2b2215;
+  --tone-1: #B5C5B9;
+  --tone-1-container: #35453C;
+  --tone-2: #C9BE9F;
+  --tone-2-container: #484332;
+  --tone-3: #B5C895;
+  --tone-3-container: #3D4933;
+  --tone-4: #D4AA9D;
+  --tone-4-container: #49352F;
+  --tone-5: #D7B98B;
+  --tone-5-container: #453929;
 
   --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-2: 0 1px 2px rgba(0, 0, 0, 0.4), 0 14px 30px -18px rgba(0, 0, 0, 0.72);
@@ -229,16 +229,16 @@
     --danger-container: #331b18;
     --on-danger: #2a1210;
 
-    --tone-1: #8fc4ea;
-    --tone-1-container: #142632;
-    --tone-2: #c0b0ee;
-    --tone-2-container: #241f36;
-    --tone-3: #7fd9b8;
-    --tone-3-container: #102a22;
-    --tone-4: #eda5c2;
-    --tone-4-container: #2e1c25;
-    --tone-5: #e6ba86;
-    --tone-5-container: #2b2215;
+    --tone-1: #B5C5B9;
+    --tone-1-container: #35453C;
+    --tone-2: #C9BE9F;
+    --tone-2-container: #484332;
+    --tone-3: #B5C895;
+    --tone-3-container: #3D4933;
+    --tone-4: #D4AA9D;
+    --tone-4-container: #49352F;
+    --tone-5: #D7B98B;
+    --tone-5-container: #453929;
 
     --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
     --shadow-2: 0 1px 2px rgba(0, 0, 0, 0.4), 0 14px 30px -18px rgba(0, 0, 0, 0.72);
@@ -253,7 +253,7 @@
 
 /* ==========================================================================
    Aurora & glass — the «شیشه و نور» layer.
-   Pastel light sits behind every page; surfaces are translucent sheets with
+   Warm olive and cream-brown colors sit behind every page; surfaces are translucent sheets with
    a hairline of white along the top edge. Everything resolves through the
    --glass-* tokens, so light and dark swap with no second set of rules.
    ========================================================================== */
@@ -372,5 +372,201 @@
     radial-gradient(40% 40% at 0% -12%, rgba(143, 227, 176, 0.18), transparent 66%),
     radial-gradient(44% 42% at 100% 78%, rgba(11, 95, 81, 0.34), transparent 68%),
     radial-gradient(40% 40% at 4% 92%, rgba(240, 251, 239, 0.12), transparent 70%);
+  }
+}
+
+/* ── Warm olive / cream-brown theme requested for both color modes ───────── */
+:root {
+  color-scheme: light;
+  --bg: #F2E9DA;
+  --bg-deep: #E6D9C2;
+  --surface: rgba(255, 251, 243, 0.84);
+  --surface-2: rgba(232, 223, 204, 0.78);
+  --surface-3: rgba(255, 253, 247, 0.96);
+  --surface-4: rgba(49, 58, 41, 0.07);
+  --surface-inverse: #30382A;
+  --text: #30382A;
+  --text-2: #535A46;
+  --text-3: #747865;
+  --text-inverse: #FFF8EA;
+  --outline: rgba(89, 94, 69, 0.28);
+  --outline-strong: rgba(76, 83, 59, 0.46);
+  --hairline: rgba(89, 94, 69, 0.17);
+  --primary: #66724F;
+  --on-primary: #FFF9EC;
+  --primary-container: #DEE2D1;
+  --on-primary-container: #30382A;
+  --primary-soft: rgba(102, 114, 79, 0.11);
+  --ok: #596B43;
+  --ok-container: #E0E7D2;
+  --on-ok: #FFF9EC;
+  --low: #8B6740;
+  --low-container: #F1E4CE;
+  --out: #858578;
+  --danger: #9F4F3D;
+  --danger-container: #F5E1D8;
+  --on-danger: #FFF8F4;
+  --glass: rgba(242, 233, 218, 0.86);
+  --aurora-mint: rgba(105, 119, 77, 0.17);
+  --aurora-lilac: rgba(130, 119, 83, 0.12);
+  --aurora-peach: rgba(177, 142, 100, 0.16);
+  --aurora-sky: rgba(255, 249, 235, 0.60);
+  --aurora-mint-2: rgba(117, 128, 86, 0.16);
+  --glass-line: rgba(102, 104, 76, 0.28);
+  --glass-shadow: 0 22px 44px -32px rgba(48, 47, 34, 0.36);
+  --glass-shadow-lg: 0 40px 80px -44px rgba(48, 47, 34, 0.42);
+  --glass-bar: rgba(255, 250, 239, 0.88);
+  --glass-panel: rgba(250, 244, 231, 0.91);
+  --glass-card: rgba(255, 251, 241, 0.94);
+  --glass-card-hover: #F5EEDC;
+  --glass-card-border: rgba(87, 97, 65, 0.38);
+  --glass-chip: rgba(245, 238, 220, 0.82);
+  --glass-chip-hover: #E9E4D2;
+  --glass-field: rgba(255, 251, 241, 0.97);
+  --glass-field-focus: #F5EEDC;
+  --glass-sheet: rgba(251, 246, 235, 0.98);
+  --glass-menu: rgba(250, 245, 233, 0.98);
+  --glass-eyebrow-bg: #E7E7D5;
+  --glass-eyebrow-fg: #526342;
+  --glass-note: rgba(155, 142, 105, 0.14);
+  --glass-gloss: rgba(255, 249, 234, 0.78);
+  --page-mesh-veil: rgba(242, 233, 218, 0.16);
+  --page-mesh-veil-end: rgba(242, 233, 218, 0.34);
+  --page-glow:
+    linear-gradient(180deg, transparent 0%, var(--page-mesh-veil) 34%, var(--page-mesh-veil-end) 100%),
+    radial-gradient(58% 54% at 84% 2%, var(--aurora-mint), transparent 68%),
+    radial-gradient(46% 46% at 8% 0%, var(--aurora-peach), transparent 70%),
+    radial-gradient(48% 46% at 62% 34%, var(--aurora-lilac), transparent 72%),
+    radial-gradient(52% 50% at -4% 58%, var(--aurora-sky), transparent 72%),
+    radial-gradient(56% 52% at 104% 86%, var(--aurora-mint-2), transparent 72%);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #242A20;
+  --bg-deep: #191E17;
+  --surface: rgba(53, 61, 45, 0.84);
+  --surface-2: rgba(222, 204, 170, 0.08);
+  --surface-3: rgba(222, 204, 170, 0.13);
+  --surface-4: rgba(222, 204, 170, 0.17);
+  --surface-inverse: #F2E9DA;
+  --text: #F3E8D3;
+  --text-2: #D6C8AA;
+  --text-3: #B7AA8D;
+  --text-inverse: #282D22;
+  --outline: rgba(211, 193, 156, 0.31);
+  --outline-strong: rgba(222, 204, 170, 0.47);
+  --hairline: rgba(211, 193, 156, 0.19);
+  --primary: #D1BD97;
+  --on-primary: #292E22;
+  --primary-container: #4D553E;
+  --on-primary-container: #F3E8D3;
+  --primary-soft: rgba(209, 189, 151, 0.13);
+  --ok: #B5C895;
+  --ok-container: #3D4933;
+  --on-ok: #252B20;
+  --low: #D7B98B;
+  --low-container: #453929;
+  --out: #A6A28F;
+  --danger: #E8A193;
+  --danger-container: #4A3029;
+  --on-danger: #281A17;
+  --glass: rgba(36, 42, 32, 0.88);
+  --aurora-mint: rgba(112, 130, 82, 0.24);
+  --aurora-lilac: rgba(147, 124, 87, 0.16);
+  --aurora-peach: rgba(190, 158, 112, 0.18);
+  --aurora-sky: rgba(226, 211, 181, 0.09);
+  --aurora-mint-2: rgba(99, 119, 74, 0.23);
+  --glass-line: rgba(211, 193, 156, 0.29);
+  --glass-shadow: 0 22px 44px -30px rgba(0, 0, 0, 0.72);
+  --glass-shadow-lg: 0 40px 80px -40px rgba(0, 0, 0, 0.84);
+  --glass-bar: rgba(43, 49, 37, 0.88);
+  --glass-panel: rgba(51, 58, 43, 0.88);
+  --glass-card: rgba(57, 64, 48, 0.88);
+  --glass-card-hover: rgba(70, 77, 56, 0.93);
+  --glass-card-border: rgba(211, 193, 156, 0.33);
+  --glass-chip: rgba(211, 193, 156, 0.09);
+  --glass-chip-hover: rgba(211, 193, 156, 0.16);
+  --glass-field: rgba(211, 193, 156, 0.07);
+  --glass-field-focus: rgba(211, 193, 156, 0.13);
+  --glass-sheet: rgba(39, 44, 34, 0.97);
+  --glass-menu: rgba(40, 46, 35, 0.97);
+  --glass-eyebrow-bg: rgba(177, 164, 128, 0.16);
+  --glass-eyebrow-fg: #E0CCAA;
+  --glass-note: rgba(199, 177, 137, 0.08);
+  --glass-gloss: rgba(235, 219, 187, 0.10);
+  --page-mesh-veil: rgba(36, 42, 32, 0.26);
+  --page-mesh-veil-end: rgba(36, 42, 32, 0.64);
+  --page-glow:
+    linear-gradient(180deg, rgba(36, 42, 32, 0.02) 0%, rgba(36, 42, 32, 0.48) 40%, rgba(25, 30, 23, 0.82) 100%),
+    radial-gradient(48% 46% at 86% -4%, rgba(105, 123, 77, 0.32), transparent 68%),
+    radial-gradient(42% 40% at 8% 4%, rgba(179, 146, 102, 0.22), transparent 70%),
+    radial-gradient(46% 42% at 100% 76%, rgba(195, 169, 124, 0.14), transparent 70%),
+    radial-gradient(42% 40% at 4% 92%, rgba(82, 101, 62, 0.25), transparent 70%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #242A20;
+    --bg-deep: #191E17;
+    --surface: rgba(53, 61, 45, 0.84);
+    --surface-2: rgba(222, 204, 170, 0.08);
+    --surface-3: rgba(222, 204, 170, 0.13);
+    --surface-4: rgba(222, 204, 170, 0.17);
+    --surface-inverse: #F2E9DA;
+    --text: #F3E8D3;
+    --text-2: #D6C8AA;
+    --text-3: #B7AA8D;
+    --text-inverse: #282D22;
+    --outline: rgba(211, 193, 156, 0.31);
+    --outline-strong: rgba(222, 204, 170, 0.47);
+    --hairline: rgba(211, 193, 156, 0.19);
+    --primary: #D1BD97;
+    --on-primary: #292E22;
+    --primary-container: #4D553E;
+    --on-primary-container: #F3E8D3;
+    --primary-soft: rgba(209, 189, 151, 0.13);
+    --ok: #B5C895;
+    --ok-container: #3D4933;
+    --on-ok: #252B20;
+    --low: #D7B98B;
+    --low-container: #453929;
+    --out: #A6A28F;
+    --danger: #E8A193;
+    --danger-container: #4A3029;
+    --on-danger: #281A17;
+    --glass: rgba(36, 42, 32, 0.88);
+    --aurora-mint: rgba(112, 130, 82, 0.24);
+    --aurora-lilac: rgba(147, 124, 87, 0.16);
+    --aurora-peach: rgba(190, 158, 112, 0.18);
+    --aurora-sky: rgba(226, 211, 181, 0.09);
+    --aurora-mint-2: rgba(99, 119, 74, 0.23);
+    --glass-line: rgba(211, 193, 156, 0.29);
+    --glass-shadow: 0 22px 44px -30px rgba(0, 0, 0, 0.72);
+    --glass-shadow-lg: 0 40px 80px -40px rgba(0, 0, 0, 0.84);
+    --glass-bar: rgba(43, 49, 37, 0.88);
+    --glass-panel: rgba(51, 58, 43, 0.88);
+    --glass-card: rgba(57, 64, 48, 0.88);
+    --glass-card-hover: rgba(70, 77, 56, 0.93);
+    --glass-card-border: rgba(211, 193, 156, 0.33);
+    --glass-chip: rgba(211, 193, 156, 0.09);
+    --glass-chip-hover: rgba(211, 193, 156, 0.16);
+    --glass-field: rgba(211, 193, 156, 0.07);
+    --glass-field-focus: rgba(211, 193, 156, 0.13);
+    --glass-sheet: rgba(39, 44, 34, 0.97);
+    --glass-menu: rgba(40, 46, 35, 0.97);
+    --glass-eyebrow-bg: rgba(177, 164, 128, 0.16);
+    --glass-eyebrow-fg: #E0CCAA;
+    --glass-note: rgba(199, 177, 137, 0.08);
+    --glass-gloss: rgba(235, 219, 187, 0.10);
+    --page-mesh-veil: rgba(36, 42, 32, 0.26);
+    --page-mesh-veil-end: rgba(36, 42, 32, 0.64);
+    --page-glow:
+      linear-gradient(180deg, rgba(36, 42, 32, 0.02) 0%, rgba(36, 42, 32, 0.48) 40%, rgba(25, 30, 23, 0.82) 100%),
+      radial-gradient(48% 46% at 86% -4%, rgba(105, 123, 77, 0.32), transparent 68%),
+      radial-gradient(42% 40% at 8% 4%, rgba(179, 146, 102, 0.22), transparent 70%),
+      radial-gradient(46% 42% at 100% 76%, rgba(195, 169, 124, 0.14), transparent 70%),
+      radial-gradient(42% 40% at 4% 92%, rgba(82, 101, 62, 0.25), transparent 70%);
   }
 }

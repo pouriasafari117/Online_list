@@ -17,8 +17,7 @@
     "vault": "node tools/make-vault.mjs",
     "verify": "node tools/verify.mjs",
     "test": "node tools/test.mjs",
-    "check": "node tools/verify.mjs && node tools/test.mjs",
-    "build": "esbuild assets/js/hero-gradient.jsx --bundle --minify --format=iife --outfile=assets/js/hero-gradient.js"
+    "check": "node tools/verify.mjs && node tools/test.mjs"
   },
   "engines": {
     "node": ">=18"
@@ -39,12 +38,5 @@
     "404.html",
     "sw.js",
     "manifest.webmanifest"
-  ],
-  "dependencies": {
-    "react": "^19.3.1",
-    "react-dom": "^19.3.1"
-  },
-  "devDependencies": {
-    "esbuild": "^0.28.2"
-  }
+  ]
 }
