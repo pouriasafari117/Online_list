@@ -597,3 +597,58 @@ dialog.sheet::backdrop {
 
 /* Toasts belong above the floating action bar, not behind it. */
 body:has(.mpage) .toast-root { bottom: calc(96px + env(safe-area-inset-bottom)); }
+
+/* ── Light-rail header: a quiet, living pattern that shifts with the theme ── */
+.appbar__inner {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.appbar__inner::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: .72;
+  background:
+    radial-gradient(ellipse at 8% 120%, color-mix(in srgb, #f1aa57 18%, transparent), transparent 43%),
+    repeating-linear-gradient(116deg, transparent 0 26px, color-mix(in srgb, #4f9b7d 12%, transparent) 27px 28px, transparent 29px 47px),
+    linear-gradient(100deg, transparent 8%, color-mix(in srgb, #69a58c 9%, transparent) 34%, transparent 63%);
+  background-size: 150% 180%, 220% 100%, 180% 100%;
+  background-position: 0 0, 0 0, 0 0;
+  mask-image: linear-gradient(90deg, #000 0%, #000 38%, transparent 80%);
+  transition: opacity .45s ease, filter .45s ease;
+  animation: rail-drift 24s linear infinite;
+}
+[data-theme="dark"] .appbar__inner::before {
+  opacity: .92;
+  filter: saturate(1.35);
+  background:
+    radial-gradient(ellipse at 8% 120%, rgba(255, 177, 97, .18), transparent 44%),
+    repeating-linear-gradient(116deg, transparent 0 25px, rgba(105, 223, 188, .20) 26px 27px, transparent 28px 46px),
+    repeating-linear-gradient(116deg, transparent 0 68px, rgba(135, 158, 255, .18) 69px 70px, transparent 71px 105px),
+    linear-gradient(100deg, transparent 5%, rgba(102, 211, 176, .12) 35%, transparent 68%);
+  background-size: 150% 180%, 220% 100%, 240% 100%, 180% 100%;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .appbar__inner::before {
+    opacity: .92;
+    filter: saturate(1.35);
+    background:
+      radial-gradient(ellipse at 8% 120%, rgba(255, 177, 97, .18), transparent 44%),
+      repeating-linear-gradient(116deg, transparent 0 25px, rgba(105, 223, 188, .20) 26px 27px, transparent 28px 46px),
+      repeating-linear-gradient(116deg, transparent 0 68px, rgba(135, 158, 255, .18) 69px 70px, transparent 71px 105px),
+      linear-gradient(100deg, transparent 5%, rgba(102, 211, 176, .12) 35%, transparent 68%);
+    background-size: 150% 180%, 220% 100%, 240% 100%, 180% 100%;
+  }
+}
+.appbar__inner > * { position: relative; z-index: 1; }
+@keyframes rail-drift {
+  from { background-position: 0 0, 0 0, 0 0; }
+  to { background-position: 0 0, 220% 0, 180% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .appbar__inner::before { animation: none; }
+}
