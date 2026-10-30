@@ -106,27 +106,28 @@ function toggleTheme(trigger) {
     return;
   }
 
-  // Keep the same circular reveal, but don't hold the transition open for
-  // extra animation frames. The background canvas rests only while the
-  // captured layers are expanding, then continues at its normal speed.
+  // The reveal is driven by a CSS keyframe on the *new* view-transition
+  // snapshot. A CSS animation is registered before transition.ready, so the
+  // transition cannot finish before an asynchronous WAAPI callback starts it.
   const rect = trigger?.getBoundingClientRect();
   const x = rect ? rect.left + rect.width / 2 : innerWidth / 2;
   const y = rect ? rect.top + rect.height / 2 : innerHeight / 2;
   const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+  const root = document.documentElement;
+  root.style.setProperty('--reveal-x', `${x}px`);
+  root.style.setProperty('--reveal-y', `${y}px`);
+  root.style.setProperty('--reveal-radius', `${radius}px`);
   themeTransitionActive = true;
-  document.documentElement.classList.add('theme-reveal');
+  root.classList.add('theme-reveal');
   const cleanup = () => {
-    document.documentElement.classList.remove('theme-reveal');
+    root.classList.remove('theme-reveal');
+    root.style.removeProperty('--reveal-x');
+    root.style.removeProperty('--reveal-y');
+    root.style.removeProperty('--reveal-radius');
     themeTransitionActive = false;
   };
   try {
     const transition = document.startViewTransition(run);
-    transition.ready.then(() => {
-      document.documentElement.animate(
-        { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
-        { duration: 520, easing: 'cubic-bezier(.22, 1, .36, 1)', pseudoElement: '::view-transition-new(root)' }
-      );
-    }).catch(cleanup);
     transition.finished.then(cleanup, cleanup);
   } catch {
     cleanup();

@@ -1,5 +1,5 @@
 /* Online List — offline shell + fresh data */
-const VERSION = 'v1.18.0';
+const VERSION = 'v1.19.0';
 const CACHE = `online-list-${VERSION}`;
 const ASSETS = [
   './',
@@ -60,6 +60,12 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(networkFirst(request));
     return;
   }
+  // A theme fix must not be hidden for one visit by a stale JS/CSS response.
+  // Browser HTTP caching still applies; offline requests use the precache.
+  if (/\.(?:js|css)$/.test(url.pathname)) {
+    event.respondWith(networkFirst(request));
+    return;
+  }
   if (request.mode === 'navigate') {
     // Offline fallback depends on the section: the handbook should not dump the
     // visitor on the shop page.
@@ -77,7 +83,7 @@ async function networkFirst(request, fallbackUrl) {
     if (fresh && fresh.ok) cache.put(request, fresh.clone());
     return fresh;
   } catch {
-    const cached = await cache.match(request);
+    const cached = await cache.match(request, { ignoreSearch: true });
     if (cached) return cached;
     if (fallbackUrl) {
       const fallback = await cache.match(fallbackUrl);
