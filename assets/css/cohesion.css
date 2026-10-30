@@ -44,6 +44,9 @@
   --glass-shadow: 0 12px 36px -24px rgba(43, 58, 121, .36);
   --glass-shadow-lg: 0 24px 52px -28px rgba(43, 58, 121, .4);
   --page-glow: linear-gradient(180deg, #f5f7fd 0%, #f9faff 48%, #f1f4fb 100%);
+  --catalog-panel: rgba(255, 255, 255, .88);
+  --catalog-filter: rgba(236, 241, 255, .94);
+  --catalog-head: #f6f8ff;
 }
 
 /* Emerald is still Fera's dark-mode recipe; match its calmer jade palette. */
@@ -69,6 +72,9 @@
   --glass-shadow: 0 12px 36px -22px rgba(0, 0, 0, .65);
   --glass-shadow-lg: 0 24px 52px -24px rgba(0, 0, 0, .75);
   --page-glow: linear-gradient(180deg, #0b181a 0%, #102123 52%, #0d1a1c 100%);
+  --catalog-panel: rgba(18, 40, 40, .91);
+  --catalog-filter: rgba(36, 66, 62, .92);
+  --catalog-head: #1c3736;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -93,6 +99,9 @@
     --glass-shadow: 0 12px 36px -22px rgba(0, 0, 0, .65);
     --glass-shadow-lg: 0 24px 52px -24px rgba(0, 0, 0, .75);
     --page-glow: linear-gradient(180deg, #0b181a 0%, #102123 52%, #0d1a1c 100%);
+    --catalog-panel: rgba(18, 40, 40, .91);
+    --catalog-filter: rgba(36, 66, 62, .92);
+    --catalog-head: #1c3736;
   }
 }
 
@@ -155,6 +164,83 @@ body > main, body > .site-footer, body > #managePageHost {
 @media print {
   #pageGradientRoot { display: none !important; }
   body:not(.help-page):not(.setup-page) { background: #fff; }
+}
+/* The whole inventory is one framed surface over the animated canvas.
+   The toolbar is a lighter inset layer rather than another heavy black slab. */
+.catalog > .container {
+  width: min(calc(100% - var(--gutter) - var(--gutter)), var(--container));
+  padding: clamp(18px, 3vw, 36px);
+  border: 1px solid var(--glass-line);
+  border-radius: var(--r-2xl);
+  background: var(--catalog-panel);
+  box-shadow: var(--glass-shadow-lg);
+}
+.catalog .section__head {
+  margin-bottom: 20px;
+  padding-bottom: 18px;
+}
+.catalog .filterbar {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: clamp(14px, 2vw, 22px);
+  border: 1px solid var(--glass-line);
+  border-radius: var(--r-xl);
+  background: var(--catalog-filter);
+  box-shadow: inset 0 1px 0 var(--glass-gloss);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.catalog .filterbar__top, .catalog .search { width: 100%; }
+.catalog .search__input { background-color: var(--glass-field); }
+.catalog .filterbar > .filterbar__tools {
+  display: flex;
+  width: 100%;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+.catalog .filterbar__cats {
+  width: 100%;
+  gap: 8px;
+  justify-content: flex-start;
+  padding-block: 14px 2px;
+  margin-inline: 0;
+  padding-inline: 0;
+  border-top: 1px solid var(--glass-line);
+  overflow-x: auto;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+.catalog .filterbar .chip { background: var(--glass-card); box-shadow: none; }
+.catalog .filterbar .chip[aria-pressed="true"] { background: var(--primary); }
+.catalog .resultbar { padding-block: 18px 8px; }
+.catalog .group { margin-block: 12px 30px; }
+.catalog .group__head {
+  top: 80px;
+  margin-bottom: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--glass-line);
+  border-radius: var(--r-lg);
+  background: var(--catalog-head);
+  box-shadow: 0 6px 20px -18px rgba(0, 0, 0, .4);
+}
+.catalog .group__line { background: var(--glass-line); }
+/* A moving backdrop under large blurred surfaces requires expensive repaints.
+   Opaque-ish theme layers retain their appearance without repeatedly blurring. */
+.update-card, .trust__item {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+@media (max-width: 719px) {
+  .catalog > .container { border-radius: var(--r-xl); padding: 16px; }
+  .catalog .group__head { position: static; }
+  .catalog .filterbar > .filterbar__tools { flex-wrap: wrap; }
+  .catalog .filterbar__cats { padding-top: 12px; }
+}
+@media print {
+  .catalog > .container { width: 100%; padding: 0; border: 0; box-shadow: none; background: #fff; }
+  .catalog .group__head { border: 0; box-shadow: none; background: none; }
 }
 .hero__name { background: none; -webkit-text-fill-color: currentColor; color: var(--text); }
 .hero__eyebrow { color: var(--glass-eyebrow-fg); }
