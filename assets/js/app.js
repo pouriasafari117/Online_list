@@ -106,37 +106,32 @@ function toggleTheme(trigger) {
     return;
   }
 
-  // Reveal the new palette from the pressed control, like turning on a light.
-  // Capture the new snapshot after React has had a chance to repaint the
-  // Opal/Emerald canvas as well as the CSS surfaces.
+  // Only opacity and a tiny transform of the outgoing screenshot are animated.
+  // Unlike a full-screen clip-path, both can run on the compositor without
+  // repainting the live Opal/Emerald canvas on every transition frame.
   const rect = trigger?.getBoundingClientRect();
   const x = rect ? rect.left + rect.width / 2 : innerWidth / 2;
   const y = rect ? rect.top + rect.height / 2 : innerHeight / 2;
-  const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
   themeTransitionActive = true;
   document.documentElement.classList.add('theme-reveal');
-  try {
-    const transition = document.startViewTransition(async () => {
-      run();
-      // Timed fallback also resolves if the browser suspends animation frames.
-      await Promise.race([
-        new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
-        new Promise((resolve) => setTimeout(resolve, 90))
-      ]);
-    });
-    transition.ready.then(() => {
-      document.documentElement.animate(
-        { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
-        { duration: 720, easing: 'cubic-bezier(.2,.8,.2,1)', pseudoElement: '::view-transition-new(root)' }
-      );
-    }).catch(() => {});
-    transition.finished.finally(() => {
-      document.documentElement.classList.remove('theme-reveal');
-      themeTransitionActive = false;
-    });
-  } catch {
+  const cleanup = () => {
     document.documentElement.classList.remove('theme-reveal');
     themeTransitionActive = false;
+  };
+  try {
+    const transition = document.startViewTransition(run);
+    transition.ready.then(() => {
+      document.documentElement.animate(
+        [
+          { opacity: 1, transform: 'scale(1)', transformOrigin: `${x}px ${y}px` },
+          { opacity: 0, transform: 'scale(1.015)', transformOrigin: `${x}px ${y}px` }
+        ],
+        { duration: 440, easing: 'cubic-bezier(.22, 1, .36, 1)', pseudoElement: '::view-transition-old(root)' }
+      );
+    }).catch(cleanup);
+    transition.finished.then(cleanup, cleanup);
+  } catch {
+    cleanup();
     run();
   }
 }
