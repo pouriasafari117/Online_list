@@ -43,11 +43,7 @@ export function updateThemeIcon() {
     toggle.setAttribute('aria-checked', String(dark));
     toggle.setAttribute('aria-label', dark ? 'تغییر به حالت روز' : 'تغییر به حالت شب');
     toggle.dataset.tip = dark ? 'حالت روز' : 'حالت شب';
-    // Let the button play its full animation once the page's circular reveal
-    // has finished; otherwise the View Transition hides most of its movement.
-    if (!root.classList.contains('theme-reveal') || !toggle.dataset.scene) {
-      toggle.dataset.scene = dark ? 'night' : 'day';
-    }
+    // aria-checked is the single source of truth for both accessibility and artwork.
     // Match a stored/automatic theme before the toggle begins animating.
     if (toggle.classList.contains('is-initializing') && !toggle.dataset.readyScheduled) {
       toggle.dataset.readyScheduled = '1';
