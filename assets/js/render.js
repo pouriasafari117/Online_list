@@ -38,11 +38,22 @@ export function updateThemeIcon() {
   const root = document.documentElement;
   const attr = root.getAttribute('data-theme') || 'auto';
   const dark = attr === 'dark' || (attr === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-  document.querySelectorAll('[data-theme-icon]').forEach((el) => {
-    el.innerHTML = icon(dark ? 'light_mode' : 'dark_mode', { size: 21 });
-    el.dataset.icon = dark ? 'light_mode' : 'dark_mode';
-    el.dataset.iconDone = '1';
-  });
+  const toggle = document.getElementById('themeBtn');
+  if (toggle) {
+    toggle.setAttribute('aria-checked', String(dark));
+    toggle.setAttribute('aria-label', dark ? 'تغییر به حالت روز' : 'تغییر به حالت شب');
+    toggle.dataset.tip = dark ? 'حالت روز' : 'حالت شب';
+    // Let the button play its full animation once the page's circular reveal
+    // has finished; otherwise the View Transition hides most of its movement.
+    if (!root.classList.contains('theme-reveal') || !toggle.dataset.scene) {
+      toggle.dataset.scene = dark ? 'night' : 'day';
+    }
+    // Match a stored/automatic theme before the toggle begins animating.
+    if (toggle.classList.contains('is-initializing') && !toggle.dataset.readyScheduled) {
+      toggle.dataset.readyScheduled = '1';
+      requestAnimationFrame(() => requestAnimationFrame(() => toggle.classList.remove('is-initializing')));
+    }
+  }
   const metaLight = document.querySelector('meta[name="theme-color"][media*="light"]');
   const metaDark = document.querySelector('meta[name="theme-color"][media*="dark"]');
   if (metaLight) metaLight.content = '#f4f2ed';
