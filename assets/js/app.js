@@ -137,12 +137,15 @@ function toggleTheme(trigger) {
     root.style.removeProperty('--reveal-y');
     root.style.removeProperty('--reveal-radius');
     themeTransitionActive = false;
-    updateThemeIcon();
-    playToggleMotion();
   };
   try {
+    playToggleMotion();
     const transition = document.startViewTransition(run);
-    transition.finished.then(cleanup, cleanup);
+    transition.finished.then(cleanup, () => {
+      cleanup();
+      // A cancelled View Transition must still leave the switch and page in sync.
+      if (effectiveTheme() !== next) run();
+    });
   } catch {
     cleanup();
     run();

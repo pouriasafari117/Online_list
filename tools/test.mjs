@@ -783,6 +783,60 @@ test('پنل با کلیدهای میان‌بر، فوکوس و دکمهٔ با
   assert.ok(/body\.is-manage-page #main \{ display: block !important; \}/.test(css), 'چاپ از داخل پنل نباید صفحهٔ سفید بدهد');
 });
 
+/* ── Theme switch contract ────────────────────────────────────────────── */
+await testAsync('دکمه روز/شب در خودِ افکت دایره‌ای هم با تم همگام می‌ماند', async () => {
+  const { updateThemeIcon } = await import(path.join(ROOT, 'assets/js/render.js'));
+  const previous = {
+    document: globalThis.document, window: globalThis.window,
+    requestAnimationFrame: globalThis.requestAnimationFrame
+  };
+  let theme = 'auto';
+  let systemDark = true;
+  let revealing = false;
+  const attrs = new Map();
+  const toggle = {
+    dataset: {},
+    classList: { contains: () => false },
+    setAttribute: (key, value) => attrs.set(key, value),
+    getAttribute: (key) => attrs.get(key)
+  };
+  globalThis.document = {
+    documentElement: {
+      getAttribute: () => theme,
+      classList: { contains: () => revealing }
+    },
+    getElementById: () => toggle,
+    querySelector: () => null
+  };
+  globalThis.window = { matchMedia: () => ({ matches: systemDark }) };
+  globalThis.requestAnimationFrame = () => 1;
+  try {
+    updateThemeIcon();
+    assert.equal(attrs.get('aria-checked'), 'true', 'حالت خودکار تاریک');
+    revealing = true;
+    theme = 'light';
+    updateThemeIcon();
+    assert.equal(attrs.get('aria-checked'), 'false', 'دکمه باید حین گذار هم روشن شود');
+    theme = 'dark';
+    updateThemeIcon();
+    assert.equal(attrs.get('aria-checked'), 'true', 'دکمه باید حین گذار هم تاریک شود');
+    revealing = false;
+    systemDark = false;
+    theme = 'auto';
+    updateThemeIcon();
+    assert.equal(attrs.get('aria-checked'), 'false', 'حالت خودکار روشن');
+    const css = fs.readFileSync(path.join(ROOT, 'assets/css/day-night-toggle.css'), 'utf8');
+    assert.match(css, /\[aria-checked="true"\] \.dnt-knob-track/);
+    assert.match(css, /\[aria-checked="false"\] \.dnt-star/);
+    assert.doesNotMatch(css, /data-scene/, 'نباید وضعیت بصریِ جدا از تم وجود داشته باشد');
+  } finally {
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) delete globalThis[key];
+      else globalThis[key] = value;
+    }
+  }
+});
+
 /* ── Summary ──────────────────────────────────────────────────────────── */
 const line = '─'.repeat(58);
 console.log(`\n${line}`);
