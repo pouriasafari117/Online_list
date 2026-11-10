@@ -7,6 +7,7 @@ bundled and distributed under their own licenses.
 | --- | --- | --- | --- |
 | Vazirmatn (variable font) | `assets/fonts/Vazirmatn-Variable.woff2` | SIL Open Font License 1.1 (`assets/fonts/OFL.txt`) | https://github.com/rastikerdar/vazirmatn |
 | Material Symbols (Rounded, outline) | path data inside `assets/js/icons.js` | Apache License 2.0 | https://fonts.google.com/icons |
+| Animated day/night toggle | `assets/css/day-night-toggle.css`, `index.html` (button markup) | MIT (`assets/css/LICENSE-day-night-toggle.txt`) | https://github.com/HamzehGhoreyshi/interactive-day-night-toggle |
 | App icon / favicon | `assets/icons/` | MIT (this project) | hand-drawn SVG |
 
 ## Notes

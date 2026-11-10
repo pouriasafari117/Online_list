@@ -100,9 +100,21 @@ let themeTransitionActive = false;
 function toggleTheme(trigger) {
   if (themeTransitionActive) return;
   const next = effectiveTheme() === 'dark' ? 'light' : 'dark';
+  const playToggleMotion = () => {
+    const knob = document.querySelector('#themeBtn .dnt-knob');
+    if (!knob || prefersReducedMotion()) return;
+    knob.animate([
+      { transform: 'scale(1, 1)' },
+      { transform: 'scale(1.14, .88)', offset: .25 },
+      { transform: 'scale(.94, 1.06)', offset: .55 },
+      { transform: 'scale(1.02, .98)', offset: .75 },
+      { transform: 'scale(1, 1)' }
+    ], { duration: 800, easing: 'ease-out' });
+  };
   const run = () => applyTheme(next, { persist: true });
   if (!document.startViewTransition || prefersReducedMotion() || document.visibilityState !== 'visible') {
     run();
+    playToggleMotion();
     return;
   }
 
@@ -125,6 +137,8 @@ function toggleTheme(trigger) {
     root.style.removeProperty('--reveal-y');
     root.style.removeProperty('--reveal-radius');
     themeTransitionActive = false;
+    updateThemeIcon();
+    playToggleMotion();
   };
   try {
     const transition = document.startViewTransition(run);

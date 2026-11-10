@@ -1,5 +1,5 @@
 /* Online List — offline shell + fresh data */
-const VERSION = 'v1.19.0';
+const VERSION = 'v1.20.0';
 const CACHE = `online-list-${VERSION}`;
 const ASSETS = [
   './',
@@ -14,6 +14,7 @@ const ASSETS = [
   './assets/css/app.css',
   './assets/css/glass.css',
   './assets/css/cohesion.css',
+  './assets/css/day-night-toggle.css',
   './assets/js/theme-boot.js',
   './assets/js/hero-gradient.js',
   './assets/js/icons.js',
