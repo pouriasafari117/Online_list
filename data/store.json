@@ -120,7 +120,7 @@
       "categoryId": "cat_mvv3ldzdg2udc",
       "price": 5000000,
       "priceOnRequest": false,
-      "stock": 6,
+      "stock": 8,
       "condition": "کارکرده",
       "warranty": "",
       "specs": {
@@ -134,13 +134,25 @@
       "hidden": false,
       "order": 3,
       "createdAt": "2026-10-30T14:59:56.080Z",
-      "updatedAt": "2026-11-11T09:43:18.063Z"
+      "updatedAt": "2026-11-11T09:43:52.709Z"
     }
   ],
   "meta": {
-    "updatedAt": "2026-11-11T09:43:20.626Z",
+    "updatedAt": "2026-11-11T09:44:03.564Z",
     "updatedBy": "پوریا صفری",
     "history": [
+      {
+        "id": "h_mwbxmd4c4jq11",
+        "at": "2026-11-11T09:44:03.564Z",
+        "by": "پوریا صفری",
+        "action": "publish",
+        "summary": "به‌روزرسانی موجودی",
+        "stats": {
+          "added": 0,
+          "updated": 1,
+          "removed": 0
+        }
+      },
       {
         "id": "h_mwbxlfzmdi146",
         "at": "2026-11-11T09:43:20.626Z",
