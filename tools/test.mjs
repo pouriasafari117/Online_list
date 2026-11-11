@@ -900,12 +900,17 @@ test('مسیر تولیدی سبک و نسخه‌دار است و گرادیان
   assert.match(loader, /requestAnimationFrame\(\(\) => requestAnimationFrame/);
   assert.match(loader, /import\('\.\/hero-gradient\.js'\)/);
   assert.match(app, /fetchStoreData\(fromLocation, \{ localPromise \}\)/);
+  assert.ok(app.indexOf('registerServiceWorker();') < app.indexOf('const sitePromise = fetchSiteConfig()'),
+    'ثبت سرویس‌ورکر نباید منتظر درخواست داده بماند');
+  assert.match(app, /updateViaCache: 'none'/);
+  assert.match(app, /await reg\.update\(\)/);
+  assert.match(app, /window\.setInterval\(refreshPublicIfNeeded, 30_000\)/);
   assert.ok(app.indexOf('earlyFresh?.then(') < app.indexOf('const siteFile = await sitePromise'),
     'نسخه تازه نباید پشت site.json معطل بماند');
   assert.match(sw, /cacheFirst\(request\)/);
   assert.doesNotMatch(sw.slice(sw.indexOf('const ASSETS'), sw.indexOf('self.addEventListener')), /'\.\/assets\/js\/hero-gradient\.js'/);
-  assert.match(fs.readFileSync(path.join(ROOT, 'assets/js/fast-v23/app.js'), 'utf8'), /\.\/api\.js/);
-  assert.match(fs.readFileSync(path.join(ROOT, 'assets/js/fast-v23/admin.js'), 'utf8'), /\.\/state\.js/);
+  assert.match(fs.readFileSync(path.join(ROOT, 'assets/js/fast-v24/app.js'), 'utf8'), /\.\/api\.js/);
+  assert.match(fs.readFileSync(path.join(ROOT, 'assets/js/fast-v24/admin.js'), 'utf8'), /\.\/state\.js/);
 });
 
 await testAsync('کش نسخه‌دار بازدید دوباره را فوری می‌کند، اما داده و HTML تازه می‌مانند', async () => {
@@ -914,6 +919,7 @@ await testAsync('کش نسخه‌دار بازدید دوباره را فوری 
   const saved = new Map();
   const origin = 'https://shop.github.io';
   let network = 0;
+  let bypassedHttpCache = 0;
   const cache = {
     match: async (request) => saved.get(typeof request === 'string' ? request : request.url),
     put: async (request, response) => { saved.set(request.url, response); }
@@ -922,7 +928,11 @@ await testAsync('کش نسخه‌دار بازدید دوباره را فوری 
     self: { location: { origin }, addEventListener: (name, fn) => { handlers[name] = fn; } },
     caches: { open: async () => cache },
     URL, Response, Request,
-    fetch: async () => { network++; return new Response('fresh'); }
+    fetch: async (_request, options = {}) => {
+      network++;
+      if (options.cache === 'no-store') bypassedHttpCache++;
+      return new Response(options.cache === 'no-store' ? 'fresh' : 'stale-http-cache');
+    }
   };
   vm.runInNewContext(fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8'), context);
   const call = async (path, mode = 'cors') => {
@@ -930,13 +940,16 @@ await testAsync('کش نسخه‌دار بازدید دوباره را فوری 
     handlers.fetch({ request: { method: 'GET', url: origin + path, mode }, respondWith: (value) => { response = value; } });
     return (await response).text();
   };
-  const asset = '/Online_list/assets/js/fast-v23/app.js';
+  const asset = '/Online_list/assets/js/fast-v24/app.js';
   saved.set(origin + asset, new Response('cached'));
   assert.equal(await call(asset), 'cached');
   assert.equal(network, 0, 'فایل نسخه‌دار باید بدون اینترنت پاسخ بگیرد');
   assert.equal(await call('/Online_list/data/store.json'), 'fresh');
-  assert.equal(await call('/Online_list/'), 'fresh');
+  assert.equal(await call('/Online_list/', 'navigate'), 'fresh');
   assert.equal(network, 2, 'داده و صفحه باید از شبکه بررسی شوند');
+  assert.equal(bypassedHttpCache, 2, 'کش HTTP قدیمی نباید HTML یا داده را چند دقیقه نگه دارد');
+  context.fetch = async () => { throw new Error('offline'); };
+  assert.equal(await call('/Online_list/data/store.json'), 'fresh', 'فایل ذخیره‌شده هنگام قطعی باقی بماند');
 });
 
 /* ── Summary ──────────────────────────────────────────────────────────── */

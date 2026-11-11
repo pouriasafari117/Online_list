@@ -26,11 +26,11 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build React hero and verify project
-        run: npm run build && node tools/verify.mjs
+      # Production assets are committed and hash-checked by verify.mjs.
+      # Do not reinstall React/esbuild and rebuild ~600 KB on every inventory
+      # edit: data-only commits should reach Pages as soon as possible.
+      - name: Verify committed assets and data
+        run: node tools/verify.mjs && node tools/test.mjs
 
       - name: Check Pages is enabled
         env:

@@ -1,5 +1,5 @@
 /* Online List — offline shell + fresh data */
-const VERSION = 'v1.23.0';
+const VERSION = 'v1.24.0';
 const CACHE = `online-list-${VERSION}`;
 const ASSETS = [
   './',
@@ -9,18 +9,18 @@ const ASSETS = [
   './assets/css/help.css',
   './assets/js/help.js',
   './manifest.webmanifest',
-  './assets/css/fast-v23/site.css',
+  './assets/css/fast-v24/site.css',
   './assets/js/theme-boot.js',
-  './assets/js/fast-v23/gradient-loader.js',
-  './assets/js/fast-v23/icons.js',
-  './assets/js/fast-v23/util.js',
-  './assets/js/fast-v23/model.js',
-  './assets/js/fast-v23/state.js',
-  './assets/js/fast-v23/api.js',
-  './assets/js/fast-v23/ui.js',
-  './assets/js/fast-v23/crypto.js',
-  './assets/js/fast-v23/render.js',
-  './assets/js/fast-v23/app.js',
+  './assets/js/fast-v24/gradient-loader.js',
+  './assets/js/fast-v24/icons.js',
+  './assets/js/fast-v24/util.js',
+  './assets/js/fast-v24/model.js',
+  './assets/js/fast-v24/state.js',
+  './assets/js/fast-v24/api.js',
+  './assets/js/fast-v24/ui.js',
+  './assets/js/fast-v24/crypto.js',
+  './assets/js/fast-v24/render.js',
+  './assets/js/fast-v24/app.js',
   './assets/fonts/Vazirmatn-Variable.woff2',
   './assets/icons/favicon.svg',
   './assets/icons/icon-192.png',
@@ -88,7 +88,10 @@ async function cacheFirst(request) {
 async function networkFirst(request, fallbackUrl) {
   const cache = await caches.open(CACHE);
   try {
-    const fresh = await fetch(request);
+    // Bypass the browser's HTTP cache for HTML and unversioned files.
+    // The CDN may still need time to publish a commit, but an old local
+    // max-age must not add another several minutes on top of that.
+    const fresh = await fetch(request, { cache: 'no-store' });
     if (fresh && fresh.ok) cache.put(request, fresh.clone());
     return fresh;
   } catch {

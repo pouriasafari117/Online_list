@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { build, transform } from 'esbuild';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-export const ASSET_VERSION = 'v23';
+export const ASSET_VERSION = 'v24';
 const modules = ['gradient-loader', 'app', 'api', 'crypto', 'icons', 'model', 'state', 'render', 'ui', 'util', 'admin', 'manage'];
 const styles = ['tokens', 'base', 'app', 'glass', 'cohesion', 'day-night-toggle'];
 
