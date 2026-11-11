@@ -97,7 +97,7 @@
       "categoryId": "cat_mvv3ldzdg2udc",
       "price": 1200000,
       "priceOnRequest": false,
-      "stock": 3,
+      "stock": 4,
       "condition": "نو",
       "warranty": "",
       "specs": {
@@ -111,7 +111,7 @@
       "hidden": false,
       "order": 2,
       "createdAt": "2026-10-27T04:52:39.207Z",
-      "updatedAt": "2026-11-11T10:47:39.551Z"
+      "updatedAt": "2026-11-11T10:53:46.252Z"
     },
     {
       "id": "dev_mvv3mcz4v16hk",
@@ -120,7 +120,7 @@
       "categoryId": "cat_mvv3ldzdg2udc",
       "price": 5000000,
       "priceOnRequest": false,
-      "stock": 8,
+      "stock": 6,
       "condition": "کارکرده",
       "warranty": "",
       "specs": {
@@ -134,13 +134,25 @@
       "hidden": false,
       "order": 3,
       "createdAt": "2026-10-30T14:59:56.080Z",
-      "updatedAt": "2026-11-11T09:45:19.826Z"
+      "updatedAt": "2026-11-11T10:53:51.036Z"
     }
   ],
   "meta": {
-    "updatedAt": "2026-11-11T10:52:30.925Z",
+    "updatedAt": "2026-11-11T10:54:01.305Z",
     "updatedBy": "پوریا صفری",
     "history": [
+      {
+        "id": "h_mwc04c49l4u1v",
+        "at": "2026-11-11T10:54:01.305Z",
+        "by": "پوریا صفری",
+        "action": "publish",
+        "summary": "به‌روزرسانی موجودی",
+        "stats": {
+          "added": 0,
+          "updated": 2,
+          "removed": 0
+        }
+      },
       {
         "id": "h_mwc02edpt753h",
         "at": "2026-11-11T10:52:30.925Z",
