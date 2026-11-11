@@ -177,12 +177,15 @@ function normalizeSite(config) {
   return { ...config, owner, repo, branch };
 }
 
-async function loadData({ retry = false, localPromise } = {}) {
+async function loadData({ retry = false, localPromise, pendingResult } = {}) {
   const refreshBtn = $('#refreshBtn');
   if (retry && refreshBtn) refreshBtn.setAttribute('aria-busy', 'true');
   try {
-    const result = await fetchStoreData(state.site || {}, { localPromise });
+    const result = await (pendingResult || fetchStoreData(state.site || {}, { localPromise }));
+    if (result instanceof Error) throw result;
     const data = parseStoreJson(result.text);
+    if (!retry && state.source === result.source && state.data
+        && JSON.stringify(data) === JSON.stringify(state.data)) return;
     if (retry) {
       if (isAdmin() && state.dirty) {
         toast('ابتدا تغییرات را منتشر یا بازگردانی کنید.', { type: 'warn' });
@@ -634,6 +637,24 @@ async function boot() {
   // and the fresh repository copy are still on the wire.
   const sitePromise = fetchSiteConfig();
   const localPromise = fetchLocalStoreData().catch(() => null);
+  const fromLocation = parseRepoFromLocation();
+  // On GitHub Pages the repository is known from the URL: don't serialize
+  // site.json and the fresh inventory request. Custom domains still use it.
+  const earlyFresh = fromLocation
+    ? fetchStoreData(fromLocation, { localPromise }).catch((err) => err)
+    : null;
+  earlyFresh?.then((result) => {
+    if (result instanceof Error || result.source !== 'raw' || (isAdmin() && state.dirty)) return;
+    try {
+      const data = parseStoreJson(result.text);
+      if (state.source === 'raw' && JSON.stringify(data) === JSON.stringify(state.data)) return;
+      ensureFilterDefaults(data);
+      if (isAdmin()) replaceData(data, { baseline: true, source: 'raw' });
+      else initPublic(data, { source: 'raw', url: result.url });
+      state.sourceUrl = result.url;
+      applyStoreTheme();
+    } catch (err) { console.warn('[data] fresh preview unavailable', err); }
+  });
   localPromise.then((result) => {
     if (!result || state.data) return;
     try {
@@ -642,7 +663,6 @@ async function boot() {
     } catch (err) { console.warn('[data] local preview unavailable', err); }
   });
   const siteFile = await sitePromise;
-  const fromLocation = parseRepoFromLocation();
   let site = normalizeSite(siteFile || {});
   if (fromLocation) {
     site = {
@@ -656,7 +676,10 @@ async function boot() {
   state.site = site;
   state.repo = site.owner && site.repo ? { owner: site.owner, repo: site.repo, branch: site.branch } : null;
 
-  await loadData({ localPromise });
+  await loadData({
+    localPromise,
+    pendingResult: fromLocation && site.branch === fromLocation.branch ? earlyFresh : null
+  });
   handleDeepLink();
 
   window.addEventListener('online', () => {

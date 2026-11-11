@@ -118,7 +118,16 @@ body:not(.help-page):not(.setup-page) {
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
-  background: var(--bg);
+  /* Match the Opal/Emerald palette until the React canvas paints. */
+  background: linear-gradient(120deg, #f6f9ff 0%, #9be0e8 38%, #c4b5f7 72%, #f8b8d9 100%);
+}
+:root[data-theme="dark"] #pageGradientRoot {
+  background: linear-gradient(120deg, #f0fbef 0%, #8fe3b0 38%, #22c79a 72%, #0b5f51 100%);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) #pageGradientRoot {
+    background: linear-gradient(120deg, #f0fbef 0%, #8fe3b0 38%, #22c79a 72%, #0b5f51 100%);
+  }
 }
 #pageGradientRoot::after {
   content: "";

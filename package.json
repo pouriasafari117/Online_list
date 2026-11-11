@@ -18,7 +18,7 @@
     "verify": "node tools/verify.mjs",
     "test": "node tools/test.mjs",
     "check": "node tools/verify.mjs && node tools/test.mjs",
-    "build": "esbuild assets/js/hero-gradient.jsx --bundle --minify --format=iife --outfile=assets/js/hero-gradient.js"
+    "build": "node tools/build.mjs"
   },
   "engines": {
     "node": ">=18"
