@@ -2,7 +2,7 @@
   "version": 1,
   "store": {
     "name": "فروشگاه پوریا",
-    "tagline": "بسون بره",
+    "tagline": "خرید اسان",
     "description": "موجودی موبایل، لپ‌تاپ و گیمینگ — مستقیم از انبار فروشگاه، همیشه به‌روز و بدون یک تماس اضافه.",
     "phone": "۰۹۱۲ ۳۴۵ ۶۷۸۹",
     "whatsapp": "989123456789",
@@ -69,12 +69,12 @@
   "devices": [
     {
       "id": "dev_mvpq2rtn8x51h",
-      "name": "ولویمیبندریمبندر",
-      "brand": "باباللا",
+      "name": "هواوی",
+      "brand": "هواوی",
       "categoryId": "cat_mvpq1twgentn6",
       "price": 120000,
       "priceOnRequest": false,
-      "stock": 2,
+      "stock": 1,
       "condition": "استوک",
       "warranty": "",
       "specs": {
@@ -88,16 +88,16 @@
       "hidden": false,
       "order": 1,
       "createdAt": "2026-10-26T20:41:56.315Z",
-      "updatedAt": "2026-11-11T09:41:40.528Z"
+      "updatedAt": "2026-11-11T09:45:39.651Z"
     },
     {
       "id": "dev_mvq7lu3rl3vtw",
-      "name": "غلام",
+      "name": "نوکیا",
       "brand": "ممپ",
       "categoryId": "cat_mvpq1twgentn6",
       "price": 0,
       "priceOnRequest": false,
-      "stock": 1,
+      "stock": 3,
       "condition": "نو",
       "warranty": "",
       "specs": {
@@ -111,11 +111,11 @@
       "hidden": false,
       "order": 2,
       "createdAt": "2026-10-27T04:52:39.207Z",
-      "updatedAt": "2026-10-27T04:52:39.207Z"
+      "updatedAt": "2026-11-11T09:45:27.247Z"
     },
     {
       "id": "dev_mvv3mcz4v16hk",
-      "name": "سامسونگ سگی",
+      "name": "سامسونگ",
       "brand": "سامسونگ",
       "categoryId": "cat_mvv3ldzdg2udc",
       "price": 5000000,
@@ -134,13 +134,25 @@
       "hidden": false,
       "order": 3,
       "createdAt": "2026-10-30T14:59:56.080Z",
-      "updatedAt": "2026-11-11T09:43:52.709Z"
+      "updatedAt": "2026-11-11T09:45:19.826Z"
     }
   ],
   "meta": {
-    "updatedAt": "2026-11-11T09:44:03.564Z",
+    "updatedAt": "2026-11-11T09:45:45.938Z",
     "updatedBy": "پوریا صفری",
     "history": [
+      {
+        "id": "h_mwbxok427liwu",
+        "at": "2026-11-11T09:45:45.938Z",
+        "by": "پوریا صفری",
+        "action": "publish",
+        "summary": "۳ دستگاه به‌روزرسانی · اطلاعات فروشگاه",
+        "stats": {
+          "added": 0,
+          "updated": 3,
+          "removed": 0
+        }
+      },
       {
         "id": "h_mwbxmd4c4jq11",
         "at": "2026-11-11T09:44:03.564Z",
