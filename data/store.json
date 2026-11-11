@@ -134,13 +134,25 @@
       "hidden": false,
       "order": 3,
       "createdAt": "2026-10-30T14:59:56.080Z",
-      "updatedAt": "2026-10-30T14:59:56.080Z"
+      "updatedAt": "2026-11-11T09:43:18.063Z"
     }
   ],
   "meta": {
-    "updatedAt": "2026-11-11T09:41:53.844Z",
+    "updatedAt": "2026-11-11T09:43:20.626Z",
     "updatedBy": "پوریا صفری",
     "history": [
+      {
+        "id": "h_mwbxlfzmdi146",
+        "at": "2026-11-11T09:43:20.626Z",
+        "by": "پوریا صفری",
+        "action": "publish",
+        "summary": "۱ دستگاه به‌روزرسانی",
+        "stats": {
+          "added": 0,
+          "updated": 1,
+          "removed": 0
+        }
+      },
       {
         "id": "h_mwbxjl10qb0ow",
         "at": "2026-11-11T09:41:53.844Z",
