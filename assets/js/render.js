@@ -198,7 +198,7 @@ export function renderUpdateCard() {
     else if (state.mode === 'admin') source.textContent = 'همگام با مخزن گیت‌هاب';
     else if (state.mode === 'demo') source.textContent = 'حالت نمایشی — تغییرات ذخیره نمی‌شود';
     else if (state.error) source.textContent = 'آخرین نسخه ذخیره‌شده';
-    else source.textContent = 'مستقیم از مخزن گیت‌هاب';
+    else source.textContent = state.source === 'local' ? 'نسخه منتشرشده در سایت' : 'مستقیم از مخزن گیت‌هاب';
   }
   const listSub = document.getElementById('listSub');
   if (listSub) {

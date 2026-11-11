@@ -2,7 +2,7 @@
    Online List — bootstrap, theme, data loading, event delegation
    ========================================================================== */
 
-import { fetchSiteConfig, fetchStoreData, parseRepoFromLocation } from './api.js';
+import { fetchLocalStoreData, fetchSiteConfig, fetchStoreData, parseRepoFromLocation } from './api.js';
 import { makeDefaultData, normalizeStore, parseStoreJson } from './model.js';
 import {
   initPublic, isAdmin, replaceData, setNetwork, setUI, state, subscribe, syncUrl
@@ -25,8 +25,7 @@ const $ = (sel) => document.querySelector(sel);
 /* ── Admin bundle (loaded on demand) ─────────────────────────────────────
    Reading stock never needs the editor. Keeping admin.js (≈110 KB of source)
    out of the initial module graph means a public visit parses much less
-   JavaScript; the editor is fetched when someone clicks "ورود مدیر" or right
-   after the page goes idle. */
+   JavaScript; the editor is fetched on click or when login is approached. */
 const ADMIN_ACTIONS = new Set([
   'login', 'logout', 'admin-menu', 'add-menu', 'manage', 'publish', 'discard', 'settings', 'security',
   'add-device', 'edit-device', 'device-menu', 'add-category', 'edit-category',
@@ -178,11 +177,11 @@ function normalizeSite(config) {
   return { ...config, owner, repo, branch };
 }
 
-async function loadData({ retry = false } = {}) {
+async function loadData({ retry = false, localPromise } = {}) {
   const refreshBtn = $('#refreshBtn');
   if (retry && refreshBtn) refreshBtn.setAttribute('aria-busy', 'true');
   try {
-    const result = await fetchStoreData(state.site || {});
+    const result = await fetchStoreData(state.site || {}, { localPromise });
     const data = parseStoreJson(result.text);
     if (retry) {
       if (isAdmin() && state.dirty) {
@@ -195,9 +194,14 @@ async function loadData({ retry = false } = {}) {
       state.sourceUrl = result.url;
       applyStoreTheme();
       toast('لیست با آخرین نسخه‌ی مخزن همگام شد.', { type: 'ok' });
-    } else {
+    } else if (!isAdmin() || !state.dirty) {
       ensureFilterDefaults(data);
-      initPublic(data, { source: result.source, url: result.url });
+      if (isAdmin()) {
+        replaceData(data, { baseline: true, source: result.source });
+        state.sourceUrl = result.url;
+      } else {
+        initPublic(data, { source: result.source, url: result.url });
+      }
       applyStoreTheme();
     }
     document.getElementById('dataStatus')?.classList.remove('is-offline');
@@ -235,6 +239,28 @@ function handleDeepLink() {
   if (!state.data?.devices.some((d) => d.id === id)) return;
   deepLinkHandled = location.hash;
   setTimeout(() => openDeviceDetail(id), 350);
+}
+
+/* Keep already-open public tabs fresh without forcing a full page reload.
+   GitHub Pages deployment can lag behind the repository, so only a successful
+   raw response may replace the displayed copy in this background check. */
+let lastPublicCheck = 0;
+let publicCheck = null;
+function refreshPublicIfNeeded() {
+  if (document.visibilityState !== 'visible' || !state.repo || isAdmin()
+      || !state.data || Date.now() - lastPublicCheck < 20_000 || publicCheck) return;
+  lastPublicCheck = Date.now();
+  publicCheck = fetchStoreData(state.site, { timeout: 5000, localPromise: Promise.resolve(null) })
+    .then((result) => {
+      if (result.source !== 'raw' || isAdmin()) return;
+      const data = parseStoreJson(result.text);
+      if (state.source === 'raw' && JSON.stringify(data) === JSON.stringify(state.data)) return;
+      ensureFilterDefaults(data);
+      initPublic(data, { source: 'raw', url: result.url });
+      applyStoreTheme();
+    })
+    .catch((err) => console.warn('[data] background refresh failed', err))
+    .finally(() => { publicCheck = null; });
 }
 
 /* ── Header & navigation ────────────────────────────────────────────────── */
@@ -564,10 +590,6 @@ async function boot() {
   // Warm the editor bundle once the page is loaded and idle, and earlier if the
   // pointer/finger reaches the login button, so opening the panel still feels
   // instant.
-  window.addEventListener('load', () => {
-    const whenIdle = window.requestIdleCallback || ((fn) => setTimeout(fn, 1500));
-    whenIdle(warmAdmin, { timeout: 4000 });
-  }, { once: true });
   const loginBtn = document.getElementById('loginBtn');
   if (loginBtn) {
     ['pointerenter', 'touchstart', 'focus'].forEach((type) => {
@@ -608,7 +630,18 @@ async function boot() {
     if (reason === 'data') handleDeepLink();
   });
 
-  const [siteFile] = await Promise.all([fetchSiteConfig()]);
+  // Start both requests together: the local list can paint while site.json
+  // and the fresh repository copy are still on the wire.
+  const sitePromise = fetchSiteConfig();
+  const localPromise = fetchLocalStoreData().catch(() => null);
+  localPromise.then((result) => {
+    if (!result || state.data) return;
+    try {
+      initPublic(parseStoreJson(result.text), { source: result.source, url: result.url });
+      applyStoreTheme();
+    } catch (err) { console.warn('[data] local preview unavailable', err); }
+  });
+  const siteFile = await sitePromise;
   const fromLocation = parseRepoFromLocation();
   let site = normalizeSite(siteFile || {});
   if (fromLocation) {
@@ -623,7 +656,7 @@ async function boot() {
   state.site = site;
   state.repo = site.owner && site.repo ? { owner: site.owner, repo: site.repo, branch: site.branch } : null;
 
-  await loadData();
+  await loadData({ localPromise });
   handleDeepLink();
 
   window.addEventListener('online', () => {
@@ -635,6 +668,10 @@ async function boot() {
     toast('اتصال قطع شد؛ آخرین نسخه نمایش داده می‌شود.', { type: 'warn' });
   });
 
+  lastPublicCheck = Date.now();
+  document.addEventListener('visibilitychange', refreshPublicIfNeeded);
+  window.addEventListener('online', refreshPublicIfNeeded);
+  window.setInterval(refreshPublicIfNeeded, 60_000);
   registerServiceWorker();
   document.documentElement.dataset.ready = 'true';
 }

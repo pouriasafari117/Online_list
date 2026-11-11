@@ -135,41 +135,50 @@ export function parseJsonLoose(text) {
 
 /* ── Public reads (no token) ─────────────────────────────────────────────── */
 
-/**
- * Fetches data/store.json with a short timeout and a graceful fallback.
- * Order: raw.githubusercontent (fresh) → relative path (cached by Pages).
- */
-export async function fetchStoreData(siteConfig, { timeout = 8000 } = {}) {
-  const attempts = [];
-  if (siteConfig?.owner && siteConfig?.repo) {
-    attempts.push({
-      source: 'raw',
-      url: rawUrl({ ...siteConfig, path: 'data/store.json' }, { cacheBust: true })
-    });
+/** Read the deployed copy immediately, without waiting for GitHub or site.json. */
+export async function fetchLocalStoreData({ timeout = 8000 } = {}) {
+  const url = new URL('store.json', dataBase()).href;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeout);
+  try {
+    const res = await fetch(url, { signal: controller.signal, cache: 'no-store', credentials: 'omit' });
+    if (!res.ok) throw new ApiError(`دریافت لیست ناموفق بود (${res.status}).`, { status: res.status });
+    const text = await res.text();
+    const parsed = parseJsonLoose(text);
+    return { text: parsed.repaired ? JSON.stringify(parsed.value, null, 2) : text, source: 'local', url };
+  } finally {
+    clearTimeout(timer);
   }
-  attempts.push({
-    source: 'local',
-    url: new URL('store.json', dataBase()).href
-  });
+}
 
-  let lastError = null;
-  for (const attempt of attempts) {
+/**
+ * Prefer the fresh repository copy, but start the deployed copy in parallel.
+ * A caller may pass its already-running local request to show data before
+ * site.json finishes; never make visitors wait for a second local timeout.
+ */
+export async function fetchStoreData(siteConfig, { timeout = 8000, localPromise } = {}) {
+  const local = localPromise || fetchLocalStoreData({ timeout }).catch(() => null);
+  if (siteConfig?.owner && siteConfig?.repo) {
+    const url = rawUrl({ ...siteConfig, path: 'data/store.json' }, { cacheBust: true });
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeout);
     try {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), timeout);
-      const res = await fetch(attempt.url, { signal: controller.signal, cache: 'no-store', credentials: 'omit' });
-      clearTimeout(timer);
+      const res = await fetch(url, { signal: controller.signal, cache: 'no-store', credentials: 'omit' });
       if (!res.ok) throw new ApiError(`دریافت لیست ناموفق بود (${res.status}).`, { status: res.status });
-      let text = await res.text();
-      let repaired = false;
-      try { repaired = parseJsonLoose(text).repaired; } catch { repaired = false; }
-      if (repaired) text = JSON.stringify(parseJsonLoose(text).value, null, 2);
-      return { text, source: attempt.source, url: attempt.url };
+      const text = await res.text();
+      const parsed = parseJsonLoose(text);
+      return { text: parsed.repaired ? JSON.stringify(parsed.value, null, 2) : text, source: 'raw', url };
     } catch (err) {
-      lastError = err;
+      const fallback = await local;
+      if (fallback) return fallback;
+      throw err;
+    } finally {
+      clearTimeout(timer);
     }
   }
-  throw lastError || new ApiError('دریافت لیست موجودی ناموفق بود.', { code: 'network' });
+  const fallback = await local;
+  if (fallback) return fallback;
+  throw new ApiError('دریافت لیست موجودی ناموفق بود.', { code: 'network' });
 }
 
 /** Fetches `data/vault.json` (encrypted blob — safe to be public). */
