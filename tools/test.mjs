@@ -488,6 +488,57 @@ test('آدرس Pages برای هر دو نوع مخزن درست است', () => 
   assert.equal(api.pagesUrl({ owner: 'me', repo: 'me.github.io' }), 'https://me.github.io/');
 });
 
+/* ── Fast public data path ─────────────────────────────────────────────── */
+await testAsync('لیست محلی بلافاصله می‌رسد و منتظر raw نمی‌ماند', async () => {
+  const originalFetch = globalThis.fetch;
+  const originalDocument = globalThis.document;
+  let finishRaw;
+  const rawResponse = new Promise((resolve) => { finishRaw = resolve; });
+  const requests = [];
+  globalThis.document = { baseURI: 'https://shop.github.io/Online_list/' };
+  globalThis.fetch = (url, options) => {
+    requests.push({ url: String(url), options });
+    if (String(url).includes('raw.githubusercontent.com')) return rawResponse;
+    return Promise.resolve({ ok: true, text: async () => '{"version":1}' });
+  };
+  try {
+    const local = api.fetchLocalStoreData();
+    const fresh = api.fetchStoreData({ owner: 'shop', repo: 'Online_list', branch: 'main' }, { localPromise: local });
+    assert.equal((await local).source, 'local');
+    assert.equal(requests.length, 2, 'دو درخواست موازی، بدون تکرار دانلود محلی');
+    assert.ok(requests.every(({ options }) => options.cache === 'no-store'));
+    finishRaw({ ok: true, text: async () => '{"version":2}' });
+    assert.equal((await fresh).source, 'raw');
+    assert.equal((await fresh).text, '{"version":2}');
+  } finally {
+    globalThis.fetch = originalFetch;
+    if (originalDocument === undefined) delete globalThis.document;
+    else globalThis.document = originalDocument;
+  }
+});
+
+await testAsync('در خطای raw، همان درخواست محلیِ آماده‌شده بازگردانده می‌شود', async () => {
+  const originalFetch = globalThis.fetch;
+  const originalDocument = globalThis.document;
+  let localCalls = 0;
+  globalThis.document = { baseURI: 'https://shop.github.io/Online_list/' };
+  globalThis.fetch = (url) => {
+    if (String(url).includes('raw.githubusercontent.com')) return Promise.reject(new Error('offline'));
+    localCalls++;
+    return Promise.resolve({ ok: true, text: async () => '{"version":1}' });
+  };
+  try {
+    const local = api.fetchLocalStoreData();
+    const result = await api.fetchStoreData({ owner: 'shop', repo: 'Online_list' }, { localPromise: local });
+    assert.equal(result.source, 'local');
+    assert.equal(localCalls, 1);
+  } finally {
+    globalThis.fetch = originalFetch;
+    if (originalDocument === undefined) delete globalThis.document;
+    else globalThis.document = originalDocument;
+  }
+});
+
 /* ── Commit encoding (regression: base64 text was stored as the file) ──── */
 console.log('\n  ثبت فایل در مخزن');
 
