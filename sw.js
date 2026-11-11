@@ -1,5 +1,5 @@
 /* Online List — offline shell + fresh data */
-const VERSION = 'v1.22.0';
+const VERSION = 'v1.23.0';
 const CACHE = `online-list-${VERSION}`;
 const ASSETS = [
   './',
@@ -9,25 +9,18 @@ const ASSETS = [
   './assets/css/help.css',
   './assets/js/help.js',
   './manifest.webmanifest',
-  './assets/css/tokens.css',
-  './assets/css/base.css',
-  './assets/css/app.css',
-  './assets/css/glass.css',
-  './assets/css/cohesion.css',
-  './assets/css/day-night-toggle.css',
+  './assets/css/fast-v23/site.css',
   './assets/js/theme-boot.js',
-  './assets/js/hero-gradient.js',
-  './assets/js/icons.js',
-  './assets/js/util.js',
-  './assets/js/model.js',
-  './assets/js/state.js',
-  './assets/js/api.js',
-  './assets/js/ui.js',
-  './assets/js/crypto.js',
-  './assets/js/render.js',
-  './assets/js/admin.js',
-  './assets/js/manage.js',
-  './assets/js/app.js',
+  './assets/js/fast-v23/gradient-loader.js',
+  './assets/js/fast-v23/icons.js',
+  './assets/js/fast-v23/util.js',
+  './assets/js/fast-v23/model.js',
+  './assets/js/fast-v23/state.js',
+  './assets/js/fast-v23/api.js',
+  './assets/js/fast-v23/ui.js',
+  './assets/js/fast-v23/crypto.js',
+  './assets/js/fast-v23/render.js',
+  './assets/js/fast-v23/app.js',
   './assets/fonts/Vazirmatn-Variable.woff2',
   './assets/icons/favicon.svg',
   './assets/icons/icon-192.png',
@@ -57,6 +50,12 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return;
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
+  // These paths change whenever the source changes. Cached modules and CSS
+  // can load instantly on return visits without serving an obsolete release.
+  if (/\/assets\/(?:js|css)\/fast-v\d+\//.test(url.pathname)) {
+    event.respondWith(cacheFirst(request));
+    return;
+  }
   if (url.pathname.includes('/data/')) {
     event.respondWith(networkFirst(request));
     return;
@@ -76,6 +75,15 @@ self.addEventListener('fetch', (event) => {
   }
   event.respondWith(staleWhileRevalidate(request));
 });
+
+async function cacheFirst(request) {
+  const cache = await caches.open(CACHE);
+  const cached = await cache.match(request);
+  if (cached) return cached;
+  const response = await fetch(request);
+  if (response.ok) cache.put(request, response.clone());
+  return response;
+}
 
 async function networkFirst(request, fallbackUrl) {
   const cache = await caches.open(CACHE);

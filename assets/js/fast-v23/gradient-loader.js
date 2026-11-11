@@ -1,0 +1,1 @@
+function e(){import("./hero-gradient.js").catch(n=>console.warn("[gradient] unavailable",n))}function t(){requestAnimationFrame(()=>requestAnimationFrame(()=>{"requestIdleCallback"in window?requestIdleCallback(e,{timeout:900}):setTimeout(e,0)}))}document.readyState==="loading"?document.addEventListener("DOMContentLoaded",t,{once:!0}):t();

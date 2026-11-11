@@ -888,6 +888,57 @@ await testAsync('دکمه روز/شب در خودِ افکت دایره‌ای �
   }
 });
 
+/* ── Production loading / offline cache contract ──────────────────────── */
+test('مسیر تولیدی سبک و نسخه‌دار است و گرادیان از اولین رسم صفحه جلو نمی‌زند', () => {
+  const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+  const sw = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
+  const loader = fs.readFileSync(path.join(ROOT, 'assets/js/gradient-loader.js'), 'utf8');
+  const app = fs.readFileSync(path.join(ROOT, 'assets/js/app.js'), 'utf8');
+  assert.match(html, /assets\/js\/fast-v\d+\/app\.js/);
+  assert.match(html, /assets\/js\/fast-v\d+\/gradient-loader\.js/);
+  assert.doesNotMatch(html, /<script[^>]+src="assets\/js\/hero-gradient\.js/);
+  assert.match(loader, /requestAnimationFrame\(\(\) => requestAnimationFrame/);
+  assert.match(loader, /import\('\.\/hero-gradient\.js'\)/);
+  assert.match(app, /fetchStoreData\(fromLocation, \{ localPromise \}\)/);
+  assert.ok(app.indexOf('earlyFresh?.then(') < app.indexOf('const siteFile = await sitePromise'),
+    'نسخه تازه نباید پشت site.json معطل بماند');
+  assert.match(sw, /cacheFirst\(request\)/);
+  assert.doesNotMatch(sw.slice(sw.indexOf('const ASSETS'), sw.indexOf('self.addEventListener')), /'\.\/assets\/js\/hero-gradient\.js'/);
+  assert.match(fs.readFileSync(path.join(ROOT, 'assets/js/fast-v23/app.js'), 'utf8'), /\.\/api\.js/);
+  assert.match(fs.readFileSync(path.join(ROOT, 'assets/js/fast-v23/admin.js'), 'utf8'), /\.\/state\.js/);
+});
+
+await testAsync('کش نسخه‌دار بازدید دوباره را فوری می‌کند، اما داده و HTML تازه می‌مانند', async () => {
+  const vm = await import('node:vm');
+  const handlers = {};
+  const saved = new Map();
+  const origin = 'https://shop.github.io';
+  let network = 0;
+  const cache = {
+    match: async (request) => saved.get(typeof request === 'string' ? request : request.url),
+    put: async (request, response) => { saved.set(request.url, response); }
+  };
+  const context = {
+    self: { location: { origin }, addEventListener: (name, fn) => { handlers[name] = fn; } },
+    caches: { open: async () => cache },
+    URL, Response, Request,
+    fetch: async () => { network++; return new Response('fresh'); }
+  };
+  vm.runInNewContext(fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8'), context);
+  const call = async (path, mode = 'cors') => {
+    let response;
+    handlers.fetch({ request: { method: 'GET', url: origin + path, mode }, respondWith: (value) => { response = value; } });
+    return (await response).text();
+  };
+  const asset = '/Online_list/assets/js/fast-v23/app.js';
+  saved.set(origin + asset, new Response('cached'));
+  assert.equal(await call(asset), 'cached');
+  assert.equal(network, 0, 'فایل نسخه‌دار باید بدون اینترنت پاسخ بگیرد');
+  assert.equal(await call('/Online_list/data/store.json'), 'fresh');
+  assert.equal(await call('/Online_list/'), 'fresh');
+  assert.equal(network, 2, 'داده و صفحه باید از شبکه بررسی شوند');
+});
+
 /* ── Summary ──────────────────────────────────────────────────────────── */
 const line = '─'.repeat(58);
 console.log(`\n${line}`);

@@ -8,6 +8,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
@@ -94,6 +95,25 @@ if (exists('sw.js')) {
   const list = [...sw.matchAll(/'\.\/([^']+)'/g)].map((m) => m[1]).filter(Boolean);
   for (const item of list) {
     if (!fs.existsSync(path.join(ROOT, item))) warn(`sw.js: فایل کش‌شده وجود ندارد → ${item}`);
+  }
+}
+
+/* ── 4b. Versioned production assets are built from these sources ───────── */
+if (read('index.html').includes('/fast-v')) {
+  if (!exists('tools/fast-manifest.json')) fail('فایل فهرست خروجی build وجود ندارد.');
+  else {
+    const { version, files } = JSON.parse(read('tools/fast-manifest.json'));
+    const html = read('index.html');
+    const sw = read('sw.js');
+    if (!html.includes(`/fast-${version}/app.js`) || !sw.includes(`v1.${version.slice(1)}.0`)) {
+      fail('نسخه فایل‌های تولیدی، HTML و کش آفلاین یکسان نیست.');
+    }
+    for (const [file, expected] of Object.entries(files)) {
+      if (!exists(file)) { fail(`فایل خروجی یا منبع وجود ندارد: ${file}`); continue; }
+      const actual = createHash('sha256').update(fs.readFileSync(path.join(ROOT, file))).digest('hex');
+      if (expected !== actual) fail(`فایل ${file} از آخرین build تغییر کرده؛ npm run build را اجرا کنید.`);
+    }
+    note(`${Object.keys(files).length} فایل منبع و خروجی با build همگام است`);
   }
 }
 
