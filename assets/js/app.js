@@ -251,7 +251,7 @@ let lastPublicCheck = 0;
 let publicCheck = null;
 function refreshPublicIfNeeded() {
   if (document.visibilityState !== 'visible' || !state.repo || isAdmin()
-      || !state.data || Date.now() - lastPublicCheck < 20_000 || publicCheck) return;
+      || !state.data || Date.now() - lastPublicCheck < 15_000 || publicCheck) return;
   lastPublicCheck = Date.now();
   publicCheck = fetchStoreData(state.site, { timeout: 5000, localPromise: Promise.resolve(null) })
     .then((result) => {
@@ -547,24 +547,29 @@ function registerServiceWorker() {
   const host = location.hostname;
   if (location.protocol === 'file:') return;
   if (host === 'localhost' || host === '127.0.0.1' || host.endsWith('.e2b.app')) return;
-  window.addEventListener('load', async () => {
+  const hadController = !!navigator.serviceWorker.controller;
+  let reloading = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    // Do not interrupt editing or reload on the very first installation.
+    if (!hadController || reloading || isAdmin() || state.dirty) return;
+    reloading = true;
+    location.reload();
+  });
+  const register = async () => {
     try {
-      const reg = await navigator.serviceWorker.register('sw.js');
-      if (reg.waiting) {
+      const reg = await navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' });
+      // A slow data request may have completed after window.load. Explicitly
+      // check for the new worker rather than waiting for the browser's timer.
+      await reg.update();
+      if (reg.waiting && (isAdmin() || state.dirty)) {
         toast('نسخه جدید سایت آماده است؛ برای دریافت، صفحه را دوباره باز کنید.', { type: 'info', duration: 6000 });
       }
-      reg.addEventListener('updatefound', () => {
-        const worker = reg.installing;
-        worker?.addEventListener('statechange', () => {
-          if (worker.state === 'installed' && navigator.serviceWorker.controller) {
-            toast('نسخه جدید سایت آماده است؛ صفحه را دوباره باز کنید.', { type: 'info', duration: 6000 });
-          }
-        });
-      });
     } catch (err) {
       console.warn('[sw] registration failed', err);
     }
-  });
+  };
+  if (document.readyState === 'complete') register();
+  else window.addEventListener('load', register, { once: true });
 }
 
 /* ── Footer status ─────────────────────────────────────────────────────── */
@@ -589,6 +594,7 @@ async function boot() {
   initInstall();
   initDelegation();
   initAdminGate();
+  registerServiceWorker();
   const warmAdmin = () => { loadAdmin().catch((err) => console.warn('[admin]', err)); };
   // Warm the editor bundle once the page is loaded and idle, and earlier if the
   // pointer/finger reaches the login button, so opening the panel still feels
@@ -694,8 +700,7 @@ async function boot() {
   lastPublicCheck = Date.now();
   document.addEventListener('visibilitychange', refreshPublicIfNeeded);
   window.addEventListener('online', refreshPublicIfNeeded);
-  window.setInterval(refreshPublicIfNeeded, 60_000);
-  registerServiceWorker();
+  window.setInterval(refreshPublicIfNeeded, 30_000);
   document.documentElement.dataset.ready = 'true';
 }
 
